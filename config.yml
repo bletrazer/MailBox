@@ -1,0 +1,5 @@
+database:
+  database: 'dornacraft'
+  host: 'localhost'
+  user: 'dornacraft'
+  password: 'PXRYZzcGvQaGCGpV'
