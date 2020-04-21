@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.listeners;
+package fr.bletrazer.mailbox.listeners;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +11,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import fr.dornacraft.mailbox.Main;
-import fr.dornacraft.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.dornacraft.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.Main;
+import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
 
 public class PlayerChatSelector implements Listener {
 	

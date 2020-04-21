@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory.providers.utils;
+package fr.bletrazer.mailbox.inventory.providers.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
-import fr.dornacraft.mailbox.playerManager.PlayerInfo;
-import fr.dornacraft.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.playerManager.PlayerManager;
 
 public class IdentifiableAuthors {
 	private String server = "";

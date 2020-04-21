@@ -1,9 +1,9 @@
-package fr.dornacraft.mailbox.DataManager.factories;
+package fr.bletrazer.mailbox.DataManager.factories;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import fr.dornacraft.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.Data;
 /**
  * Cr�er des Data (pour l'importation depuis la base de donn�e)
  * @author Bletrazer

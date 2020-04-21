@@ -1,11 +1,11 @@
-package fr.dornacraft.mailbox.listeners;
+package fr.bletrazer.mailbox.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
 /**
  * Décharge de la mémoire les données des joueurs lors de leurs déconnexion
  * @author Bletrazer

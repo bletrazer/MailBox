@@ -1,16 +1,16 @@
-package fr.dornacraft.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.providers;
 
 import java.util.function.Consumer;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.DataHolder;
-import fr.dornacraft.mailbox.DataManager.ItemData;
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
-import fr.dornacraft.mailbox.inventory.builders.ConfirmationContentBuilder;
-import fr.dornacraft.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.DataHolder;
+import fr.bletrazer.mailbox.DataManager.ItemData;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.inventory.builders.ConfirmationContentBuilder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
 import fr.minuskube.inv.content.InventoryContents;
 
 public class DeletionDataInventory extends ConfirmationContentBuilder {

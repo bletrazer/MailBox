@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.providers;
 
 import java.util.Arrays;
 
@@ -6,10 +6,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.dornacraft.mailbox.inventory.providers.utils.IdentifiableAuthors;
-import fr.dornacraft.mailbox.listeners.PlayerChatSelector;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.listeners.PlayerChatSelector;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;

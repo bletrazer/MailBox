@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.commands;
+package fr.bletrazer.mailbox.commands;
 
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
@@ -11,15 +11,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import fr.dornacraft.mailbox.DataManager.DataHolder;
-import fr.dornacraft.mailbox.DataManager.DataManager;
-import fr.dornacraft.mailbox.DataManager.ItemData;
-import fr.dornacraft.mailbox.DataManager.LetterData;
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
-import fr.dornacraft.mailbox.inventory.providers.MailBoxInventory;
-import fr.dornacraft.mailbox.playerManager.PlayerInfo;
-import fr.dornacraft.mailbox.playerManager.PlayerManager;
-import fr.dornacraft.mailbox.sql.ItemDataSQL;
+import fr.bletrazer.mailbox.DataManager.DataHolder;
+import fr.bletrazer.mailbox.DataManager.DataManager;
+import fr.bletrazer.mailbox.DataManager.ItemData;
+import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.inventory.providers.MailBoxInventory;
+import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.sql.ItemDataSQL;
 
 public class Cmd_Mailbox implements CommandExecutor {
 	

@@ -1,12 +1,12 @@
-package fr.dornacraft.mailbox.listeners;
+package fr.bletrazer.mailbox.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
-import fr.dornacraft.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.playerManager.PlayerManager;
 /**
  * Charge en mémoire les données des joueurs lors de leurs connexion
  * @author Bletrazer

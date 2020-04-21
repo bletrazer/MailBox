@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory.builders;
+package fr.bletrazer.mailbox.inventory.builders;
 
 import java.util.function.Consumer;
 
@@ -9,8 +9,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.scheduler.BukkitTask;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.Main;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.Main;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.InventoryListener;
 import fr.minuskube.inv.SmartInventory;

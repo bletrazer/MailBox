@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory;
+package fr.bletrazer.mailbox.inventory;
 
 import java.text.SimpleDateFormat;
 
@@ -7,10 +7,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.ItemData;
-import fr.dornacraft.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.ItemData;
+import fr.bletrazer.mailbox.DataManager.LetterData;
 
 public class MailBoxInventoryHandler {
 	

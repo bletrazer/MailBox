@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.providers;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -6,10 +6,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.DataManager.DataHolder;
-import fr.dornacraft.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.dornacraft.mailbox.listeners.LetterCreator;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.DataManager.DataHolder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.listeners.LetterCreator;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 

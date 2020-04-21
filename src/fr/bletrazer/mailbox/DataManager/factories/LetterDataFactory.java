@@ -1,10 +1,10 @@
-package fr.dornacraft.mailbox.DataManager.factories;
+package fr.bletrazer.mailbox.DataManager.factories;
 
 import java.util.List;
 
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.LetterData;
-import fr.dornacraft.mailbox.DataManager.LetterType;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.DataManager.LetterType;
 
 public class LetterDataFactory extends LetterData {
 	

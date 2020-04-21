@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.providers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +9,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.DataManager.DataHolder;
-import fr.dornacraft.mailbox.DataManager.DataManager;
-import fr.dornacraft.mailbox.DataManager.LetterData;
-import fr.dornacraft.mailbox.DataManager.LetterType;
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
-import fr.dornacraft.mailbox.inventory.MailBoxInventoryHandler;
-import fr.dornacraft.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.dornacraft.mailbox.inventory.providers.utils.IdentifiableAuthors;
-import fr.dornacraft.mailbox.playerManager.PlayerInfo;
-import fr.dornacraft.mailbox.sql.LetterDataSQL;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.DataManager.DataHolder;
+import fr.bletrazer.mailbox.DataManager.DataManager;
+import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.DataManager.LetterType;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
+import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.sql.LetterDataSQL;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;

@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.listeners;
+package fr.bletrazer.mailbox.listeners;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,16 +13,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import fr.dornacraft.mailbox.Main;
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.LetterData;
-import fr.dornacraft.mailbox.DataManager.LetterType;
-import fr.dornacraft.mailbox.DataManager.MailBoxController;
-import fr.dornacraft.mailbox.DataManager.factories.DataFactory;
-import fr.dornacraft.mailbox.DataManager.factories.LetterDataFactory;
-import fr.dornacraft.mailbox.inventory.providers.PlayerSelectorInventory;
-import fr.dornacraft.mailbox.inventory.providers.utils.IdentifiableAuthors;
-import fr.dornacraft.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.Main;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.DataManager.LetterType;
+import fr.bletrazer.mailbox.DataManager.MailBoxController;
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
+import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
+import fr.bletrazer.mailbox.inventory.providers.PlayerSelectorInventory;
+import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 
 public class LetterCreator implements Listener {
 	
