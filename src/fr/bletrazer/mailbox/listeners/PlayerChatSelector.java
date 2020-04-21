@@ -12,8 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import fr.bletrazer.mailbox.Main;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
 
 public class PlayerChatSelector implements Listener {
 	
@@ -21,9 +21,9 @@ public class PlayerChatSelector implements Listener {
 	
 	private Player player;
 	private IdentifiableAuthors identifiableAuthors;
-	private InventoryProviderBuilder parent;
+	private InventoryBuilder parent;
 	
-	public PlayerChatSelector(IdentifiableAuthors identifiableAuthors, InventoryProviderBuilder parent) {
+	public PlayerChatSelector(IdentifiableAuthors identifiableAuthors, InventoryBuilder parent) {
 		this.setAuthorFilter(identifiableAuthors);
 		this.setParent(parent);
 	}
@@ -91,11 +91,11 @@ public class PlayerChatSelector implements Listener {
 		this.player = player;
 	}
 
-	public InventoryProviderBuilder getParent() {
+	public InventoryBuilder getParent() {
 		return parent;
 	}
 
-	public void setParent(InventoryProviderBuilder parent) {
+	public void setParent(InventoryBuilder parent) {
 		this.parent = parent;
 	}
 

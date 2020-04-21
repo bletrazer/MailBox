@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
@@ -20,8 +19,8 @@ import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
-import fr.bletrazer.mailbox.inventory.providers.PlayerSelectorInventory;
-import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.PlayerSelectorInventory;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 
 public class LetterCreator implements Listener {
@@ -148,13 +147,20 @@ public class LetterCreator implements Listener {
 			});
 			pci.openInventory(ePlayer);
 			
-		} else if(eMessage.equals("send") ){	
-			Data data = new DataFactory(null, ePlayer.getName(), this.getObject());
-			LetterData letterData = new LetterDataFactory(data, LetterType.STANDARD, this.getContent(), false);//FIXME
+		} else if(eMessage.equals("#send") ){
+			LetterType type = this.getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
 			
-			MailBoxController.sendLetter(letterData, this.getRecipients().getPlayerList().stream().map(PlayerInfo::getUuid).collect(Collectors.toList()));
+			List<LetterData> toSend = new ArrayList<>();
 			
-			ePlayer.sendMessage("Vous avez envoyer une lettre à: " + this.getRecipients().getPreview() );
+			for(PlayerInfo pi : this.getRecipients().getPlayerList() ) {
+				Data data = new DataFactory(pi.getUuid(), ePlayer.getName(), this.getObject());
+				toSend.add(new LetterDataFactory(data, type, this.getContent(), false) );
+				
+			}
+			
+			MailBoxController.sendLetters(toSend);
+			
+			ePlayer.sendMessage("Vous avez envoyer une lettre à: " + this.getRecipients().getPreview().toString().replace("#", "").replace("]", "") );
 			this.stopCreation();
 			
 		} else {

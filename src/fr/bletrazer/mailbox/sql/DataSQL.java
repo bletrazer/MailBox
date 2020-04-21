@@ -105,7 +105,64 @@ public class DataSQL extends DAO<Data> {
 		
 		return res;
 	}
+	
+	@Override
+	public List<Data> createAll(List<Data> list) {
+		List<Data> res = null;
+		PreparedStatement query = null;
+		try {
+			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			List<Data> temp = new ArrayList<>();
+			this.getConnection().setAutoCommit(false);
+			
+			for(Integer index = 0; index < list.size(); index++) {
+				Data tempData = list.get(index).clone();
+				tempData.setCreationDate(Timestamp.from(Instant.now()));
+				query.setString(1, tempData.getUuid().toString());
+				query.setString(2, tempData.getAuthor());
+				query.setString(3, tempData.getObject());
+				query.setTimestamp(4, tempData.getCreationDate());
+				
+				query.execute();
 
+				ResultSet tableKeys = query.getGeneratedKeys();
+				if(tableKeys.next()) {
+					tempData.setId(tableKeys.getLong(1));
+				}
+				
+				temp.add(tempData);
+				
+			}
+			
+			this.getConnection().commit();
+			res = temp;
+			
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	        if (this.getConnection() != null) {
+	            try {
+	                System.err.print("Transaction is being rolled back");
+	                this.getConnection().rollback();
+	            } catch(SQLException excep) {
+	                excep.printStackTrace();
+	            }
+	        }
+	    } finally {
+
+	        try {
+		        if (query != null) {
+		        	query.close();
+		        }
+		        
+				this.getConnection().setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+		
+		return res;
+	}
+	
 	@Override
 	public Data find(Long i) {
 		Data res = null;

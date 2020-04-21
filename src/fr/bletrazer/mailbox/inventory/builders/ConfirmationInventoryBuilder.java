@@ -10,13 +10,13 @@ import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
-public abstract class ConfirmationContentBuilder extends InventoryProviderBuilder {
+public abstract class ConfirmationInventoryBuilder extends InventoryBuilder {
 	public static Material CONFIRMATION_MATERIAL = Material.RED_TERRACOTTA;
 	public static Material ANNULATION_MATERIAL = Material.GREEN_TERRACOTTA;
 	
 	//TODO rajouter un preview ?
 	
-	public ConfirmationContentBuilder(String subId, String title) {
+	public ConfirmationInventoryBuilder(String subId, String title) {
 		super("MailBox_Confirmation_" + subId, title, 3);
 		
 	}

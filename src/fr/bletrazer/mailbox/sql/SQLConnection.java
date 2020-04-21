@@ -34,7 +34,7 @@ public class SQLConnection {
 			setPassword(password);
 
 			try {
-				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase(),
+				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false",
 						getUser(), getPassword()));
 				Main.getInstance().getLogger().log(Level.INFO, "Base de donnée connectée.");
 			} catch (SQLException e) {
@@ -53,13 +53,13 @@ public class SQLConnection {
 			}
 		}
 	}
-
+	
 	public void refresh() {
 		try {
 			if (isConnected()) {
 				getConnection().close();
 			}
-			setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase(), getUser(),
+			setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false", getUser(),
 					getPassword()));
 		} catch (SQLException e) {
 			e.printStackTrace();

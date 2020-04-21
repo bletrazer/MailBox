@@ -3,8 +3,10 @@ package fr.bletrazer.mailbox.sql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -95,6 +97,68 @@ public class LetterDataSQL extends DAO<LetterData> {
 			e.printStackTrace();
 		}
 
+		return res;
+	}
+	
+	@Override
+	public List<LetterData> createAll(List<LetterData> list) {
+		List<LetterData> res = null;
+		PreparedStatement query = null;
+		
+		try {
+			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
+			List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
+			
+			List<LetterData> tempLetterList = new ArrayList<>();
+			
+			this.getConnection().setAutoCommit(false);
+			
+			for(Integer index = 0; index < list.size(); index++) {
+				LetterData tempLetterData = list.get(index).clone();
+				Data tempData = tempDataList.get(index);
+				
+				tempLetterData.setId(tempData.getId());
+				tempLetterData.setCreationDate(tempData.getCreationDate());
+				
+				query.setLong(1, tempLetterData.getId());
+				query.setString(2, tempLetterData.getLetterType().name());
+				query.setString(3, toText(tempLetterData.getContent()));
+				query.setBoolean(4, tempLetterData.getIsRead());
+				
+				query.execute();
+				
+				tempLetterList.add(tempLetterData);
+				
+			}
+			
+			this.getConnection().commit();
+			this.getConnection().setAutoCommit(true);
+			res = tempLetterList;
+			
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	        
+	        if (this.getConnection() != null) {
+	            try {
+	                System.err.print("Transaction is being rolled back");
+	                this.getConnection().rollback();
+	            } catch(SQLException excep) {
+	                excep.printStackTrace();
+	            }
+	        }
+	    } finally {
+
+	        try {
+		        if (query != null) {
+		        	query.close();
+		        }
+		        
+				this.getConnection().setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+		
 		return res;
 	}
 

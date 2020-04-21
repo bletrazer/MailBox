@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,8 @@ import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
 import fr.minuskube.inv.ClickableItem;
@@ -25,7 +25,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
 import fr.minuskube.inv.content.SlotIterator;
 
-public class LetterInventory extends InventoryProviderBuilder {
+public class LetterInventory extends InventoryBuilder {
 
 	// Materials
 	public static Material NON_READ_LETTERS_MATERIAL = Material.BELL;
@@ -38,8 +38,8 @@ public class LetterInventory extends InventoryProviderBuilder {
 	// secondary
 	private List<LetterData> toShow = new ArrayList<>();
 	private IdentifiableAuthors filter = new IdentifiableAuthors();
-	private LetterType showedLetterType = null;
-	private Integer letterTypeIndex = -1;
+	private LetterType showedLetterType = LetterType.NO_TYPE;
+	private Integer letterTypeIndex = 0;
 	private Integer notReadYet = 0;
 	private Boolean isSortingByDecreasingDate = true;
 
@@ -51,7 +51,7 @@ public class LetterInventory extends InventoryProviderBuilder {
 
 	}
 
-	public LetterInventory(DataHolder dataSource, InventoryProviderBuilder parent) {
+	public LetterInventory(DataHolder dataSource, InventoryBuilder parent) {
 		super("MailBox_Letters", "§lMenu des lettres", 5);
 
 		this.setDataSource(dataSource);
@@ -106,7 +106,7 @@ public class LetterInventory extends InventoryProviderBuilder {
 	private void dynamicContent(Player player, InventoryContents contents) {
 		this.setToShow(DataManager.getTypeData(this.getDataSource(), LetterData.class) );
 		
-		if (this.getShowedLetterType() != null) {
+		if (this.getShowedLetterType() != LetterType.NO_TYPE) {
 			this.setToShow(this.filterByType(this.getToShow()) );
 
 		}
@@ -243,14 +243,9 @@ public class LetterInventory extends InventoryProviderBuilder {
 						.addLore("droit / gauche: choisir filtre")
 						.addLore("Drop pour supprimer le filtre");
 
-		if (this.letterTypeIndex < 0) {
-			this.setShowedLetterType(null);
+		this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);
 
-		} else {
-			this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);
-		}
-
-		String filter = this.getShowedLetterType() == null ? "aucun" : this.getShowedLetterType().name().toLowerCase();
+		String filter = this.getShowedLetterType() == LetterType.NO_TYPE ? "aucun" : this.getShowedLetterType().name().toLowerCase();
 		itemStackBuilder.setName("§f§lFiltre par type: " + filter);
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
@@ -272,7 +267,7 @@ public class LetterInventory extends InventoryProviderBuilder {
 	// manipulation
 	private void cycleAddIndex(Boolean b) {
 		Integer index = this.letterTypeIndex;
-		Integer minIndex = -1;
+		Integer minIndex = 0;
 		Integer maxIndex = LetterType.values().length - 1;
 
 		if (b) {

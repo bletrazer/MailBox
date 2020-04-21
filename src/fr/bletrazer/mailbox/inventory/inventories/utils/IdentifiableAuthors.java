@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers.utils;
+package fr.bletrazer.mailbox.inventory.inventories.utils;
 
 import java.util.ArrayList;
 import java.util.List;

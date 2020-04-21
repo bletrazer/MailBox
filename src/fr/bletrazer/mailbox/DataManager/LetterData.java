@@ -40,7 +40,7 @@ public class LetterData extends Data {
 	}
 
 	public LetterType getLetterType() {
-		return letterType;
+		return this.letterType;
 	}
 
 	public void setLetterType(LetterType letterType) {

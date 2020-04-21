@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-/**
- * Contient les Data des joueurs
- * @author Bletrazer
- *
- */
+
 public class DataHolder {
 	private UUID ownerUuid;
 	private List<Data> listData = new ArrayList<>();

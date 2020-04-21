@@ -86,11 +86,29 @@ public class MailBoxController {
 		
 	}
 	
-	public static void sendLetter(LetterData letterData, List<UUID> recipients) {
-		for(UUID uuid : recipients ) {//FIXME si l'envoie echoue, ne pas faire le reste
-			LetterData toSend = letterData.clone();
-			toSend.setUuid(uuid );
-			sendLetter(toSend);
+	//FIXME si l'envoie echoue, ne pas faire le reste
+	public static void sendLetters(List<LetterData> letters) {
+		List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
+
+		if(sent != null) {
+			for(LetterData letter : sent) {
+				DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
+				
+				if (holder != null) {
+					holder.addData(letter);
+				}
+				
+				//notification
+				Player recipient = Bukkit.getPlayer(letter.getUuid() );
+				
+				if(recipient != null) {
+					recipient.getPlayer().sendMessage("Vous avez reçu un lettre de la part de " + letter.getAuthor() );
+				}
+				
+			}
+			
+		} else {
+			//TODO null pointer (erreur d'acces a la BDD
 		}
 		
 	}

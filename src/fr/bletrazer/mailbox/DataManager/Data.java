@@ -3,6 +3,8 @@ package fr.bletrazer.mailbox.DataManager;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
+
 public abstract class Data {
 
 	private Long id;
@@ -65,6 +67,10 @@ public abstract class Data {
 
 	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
+	}
+	
+	public Data clone() {
+		return new DataFactory(this.getId(), this.getUuid(), this.getAuthor(), this.getObject(), this.getCreationDate());
 	}
 
 }

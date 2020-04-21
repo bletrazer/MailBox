@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,17 +12,17 @@ import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
-import fr.bletrazer.mailbox.inventory.builders.ConfirmationContentBuilder;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.minuskube.inv.content.InventoryContents;
 
-public class DeletionDatasInventory extends ConfirmationContentBuilder {
+public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItems";
 	
 	private DataHolder holder;
 	private List<Long> dataIdList = new ArrayList<>();
 	
-	public DeletionDatasInventory(DataHolder dataSource, List<Long> listDataId, String inventoryTitle, InventoryProviderBuilder parent) {
+	public DeletionDatasInventory(DataHolder dataSource, List<Long> listDataId, String inventoryTitle, InventoryBuilder parent) {
 		super(INVENTORY_SUB_ID, inventoryTitle);
 		this.setHolder(dataSource);
 		this.setDataIdList(listDataId);

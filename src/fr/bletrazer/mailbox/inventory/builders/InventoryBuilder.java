@@ -19,7 +19,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import fr.minuskube.inv.content.Pagination;
 
-public abstract class InventoryProviderBuilder implements InventoryProvider { 
+public abstract class InventoryBuilder implements InventoryProvider { 
 	public static Material GO_BACK_MATERIAL = Material.OAK_SIGN;
 	public Material PAGINATION_MATERIAL = Material.ARROW;
 	
@@ -27,13 +27,13 @@ public abstract class InventoryProviderBuilder implements InventoryProvider {
 	private String title;
 	private Integer rows;
 	
-	private InventoryProviderBuilder parent;
+	private InventoryBuilder parent;
 	private Consumer<BukkitTask> onFinalQuit;
 	private Boolean finalClose = true;
 	private Builder anyBuilder;
 	
 	
-	public InventoryProviderBuilder(String id, String title, Integer rows) {
+	public InventoryBuilder(String id, String title, Integer rows) {
 		this.setId(id);
 		this.setTitle(title);
 		this.setRows(rows);
@@ -152,11 +152,11 @@ public abstract class InventoryProviderBuilder implements InventoryProvider {
 		
 	}
 
-	public InventoryProviderBuilder getParent() {
+	public InventoryBuilder getParent() {
 		return parent;
 	}
 
-	public InventoryProviderBuilder setParent(InventoryProviderBuilder parent) {
+	public InventoryBuilder setParent(InventoryBuilder parent) {
 		this.parent = parent;
 		return this;
 	}
@@ -165,7 +165,7 @@ public abstract class InventoryProviderBuilder implements InventoryProvider {
 		return finalClose;
 	}
 
-	public InventoryProviderBuilder setFinalClose(Boolean finalClose) {
+	public InventoryBuilder setFinalClose(Boolean finalClose) {
 		this.finalClose = finalClose;
 		return this;
 	}
@@ -182,7 +182,7 @@ public abstract class InventoryProviderBuilder implements InventoryProvider {
 		return anyBuilder;
 	}
 
-	public InventoryProviderBuilder setSpecificBuilder(Builder anyBuilder) {
+	public InventoryBuilder setSpecificBuilder(Builder anyBuilder) {
 		this.anyBuilder = anyBuilder;
 		return this;
 	}

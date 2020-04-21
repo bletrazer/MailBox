@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.function.Consumer;
 
@@ -9,17 +9,17 @@ import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
-import fr.bletrazer.mailbox.inventory.builders.ConfirmationContentBuilder;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.minuskube.inv.content.InventoryContents;
 
-public class DeletionDataInventory extends ConfirmationContentBuilder {
+public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItem";
 	
 	private DataHolder holder;
 	private Long dataId;
 	
-	public DeletionDataInventory(DataHolder dataSource, Long dataId, String InventoryTitle, InventoryProviderBuilder parent) {
+	public DeletionDataInventory(DataHolder dataSource, Long dataId, String InventoryTitle, InventoryBuilder parent) {
 		super(INVENTORY_SUB_ID, InventoryTitle);
 		this.setHolder(dataSource);
 		this.setDataId(dataId);

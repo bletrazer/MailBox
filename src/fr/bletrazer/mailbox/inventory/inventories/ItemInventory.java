@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ import fr.bletrazer.mailbox.DataManager.DataManager;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
 import fr.minuskube.inv.content.SlotIterator;
 
-public class ItemInventory extends InventoryProviderBuilder {
+public class ItemInventory extends InventoryBuilder {
 	
 	public static Material RULES_MATERIAL = Material.WRITABLE_BOOK;
 	public static Material RECOVER_ALL_MATERIAl = Material.CHEST;
@@ -31,7 +31,7 @@ public class ItemInventory extends InventoryProviderBuilder {
 		this.setDataSource(dataSource);
 	}
 	
-	public ItemInventory(DataHolder dataSource, InventoryProviderBuilder parent) {
+	public ItemInventory(DataHolder dataSource, InventoryBuilder parent) {
 		super("MailBox_Items", "§lMenu des objets", 5);
 		this.setDataSource(dataSource);
 		this.setParent(parent);
@@ -56,7 +56,7 @@ public class ItemInventory extends InventoryProviderBuilder {
 				clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData),
 						e -> {
 							ClickType clickType = e.getClick();
-							if(player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) ) {//l'inventaire appartien au joueur en parametre
+							if(player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) ) {
 								if(clickType == ClickType.LEFT ) {
 									MailBoxController.recoverItem(player, dataId);
 									
@@ -110,7 +110,7 @@ public class ItemInventory extends InventoryProviderBuilder {
 			contents.set(4, 7, this.nextPageItem(player, contents));
 		}
 		
-		contents.set(4, 8, this.goBackItem(player) );
+		contents.set(4, 0, this.goBackItem(player) );
 	}
 
 	@Override

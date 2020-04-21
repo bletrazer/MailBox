@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory.providers;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.Arrays;
 
@@ -7,15 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
-import fr.bletrazer.mailbox.inventory.builders.InventoryProviderBuilder;
-import fr.bletrazer.mailbox.inventory.providers.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
 import fr.bletrazer.mailbox.listeners.PlayerChatSelector;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
 import fr.minuskube.inv.content.SlotIterator;
 
-public class PlayerSelectorInventory extends InventoryProviderBuilder {
+public class PlayerSelectorInventory extends InventoryBuilder {
 	public static final Material CHOOSE_ALL_MATERIAL = Material.NETHER_STAR;
 	public static final Material CHOOSE_FACTION_MATERIAL = Material.MAGENTA_BANNER;
 	public static final Material CHOOSE_PRECISE_PLAYER_MATERIAL = Material.PLAYER_HEAD;
@@ -29,7 +29,7 @@ public class PlayerSelectorInventory extends InventoryProviderBuilder {
 		this.setAuthorFilter(identifiableAuthors);
 	}
 	
-	public PlayerSelectorInventory(IdentifiableAuthors identifiableAuthors, String invTitle, InventoryProviderBuilder parent) {
+	public PlayerSelectorInventory(IdentifiableAuthors identifiableAuthors, String invTitle, InventoryBuilder parent) {
 		super("MailBox_Player_Selector", invTitle, 3);
 		super.setParent(parent);
 		this.setAuthorFilter(identifiableAuthors);
@@ -71,7 +71,9 @@ public class PlayerSelectorInventory extends InventoryProviderBuilder {
 			
 		}));
 		
-		contents.set(2, 8, this.goBackItem(player) );
+		if(this.getParent() != null) {
+			contents.set(2, 0, this.goBackItem(player) );
+		}
 		
 	}
 
