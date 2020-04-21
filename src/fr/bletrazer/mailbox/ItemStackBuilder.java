@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox;
+package fr.bletrazer.mailbox;
 
 import java.util.ArrayList;
 import java.util.HashMap;

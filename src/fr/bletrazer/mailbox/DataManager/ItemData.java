@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.DataManager;
+package fr.bletrazer.mailbox.DataManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

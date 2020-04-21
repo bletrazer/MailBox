@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.sql;
+package fr.bletrazer.mailbox.sql;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.ItemData;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.ItemData;
 
 public class ItemDataSQL extends DAO<ItemData>{
 	private static final String TABLE_NAME = "MailBox_ItemData";

@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.sql;
+package fr.bletrazer.mailbox.sql;
 
 import java.sql.Connection;
 

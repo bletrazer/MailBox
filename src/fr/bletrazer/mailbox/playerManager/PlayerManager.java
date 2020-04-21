@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.playerManager;
+package fr.bletrazer.mailbox.playerManager;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.DataManager;
+package fr.bletrazer.mailbox.DataManager;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -12,13 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import fr.dornacraft.mailbox.ItemStackBuilder;
-import fr.dornacraft.mailbox.DataManager.factories.DataFactory;
-import fr.dornacraft.mailbox.playerManager.PlayerInfo;
-import fr.dornacraft.mailbox.playerManager.PlayerManager;
-import fr.dornacraft.mailbox.sql.DataSQL;
-import fr.dornacraft.mailbox.sql.ItemDataSQL;
-import fr.dornacraft.mailbox.sql.LetterDataSQL;
+import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
+import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.sql.DataSQL;
+import fr.bletrazer.mailbox.sql.ItemDataSQL;
+import fr.bletrazer.mailbox.sql.LetterDataSQL;
 
 public class MailBoxController {
 	

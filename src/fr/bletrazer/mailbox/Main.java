@@ -1,13 +1,13 @@
-package fr.dornacraft.mailbox;
+package fr.bletrazer.mailbox;
 
 import java.util.logging.Level;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import fr.dornacraft.mailbox.listeners.JoinListener;
-import fr.dornacraft.mailbox.listeners.QuitListener;
-import fr.dornacraft.mailbox.playerManager.PlayerManager;
-import fr.dornacraft.mailbox.sql.SQLConnection;
+import fr.bletrazer.mailbox.listeners.JoinListener;
+import fr.bletrazer.mailbox.listeners.QuitListener;
+import fr.bletrazer.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.sql.SQLConnection;
 import fr.minuskube.inv.InventoryManager;
 
 public class Main extends JavaPlugin {

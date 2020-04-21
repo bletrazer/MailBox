@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.sql;
+package fr.bletrazer.mailbox.sql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.LetterData;
-import fr.dornacraft.mailbox.DataManager.LetterType;
-import fr.dornacraft.mailbox.DataManager.factories.LetterDataFactory;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.DataManager.LetterType;
+import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 
 public class LetterDataSQL extends DAO<LetterData> {
 	private static final String TABLE_NAME = "MailBox_LetterData";

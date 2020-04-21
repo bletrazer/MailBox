@@ -1,68 +1,11 @@
 name: MailBox
 version: 0.1a
-depend: [DevToolsLib]
-description: envoyer et recevoir des messages et des objets
+depend: [SmartInvs]
+description: Envoyer et recevoir des objets et des mails.
 author: Bletrazer
 api-version: 1.13
-main: fr.dornacraft.mailbox.Main
+main: fr.bletrazer.mailbox.Main
 commands:
   mailbox:
     description: commande par defaut
     permission: mailbox.admin
-
-permissions:
-  mailbox.*:
-    description: Accès total au plugin MailBox.
-    children:
-      - mailbox.openmenu.*
-      - mailbox.delete.*
-      - mailbox.send.*
-  
-  mailbox.openmenu.*:
-    description: Avoir accès a tout les menus.
-    children:
-      - mailbox.openmenu.self
-      - mailbox.openmenu.other
-  mailbox.openmenu.self:
-    description: Ouvrir son propre inventaire MailBox.
-    default: true
-  mailbox.openmenu.other:
-    description: Ouvrir l'inventaire d'autres joueurs.
-    
-  mailbox.delete.*:
-    description: Pouvoir supprimer n'importe quoi.
-    children:
-     - mailbox.delete.item.*
-     - mailbox.delete.letter.*
-    
-  mailbox.delete.item.*:
-    description: Supprimer n'importe quels objets.
-    children:
-     - mailbox.delete.item.self
-     - mailbox.delete.item.other
-  mailbox.delete.item.self:
-    description: Supprimer ses propres objets.
-  mailbox.delete.item.other:
-    description: Supprimer les objets des autres.
-    
-  mailbox.delete.letter.*:
-    description: Supprimer n'importe quels lettres.
-    children:
-     - mailbox.delete.letter.self
-     - mailbox.delete.letter.other
-  mailbox.delete.letter.self:
-    description: Supprimer ses propres lettres.
-    default: true
-  mailbox.delete.letter.other:
-    description: Supprimer les lettres des autres.
-  
-  mailbox.send.*:
-    description: Permission d'envoyer un lettre ou un objet.
-    children:
-     - mailbox.send.item
-     - mailbox.send.letter
-  mailbox.send.item:
-    description: Envoyer des objets.
-  mailbox.send.letter:
-    default: true
-    description: Envoyer des lettres.

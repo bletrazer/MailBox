@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.DataManager;
+package fr.bletrazer.mailbox.DataManager;
 
 import java.sql.Timestamp;
 import java.util.UUID;

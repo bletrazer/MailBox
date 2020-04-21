@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.playerManager;
+package fr.bletrazer.mailbox.playerManager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
-import fr.dornacraft.mailbox.sql.SQLConnection;
+import fr.bletrazer.mailbox.sql.SQLConnection;
 
 public class PlayerInfoSQL {
 	

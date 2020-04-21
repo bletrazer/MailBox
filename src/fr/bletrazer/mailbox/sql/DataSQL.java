@@ -1,4 +1,4 @@
-package fr.dornacraft.mailbox.sql;
+package fr.bletrazer.mailbox.sql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import fr.dornacraft.mailbox.DataManager.Data;
-import fr.dornacraft.mailbox.DataManager.factories.DataFactory;
+import fr.bletrazer.mailbox.DataManager.Data;
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 
 
 public class DataSQL extends DAO<Data> {
