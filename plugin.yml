@@ -1,5 +1,5 @@
 name: MailBox
-version: 0.1a
+version: 0.5.5a
 depend: [SmartInvs]
 description: Envoyer et recevoir des objets et des mails.
 author: Bletrazer
@@ -9,3 +9,32 @@ commands:
   mailbox:
     description: commande par defaut
     permission: mailbox.admin
+    
+permissions:
+  mailbox.admin:
+    description: Toutes les permissions du plugin.
+    children:
+     - mailbox.openmenu.*
+     - mailbox.send.*
+     
+  mailbox.openmenu.*:
+    description: Ouvrir le menu du plugin de n'importe qui.
+    children:
+     - mailbox.openmenu.self
+     - mailbox.openmenu.other
+
+  mailbox.openmenu.self:
+    description: Ouvrir son propre menu.
+  mailbox.openmenu.other:
+    description: Ouvrir le menu du plugin des autres.
+  
+  mailbox.send.*:
+    description: Envoyer des objet ou des lettres.
+    children:
+     - mailbox.send.items
+     - mailbox.send.letters
+  
+  mailbox.send.items:
+    description: Envoyer des objets.
+  mailbox.send.letters:
+    description: Envoyer des lettres.
