@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 import fr.bletrazer.mailbox.Main;
+import fr.bletrazer.mailbox.lang.LangManager;
 
 
 public class SQLConnection {
@@ -26,7 +27,7 @@ public class SQLConnection {
 	
 	public void connect(String jdbc, String host, String database, String user, String password) {
 		if (!isConnected()) {
-			Main.getInstance().getLogger().log(Level.INFO, "Tentative de connexion à la base de donnée.");
+			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connection"));
 			setJdbc(jdbc);
 			setHost(host);
 			setDatabase(database);
@@ -36,9 +37,10 @@ public class SQLConnection {
 			try {
 				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false",
 						getUser(), getPassword()));
-				Main.getInstance().getLogger().log(Level.INFO, "Base de donnée connectée.");
+				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connected"));
+				
 			} catch (SQLException e) {
-				Main.getInstance().getLogger().log(Level.INFO, "Connexion à la base de donnée impossible.");
+				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_impossible_to_connect"));
 			}
 		}
 	}
@@ -47,7 +49,7 @@ public class SQLConnection {
 		if (isConnected()) {
 			try {
 				getConnection().close();
-				Main.getInstance().getLogger().log(Level.INFO, "Base de donnée connectée.");
+				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_disconnected"));
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

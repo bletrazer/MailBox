@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.LetterData;
@@ -21,7 +23,9 @@ import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.inventories.PlayerSelectorInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.minuskube.inv.ClickableItem;
 
 public class LetterCreator implements Listener {
 	
@@ -31,6 +35,8 @@ public class LetterCreator implements Listener {
 	private IdentifiableAuthors recipients = new IdentifiableAuthors();
 	private String object;
 	private List<String> content;
+	private Boolean forcedStop = false;
+	private Boolean showLastStep = true;
 	
 	/* * * * * * * * * * * * * * * * *
 	 * * * * constructor(s) * * * * *
@@ -46,13 +52,15 @@ public class LetterCreator implements Listener {
 	public void startCreation(Player player) {
 		this.setUuid(player.getUniqueId());
 		getActivity().add(player.getUniqueId());
-		player.sendMessage("Vous pouvez annuler a tout moment en envoyant #stop");
+		player.sendMessage(LangManager.getValue("help_letter_creation_start_1"));
+		player.sendMessage(LangManager.getValue("help_letter_creation_start_2"));
 		Main.getInstance().getServer().getPluginManager().registerEvents(this, Main.getInstance());
 		this.next(player);
 		
 	}
 	
 	public void stopCreation() {
+		this.setForcedStop(true);
 		getActivity().remove(this.getUuid());
 		AsyncPlayerChatEvent.getHandlerList().unregister(this);
 	}
@@ -61,16 +69,17 @@ public class LetterCreator implements Listener {
 		this.execute(player, "###");
 	}
 	
-	private void sendRecap(Player player, Boolean shownextStep) {
+	private void sendRecap(Player player) {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("§l§n§eRécapitulation:§r\n");
-		sb.append("§8Objet:§r " + this.getObject() + "\n");
-		sb.append("§8Destinataires:§r " + this.getRecipients().getPreview() + "\n");
+		sb.append("\n");
+		sb.append("§8"+LangManager.getValue("string_object")+":§r " + this.getObject() + "\n");
+		sb.append("§8"+LangManager.getValue("string_recipients")+":§r " + this.getRecipients().getPreview() + "\n");
 		sb.append("§8Message:§r\n" + StringUtils.join(this.getContent(), " ") + "\n");
 		
-		if(shownextStep ) {
-			sb.append("§o§6Pour envoyer votre mail écrivez \"send\".");
+		if(this.getShowLastStep() ) {
+			sb.append("§o§6"+LangManager.getValue("string_recipients"));
+			this.setShowLastStep(false);
 		}
 		
 		player.sendMessage(sb.toString());
@@ -84,31 +93,35 @@ public class LetterCreator implements Listener {
 		
 		if(isCreatingLetter(ePlayer) ) {
 			
-			if(eMessage.contentEquals("#stop")) {
-				ePlayer.sendMessage("Vous avez quitté le mode de creation de lettre.");
-				this.stopCreation();
-				return;
-			}
-			
-			if(eMessage.equals("#recap")) {
-				this.sendRecap(ePlayer, false);
-				return;
+			if(eMessage.startsWith("#")) {
+				if(eMessage.equals("#stop")) {
+					ePlayer.sendMessage(LangManager.getValue("information_letter_creation_quit"));
+					this.stopCreation();
+					return;
+				}
 				
-			}
-			
-			if(!eMessage.contains(" ") && eMessage.startsWith("clear#")) {
-				eMessage = eMessage.toLowerCase();
-				if (eMessage.contains("#1") || eMessage.contains("#objet") || eMessage.contains("#o")) {
-					this.reObject(ePlayer);
+				if(eMessage.equals("#recap")) {
+					this.sendRecap(ePlayer);
 					return;
-	
-				} else if (eMessage.contains("#2") || eMessage.contains("#message") || eMessage.contains("#m")) {
-					this.reContent(ePlayer);
-					return;
-	
-				} else if (eMessage.contains("#3") || eMessage.contains("#destinataire") || eMessage.contains("#d")) {
-					this.reRecipients(ePlayer);
-					return;
+					
+				}
+				
+				String[] args = eMessage.split(" ");
+				
+				if(args.length == 2 && args[0].equals("#clear")) {
+					eMessage = eMessage.toLowerCase();
+					if (args[1].equals("1")) {
+						this.reObject(ePlayer);
+						return;
+		
+					} else if (args[1].equals("2")) {
+						this.reContent(ePlayer);
+						return;
+		
+					} else if (args[1].equals("3")) {
+						this.reRecipients(ePlayer);
+						return;
+					}
 				}
 			}
 			
@@ -118,33 +131,45 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void execute(Player ePlayer, String eMessage) {
+		if(this.getForcedStop() ) {
+			return;
+		}
+		
 		if(this.getObject() == null) {
-			ePlayer.sendMessage("Quel est l'objet de la lettre ?");
+			ePlayer.sendMessage(LangManager.getValue("question_lettre_creation_object"));
 			this.setObject("");
 			
 		} else if(this.getObject().isEmpty() ) {
 			if(!eMessage.equals("###")) {
 				this.setObject(eMessage);
-				ePlayer.sendMessage("l'objet de la lettre seras: " + this.getObject() + "\"." );
+				ePlayer.sendMessage(LangManager.getValue("information_letter_creation_object", this.getObject()) );
 				this.next(ePlayer);
 			}
 			
 		} else if (this.getContent() == null ) {
-			ePlayer.sendMessage("Quel est votre message ?");
+			ePlayer.sendMessage(LangManager.getValue("question_letter_creation_message"));
 			this.setContent(new ArrayList<>());
 			
 		} else if (this.getContent().isEmpty() ) {
 			if(!eMessage.equals("###")) {
 				this.setContent(Arrays.asList(new String[] {eMessage}));
-				ePlayer.sendMessage("Le message seras: \"" + this.getContent() + "\"." );
+				ePlayer.sendMessage(LangManager.getValue("information_letter_creation_message", eMessage));
 				this.next(ePlayer);
 			}
 			
 		} else if (this.getRecipients().getPlayerList().isEmpty() ) {
-			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getRecipients(), "§lChoisissez votre/vos cible");
+			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getRecipients(), "§l"+LangManager.getValue("string_menu_target_selection"));
+			pci.setOptional(ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l"+LangManager.getValue("string_cancel")).build(), e -> {
+				pci.setFinalClose(true);
+				ePlayer.sendMessage(LangManager.getValue("information_letter_creation_quit"));
+				stopCreation();
+				ePlayer.closeInventory();
+			}));
+			
 			pci.onFinalClose(e -> {
 				this.next(ePlayer);
 			});
+			
 			pci.openInventory(ePlayer);
 			
 		} else if(eMessage.equals("#send") ){
@@ -160,36 +185,39 @@ public class LetterCreator implements Listener {
 			
 			MailBoxController.sendLetters(toSend);
 			
-			ePlayer.sendMessage("Vous avez envoyer une lettre à: " + this.getRecipients().getPreview().toString().replace("#", "").replace("]", "") );
+			ePlayer.sendMessage(LangManager.getValue("send_item_notification")+": " + this.getRecipients().getPreview().toString().replace("#", "").replace("]", "") );
 			this.stopCreation();
 			
 		} else {
-			this.sendRecap(ePlayer, true);
+			this.sendRecap(ePlayer);
 		}
 	}
 	
 	private void reObject(Player player) {
+		this.setShowLastStep(false);
 		if(this.getContent() != null && this.getContent().isEmpty() ) {
 			this.setContent(null);
 		}
 		this.setObject(null);
-		player.sendMessage("Objet supprimé.");
+		player.sendMessage(LangManager.getValue("information_letter_creation_object_deletion"));
 		this.next(player);
 		
 	}
 	
 	private void reContent(Player player) {
+		this.setShowLastStep(false);
 		if(this.getObject() != null && this.getObject().isEmpty() ) {
 			this.setObject(null);
 		}
 		
 		this.setContent(null);
 		
-		player.sendMessage("Message supprimé.");
+		player.sendMessage(LangManager.getValue("information_letter_creation_message_deletion"));
 		this.next(player);
 	}
 	
 	private void reRecipients(Player player) {
+		this.setShowLastStep(false);
 		if(this.getObject() != null && this.getObject().isEmpty() ) {
 			this.setObject(null);
 		}
@@ -199,7 +227,7 @@ public class LetterCreator implements Listener {
 		
 		this.setRecipients(new IdentifiableAuthors());
 		
-		player.sendMessage("Destinaire(s) supprimé(s).");
+		player.sendMessage(LangManager.getValue("information_letter_creation_recipients_deletion"));
 		this.next(player);
 	}
 	
@@ -248,6 +276,26 @@ public class LetterCreator implements Listener {
 
 	private static List<UUID> getActivity() {
 		return activity;
+	}
+
+
+	public Boolean getForcedStop() {
+		return forcedStop;
+	}
+
+
+	public void setForcedStop(Boolean forcedStop) {
+		this.forcedStop = forcedStop;
+	}
+
+
+	public Boolean getShowLastStep() {
+		return showLastStep;
+	}
+
+
+	public void setShowLastStep(Boolean showLastStep) {
+		this.showLastStep = showLastStep;
 	}
 
 }

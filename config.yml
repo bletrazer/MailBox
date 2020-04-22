@@ -1,5 +1,7 @@
+lang_file: "FR_fr"
+
 database:
-  database: 'dornacraft'
+  database: 'database'
   host: 'localhost'
-  user: 'dornacraft'
-  password: 'PXRYZzcGvQaGCGpV'
+  user: 'user'
+  password: 'password'

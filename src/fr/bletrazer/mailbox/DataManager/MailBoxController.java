@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.BookMeta;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 import fr.bletrazer.mailbox.sql.DataSQL;
@@ -78,7 +79,7 @@ public class MailBoxController {
 			Player recipient = Bukkit.getPlayer(temp.getUuid() );
 			
 			if(recipient != null) {
-				recipient.getPlayer().sendMessage("Vous avez reçu un lettre de la part de " + letterData.getAuthor() );
+				recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letterData.getAuthor()) );
 			}
 		} else {
 			//TODO null pointer (erreur d'acces a la BDD
@@ -102,7 +103,7 @@ public class MailBoxController {
 				Player recipient = Bukkit.getPlayer(letter.getUuid() );
 				
 				if(recipient != null) {
-					recipient.getPlayer().sendMessage("Vous avez reçu un lettre de la part de " + letter.getAuthor() );
+					recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
 				}
 				
 			}
@@ -136,12 +137,12 @@ public class MailBoxController {
 	
 	private static ItemStack getBookView(LetterData letterData) {
 		StringBuilder letterHead = new StringBuilder();
-		letterHead.append(String.format("§lAutheur(e):§r %s\n", letterData.getAuthor()));
+		letterHead.append(String.format("§l%s:§r %s\n", LangManager.getValue("string_author"), letterData.getAuthor()) );
 		
-		SimpleDateFormat sdf =  new SimpleDateFormat("dd/MM/yyyy à HH:mm:ss");
+		SimpleDateFormat sdf =  new SimpleDateFormat(LangManager.getValue("string_date_format"));
 		
-		letterHead.append(String.format("§lDate de récéption:§r %s\n", sdf.format(letterData.getCreationDate()) ));
-		letterHead.append(String.format("§lObject:§r %s\n", letterData.getObject() ) );
+		letterHead.append(String.format("§l%s:§r %s\n", LangManager.getValue("string_reception_date"), sdf.format(letterData.getCreationDate()) ));
+		letterHead.append(String.format("§l%s:§r %s\n", LangManager.getValue("string_object"), letterData.getObject() ) );
 		
 		ItemStack book = new ItemStackBuilder(Material.WRITTEN_BOOK).build();
 		BookMeta bookMeta = (BookMeta) book.getItemMeta();
@@ -238,7 +239,7 @@ public class MailBoxController {
 				
 				Player p = Bukkit.getPlayer(pi.getUuid());
 				if(p != null) {
-					p.sendMessage("Vous avez reçu un objet de la part de " + pi.getName() );
+					p.sendMessage(LangManager.getValue("receive_item_notification", pi.getName() ) );
 					
 				}
 			} else {

@@ -17,6 +17,7 @@ import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.inventories.MailBoxInventory;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 import fr.bletrazer.mailbox.sql.ItemDataSQL;
@@ -45,10 +46,10 @@ public class Cmd_Mailbox implements CommandExecutor {
 								String prefix = args[3].contains("D") ? "P" : "PT";
 								String subD = args[3].replace("D", "DT");
 								String strD = prefix + subD;
-								System.out.println(strD);
+
 								Duration d = Duration.parse(strD);
 								MailBoxController.sendItem(pi.getName(), player.getInventory().getItemInMainHand(), d );
-								player.sendMessage("Vous avez envoyé un objet a " + pi.getName() );
+								player.sendMessage(LangManager.getValue("send_item_notification", pi.getName()));
 								
 							} catch(DateTimeParseException e) {
 								player.sendMessage("wrong duration");

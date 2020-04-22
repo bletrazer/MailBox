@@ -4,10 +4,10 @@ import org.bukkit.Material;
 
 public enum LetterType {
 	
-	NO_TYPE(Material.GLASS),
+	NO_TYPE(Material.WRITABLE_BOOK),
 	STANDARD(Material.PAPER),
 	SYSTEM(Material.MAP),
-	ANNOUNCE(Material.FILLED_MAP);
+	ANNOUNCE(Material.BOOK);
 	
 	private Material material;
 	

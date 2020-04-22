@@ -1,10 +1,12 @@
 package fr.bletrazer.mailbox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -87,6 +89,39 @@ public class ItemStackBuilder {
 	
 	public ItemStackBuilder addLore(String str) {
 		this.getLore().add(this.getLoreFormat() + str);
+		return this;
+	}
+	
+	public ItemStackBuilder addLores(List<String> list) {
+		for(String str : list) {
+			this.addLore(str);
+			
+		}
+		
+		return this;
+	}
+	
+	public ItemStackBuilder setAutoFormatingLore(String str) {
+		Integer size = 22;
+		Integer t = (int) Math.ceil((str.length() / size)) +1;
+	    StringBuilder[] res = new StringBuilder[t];
+	    Integer index = 0;
+	    
+	    for(String word : str.split(" ")) {
+	    	if(res[index] == null) {
+	    		res[index] = new StringBuilder();
+	    	}
+	    	
+	    	res[index].append(word + " ");
+	    	
+	    	if(res[index].toString().length() >= size) {
+	    		index++;
+	    		
+	    	}
+	    }
+		
+	    this.setLore(Arrays.asList(res).stream().filter(e -> e!=null).map(StringBuilder::toString).collect(Collectors.toList()));
+	    
 		return this;
 	}
 

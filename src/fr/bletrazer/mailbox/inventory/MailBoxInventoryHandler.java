@@ -11,6 +11,7 @@ import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.LetterData;
+import fr.bletrazer.mailbox.lang.LangManager;
 
 public class MailBoxInventoryHandler {
 	
@@ -36,9 +37,11 @@ public class MailBoxInventoryHandler {
 	}
 	
 	private static	 ItemStack generateLetterDataRepresentation(LetterData data) {
-		SimpleDateFormat sdf =  new SimpleDateFormat("dd/MM/yyyy à HH:mm:ss");
-		ItemStackBuilder itemGenerator = new ItemStackBuilder(data.getLetterType().getMaterial()).setName("§r§7" + data.getObject()).setLoreFormat("§r§7")
-				.addLore("Expéditeur: " + data.getAuthor()).addLore("date de reception: " + sdf.format(data.getCreationDate()) );
+		SimpleDateFormat sdf =  new SimpleDateFormat(LangManager.getValue("string_date_format"));
+		ItemStackBuilder itemGenerator = new ItemStackBuilder(data.getLetterType().getMaterial())
+				.setName(LangManager.getValue("string_object") + ": " + data.getObject())
+				.addLore(LangManager.getValue("string_author") + ": " + data.getAuthor())
+				.addLore(LangManager.getValue("string_reception_date") + ": " + sdf.format(data.getCreationDate()) );
 		
 		if(!data.getIsRead()) {
 			itemGenerator.enchant(Enchantment.ARROW_FIRE, 1).addFlag(ItemFlag.HIDE_ENCHANTS);

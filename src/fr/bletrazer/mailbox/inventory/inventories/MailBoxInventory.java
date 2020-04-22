@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.LetterCreator;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
@@ -28,17 +29,17 @@ public class MailBoxInventory extends InventoryBuilder {
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
 		
-		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(LETTER_MENU_MATERIAL).setName("§f§lMenu des lettres reçues").build(), e -> {
+		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(LETTER_MENU_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_letters")).build(), e -> {
 			LetterInventory inv = new LetterInventory(this.getDataSource(), this);
 			inv.openInventory(player);
 		}));
 		
-		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(ITEM_MENU_MATERIAL).setName("§f§lMenu des objets reçues").build(), e ->  {
+		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(ITEM_MENU_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_items")).build(), e ->  {
 			ItemInventory inv = new ItemInventory(this.getDataSource(), this);
 			inv.openInventory(player);
 		}));
 		
-		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§lEnvoyer une lettre").build(), e ->  {
+		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§l"+LangManager.getValue("string_send_letter")).build(), e ->  {
 			ClickType click = e.getClick();
 			ItemStack cursor = e.getCursor();
 			
@@ -55,7 +56,7 @@ public class MailBoxInventory extends InventoryBuilder {
 							creator.startCreation(player);
 							
 						} else {
-							player.sendMessage("Faites d'abord de la place dans votre inventaire.");
+							player.sendMessage(LangManager.getValue("string_not_enought_space"));
 						}
 					} else {//simple
 						player.closeInventory();

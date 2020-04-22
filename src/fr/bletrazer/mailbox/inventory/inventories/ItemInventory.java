@@ -14,6 +14,7 @@ import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
@@ -27,12 +28,12 @@ public class ItemInventory extends InventoryBuilder {
 	private DataHolder dataSource;
 	
 	public ItemInventory(DataHolder dataSource) {
-		super("MailBox_Items", "§lMenu des objets", 5);
+		super("MailBox_Items", "§l"+LangManager.getValue("string_menu_items"), 5);
 		this.setDataSource(dataSource);
 	}
 	
 	public ItemInventory(DataHolder dataSource, InventoryBuilder parent) {
-		super("MailBox_Items", "§lMenu des objets", 5);
+		super("MailBox_Items", "§l"+LangManager.getValue("string_menu_items"), 5);
 		this.setDataSource(dataSource);
 		this.setParent(parent);
 		
@@ -61,12 +62,10 @@ public class ItemInventory extends InventoryBuilder {
 									MailBoxController.recoverItem(player, dataId);
 									
 								}
-							} else {
-								if (clickType == ClickType.DROP || clickType == ClickType.CONTROL_DROP) {
-									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§lSupprimer l'objet ?", this);
-									inv.openInventory(player);
+							} else if (clickType == ClickType.DROP || clickType == ClickType.CONTROL_DROP) {
+								DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l"+LangManager.getValue("question_delete_item"), this);
+								inv.openInventory(player);
 
-								}
 							}
 						});
 				
@@ -92,14 +91,14 @@ public class ItemInventory extends InventoryBuilder {
 		}
 		
 		if(!this.getDataSource().getOwnerUuid().equals(player.getUniqueId())) { //TODO add permission delete all other
-			contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§lVider la boîte").build(), e -> {
+			contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
 				List<ItemData> dataList = DataManager.getTypeData(this.dataSource, ItemData.class);
 				List<Long> listDataId = new ArrayList<>();
 				for(ItemData data : dataList) {
 					listDataId.add(data.getId());
 				}
 				
-				DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.dataSource, listDataId, "§4§lSupprimer les " + listDataId.size() +" objets ?", this);
+				DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.dataSource, listDataId, "§4§l" + LangManager.getValue("question_clean_items", listDataId.size()), this);
 				deletionDatasInventory.openInventory(player);
 			}));
 		}
@@ -119,7 +118,7 @@ public class ItemInventory extends InventoryBuilder {
 	}
 	
 	private ClickableItem generateRecoverAll(Player player, InventoryContents contents) {
-		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(RECOVER_ALL_MATERIAl).setName("§e§lTout récupéré");
+		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(RECOVER_ALL_MATERIAl).setName("§e§l" + LangManager.getValue("string_retreive_all"));
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId())) {//TODO permission take all other

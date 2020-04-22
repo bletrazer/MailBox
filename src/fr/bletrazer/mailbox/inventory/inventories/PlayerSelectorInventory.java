@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.ClickType;
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.PlayerChatSelector;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
@@ -46,11 +47,11 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 		pagination.setItemsPerPage(27);
 		pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
 		
-		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_FACTION_MATERIAL).setName("§f§lChoisir faction").build(), e -> {
+		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_FACTION_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_faction")).build(), e -> {
 			
 		}));
 		
-		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§lJoueur précis").build(), e -> {
+		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
 			if(!PlayerChatSelector.isUsingPCS(player) ) {
 				this.setFinalClose(false);
 				this.getSelector().start(player);
@@ -59,7 +60,7 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 			
 		}));
 		
-		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CHOOSE_ALL_MATERIAL).setName("§f§lJoueur du server").build(), e -> {
+		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CHOOSE_ALL_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_server")).build(), e -> {
 			ClickType clickType = e.getClick();
 			
 			if(clickType == ClickType.LEFT ) {
@@ -71,6 +72,10 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 			
 		}));
 		
+		if(this.getOptional() != null) {
+			contents.set(2, 4, this.getOptional());
+		}
+		
 		if(this.getParent() != null) {
 			contents.set(2, 0, this.goBackItem(player) );
 		}
@@ -80,9 +85,9 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 	@Override
 	public void updateInventory(Player player, InventoryContents contents) {
 		contents.set(0, 4, ClickableItem.of(new ItemStackBuilder(Material.REDSTONE)
-				.setName("§f§lLe filtre contient:")
-				.addLore(String.format(" - %s joueurs", this.getAuthorFilter().getPlayerList().size() ))
-				.addLore("Click droit pour supprimer les filtres")
+				.setName("§f§l"+LangManager.getValue("string_displayed_players")+":")
+				.addLores(this.getAuthorFilter().getPreview())
+				.addLore(LangManager.getValue("help_delete_player_filter"))
 				.build(), e -> {
 					if(e.getClick() == ClickType.RIGHT) {
 						this.getAuthorFilter().reset();

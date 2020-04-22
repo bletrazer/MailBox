@@ -14,6 +14,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.lang.LangManager;
 
 public class PlayerChatSelector implements Listener {
 	
@@ -35,7 +36,7 @@ public class PlayerChatSelector implements Listener {
 	public void start(Player player) {
 		this.setPlayer(player);
 		getActivity().add(player.getUniqueId());
-		this.getPlayer().sendMessage("Entrez le nom du/des joueurs. \"#stop\" pour annuler la selection.");
+		this.getPlayer().sendMessage(LangManager.getValue("error_chat_selection_recipients"));
 		Main.getInstance().getServer().getPluginManager().registerEvents(this, Main.getInstance());
 		
 	}
@@ -70,16 +71,15 @@ public class PlayerChatSelector implements Listener {
 			String wrongName = this.getAuthorFilter().addAllIdentifiers(splitedMsg);
 			
 			if(wrongName == null) {
-				player.sendMessage("Vous avez choisit de cibler:\n" +  this.getAuthorFilter().getPreview().toString().replace("[", "").replace("]", ""));
+				player.sendMessage(LangManager.getValue("information_chat_selection_recipients", this.getAuthorFilter().getPreview().toString().replace("[", "").replace("]", "")));
 
 				this.TryOpenInventory();
 				this.stop();
 				
 			} else {
-				player.sendMessage("Action impossible: le joueur " + wrongName + " n'a pas été trouvé, veuillez réessayer.");
+				player.sendMessage((LangManager.getValue("error_chat_selection_recipients", wrongName)) );
 				
 			}
-
 		}
 	}
 	

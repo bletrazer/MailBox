@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.bletrazer.mailbox.commands.Cmd_Mailbox;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.JoinListener;
 import fr.bletrazer.mailbox.listeners.QuitListener;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
@@ -24,9 +25,10 @@ public class Main extends JavaPlugin {
 	}
 
 	@Override
-	public void onEnable() {
+	public void onEnable() {		
 		Main.main = this;
 		this.saveDefaultConfig();
+		LangManager.load();
 		
 		SQLConnection.getInstance().connect(SQLConnection.SGBD_TYPE_ROOT, this.getConfig().getString("database.host"),
 				this.getConfig().getString("database.database"), this.getConfig().getString("database.user"),
@@ -43,7 +45,7 @@ public class Main extends JavaPlugin {
 			
 			
 		} else {
-			this.getLogger().log(Level.SEVERE, "Le plugin a besoin d'un connexion une base de donnée pour fonctionner");
+			this.getLogger().log(Level.SEVERE, LangManager.getValue("connection_needed"));
 		}
 
 	}

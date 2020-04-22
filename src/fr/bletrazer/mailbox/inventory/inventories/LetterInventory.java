@@ -18,6 +18,7 @@ import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
 import fr.minuskube.inv.ClickableItem;
@@ -45,14 +46,14 @@ public class LetterInventory extends InventoryBuilder {
 
 	// builder
 	public LetterInventory(DataHolder dataSource) {
-		super("MailBox_Letters", "§lMenu des lettres", 5);
+		super("MailBox_Letters", "§l"+LangManager.getValue("string_menu_letters"), 5);
 
 		this.setDataSource(dataSource);
 
 	}
 
 	public LetterInventory(DataHolder dataSource, InventoryBuilder parent) {
-		super("MailBox_Letters", "§lMenu des lettres", 5);
+		super("MailBox_Letters", "§l"+LangManager.getValue("string_menu_letters"), 5);
 
 		this.setDataSource(dataSource);
 		this.setParent(parent);
@@ -74,20 +75,20 @@ public class LetterInventory extends InventoryBuilder {
 		}
 
 		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§c§7Filtre joueur:" ).setLore(this.getAuthorFilter().getPreview()).build(), e -> {
-							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getAuthorFilter(), "§lExpéditeurs a affichés:", this);
+				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getAuthorFilter().getPreview()).build(), e -> {
+							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getAuthorFilter(), "§l"+LangManager.getValue("string_show_sender")+":", this);
 							selector.openInventory(player);
 
 						}));
 
 		contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
-				.setName("§4§lSupprimer les lettres affichées.").build(), e -> {
-			        List<Long> idList = toShow.stream()
+				.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
+			        List<Long> idList = getToShow().stream()
 			                .map(LetterData::getId)
 			                .collect(Collectors.toList());
 
-					DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§lSupprimer les " + idList.size() + " lettres ?", this);
-					inv.openInventory(player);
+					DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
+					inv.openInventory(player); 
 					
 				}));
 
@@ -149,7 +150,7 @@ public class LetterInventory extends InventoryBuilder {
 					}
 
 				} else if (clickType == ClickType.CONTROL_DROP) {// supprimer
-					DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§c§lSupprimer la lettre ?", this);
+					DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
 					inv.openInventory(player);
 
 				}
@@ -162,6 +163,7 @@ public class LetterInventory extends InventoryBuilder {
 		pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
 		contents.set(4, 3, generateCycleFilters());
 		contents.set(4, 5, generateSortByDateItem());
+		
 		contents.set(4, 6, generateNonReadLettersItem(player));
 	}
 
@@ -193,44 +195,47 @@ public class LetterInventory extends InventoryBuilder {
 		
 		return res;
 	};
-
+	
+	private static final String help_mark_all = LangManager.getValue("help_mark_all");
+	
 	// generate items
 	private ClickableItem generateNonReadLettersItem(Player player) {
 		List<LetterData> list = filterByReadState(DataManager.getTypeData(this.getDataSource(), LetterData.class), false);
 		
 		ItemStack itemStack = new ItemStackBuilder(NON_READ_LETTERS_MATERIAL)
-				.setName(String.format("§l§e%s lettres non lues.", list.size() ))
-				.addLore("clique pour toutes les")
-				.addLore("marquée comme lues.")
+				.setName("§e§l" + LangManager.getValue("string_non_read_letters", list.size()) )
+				.setAutoFormatingLore(help_mark_all)
 				.setStackSize(list.size(), false )
 				.build();
 
 		return ClickableItem.of(itemStack, e -> {
-			for (LetterData letterData : list ) {
-				if(letterData.getUuid().equals(player.getUniqueId()) ){
-					letterData.setIsRead(true);
-					LetterDataSQL.getInstance().update(letterData);
-				} else {
-					break;
+			//TODO confirmation de marquages des lettres 
+			//DeletionDatasInventory inv = new DeletionDatasInventory(this.getDataSource(), list.stream().map(LetterData::getId).collect(Collectors.toList()), "§lMarque tout les lettres commes lues ?", this);
+			if(e.getClick() == ClickType.DROP) {
+				for (LetterData letterData : list ) {
+					if(letterData.getUuid().equals(player.getUniqueId()) ){
+						letterData.setIsRead(true);
+						LetterDataSQL.getInstance().update(letterData);
+					} else {
+						break;
+					}
 				}
 			}
 		});
 	}
 
 	private ClickableItem generateSortByDateItem() {
-		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(DATE_SORT_MATERIAL).setName("§7§lAffichage:");
+		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(DATE_SORT_MATERIAL).setName("§e§l"+LangManager.getValue("string_display") + ":");
 
 		if (this.getIsSortingByDecreasingDate()) {
 
-			itemStackBuilder.addLore(" -> du plus récent au plus ancien")
-					.addLore("clique pour toutes les triées")
-					.addLore("du plus ancien au plus récent.");
+			itemStackBuilder.addLore(LangManager.getValue("string_descending_order"));
 		} else {
-			itemStackBuilder.addLore(" -> du plus ancien au plus récent")
-					.addLore("clique pour toutes les triées")
-					.addLore("du plus récent au plus ancien.");
+			itemStackBuilder.addLore(LangManager.getValue("string_ascending_order"));
 
 		}
+		
+		itemStackBuilder.addLore(LangManager.getValue("help_toggle_date_order"));
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			this.setIsSortingByDecreasingDate(!this.getIsSortingByDecreasingDate());
@@ -239,14 +244,14 @@ public class LetterInventory extends InventoryBuilder {
 	}
 
 	private ClickableItem generateCycleFilters() {
+		String str = this.getShowedLetterType() == LetterType.NO_TYPE ? LangManager.getValue("string_no") : this.getShowedLetterType().name().toLowerCase();
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(this.getShowedLetterType().getMaterial())
-						.addLore("droit / gauche: choisir filtre")
-						.addLore("Drop pour supprimer le filtre");
+						.setName("§e§l"+LangManager.getValue("string_filter_by_type")+": ")
+						.addLore(str)
+						.addLore(LangManager.getValue("help_choose_type_filter"))
+						.addLore(LangManager.getValue("help_delete_type_filter"));
 
 		this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);
-
-		String filter = this.getShowedLetterType() == LetterType.NO_TYPE ? "aucun" : this.getShowedLetterType().name().toLowerCase();
-		itemStackBuilder.setName("§f§lFiltre par type: " + filter);
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			ClickType click = e.getClick();
@@ -258,7 +263,7 @@ public class LetterInventory extends InventoryBuilder {
 				this.cycleAddIndex(false);
 
 			} else if (click == ClickType.DROP) {
-				this.setLetterTypeIndex(-1);
+				this.setLetterTypeIndex(0);
 			}
 		});
 

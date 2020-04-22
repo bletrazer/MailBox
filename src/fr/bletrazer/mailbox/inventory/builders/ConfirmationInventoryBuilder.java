@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
@@ -24,13 +25,14 @@ public abstract class ConfirmationInventoryBuilder extends InventoryBuilder {
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
 		Consumer<InventoryClickEvent> consumer = this.goBackListener(player);
+		
 		if(this.onAnnulation(player, contents) != null) {
 			consumer = this.onAnnulation(player, contents);
 		}
 		
-		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(ANNULATION_MATERIAL).setName("§f§lAnnuler").build(), consumer) );
+		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(ANNULATION_MATERIAL).setName("§f§l" + LangManager.getValue("string_cancel")).build(), consumer) );
 		
-		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CONFIRMATION_MATERIAL).setName("§4§lConfirmer").build(), onConfirmation(player, contents)) );
+		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CONFIRMATION_MATERIAL).setName("§4§l" + LangManager.getValue("string_confirm")).build(), onConfirmation(player, contents)) );
 		
 	}
 	

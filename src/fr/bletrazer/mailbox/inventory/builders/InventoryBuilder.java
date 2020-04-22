@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.Main;
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.InventoryListener;
 import fr.minuskube.inv.SmartInventory;
@@ -85,18 +86,18 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	public ClickableItem nextPageItem(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
 		SmartInventory inventory = contents.inventory();
-		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§lPage suivante").build(), e -> inventory.open(player, pagination.next().getPage()));
+		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§l" + LangManager.getValue("string_next_page") ).build(), e -> inventory.open(player, pagination.next().getPage()));
 	}
 	
 	public ClickableItem previousPageItem(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
 		SmartInventory inventory = contents.inventory();
-		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§lPage précédente").build(), e -> inventory.open(player, pagination.previous().getPage()));
+		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§l" + LangManager.getValue("string_previous_page")).build(), e -> inventory.open(player, pagination.previous().getPage()));
 	}
 	
 	public ClickableItem goBackItem(Player player) {
 		
-		String name = this.getParent() == null ? "§c§lQuitter" : "<- §c§lMenu précédent";
+		String name = this.getParent() == null ? "§c§l"+LangManager.getValue("string_quit") : "<- §c§l" + LangManager.getValue("string_previous_menu");
 
 		return ClickableItem.of(new ItemStackBuilder(GO_BACK_MATERIAL).setName(name).build(), goBackListener(player));
 	}

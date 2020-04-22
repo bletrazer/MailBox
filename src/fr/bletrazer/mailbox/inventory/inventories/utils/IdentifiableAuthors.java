@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
+import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 
@@ -91,20 +92,20 @@ public class IdentifiableAuthors {
 		return res;
 	}
 	
-	public List<String> getPreview() {//FIXME affichage out of index string
+	public List<String> getPreview() {
 		if(this.calculPreview ) {
 			List<String> temp = new ArrayList<>();
 			
 			if(!this.server.isEmpty() ) {
 				
 				if(this.server.equals("#registered")) {
-					temp.add("Tout les joueurs du server.");
+					temp.add(LangManager.getValue("string_registered_players") );
 					
 				} else if(this.server.equals("#online")) {
-					temp.add("Tout les joueurs en ligne.");
+					temp.add(LangManager.getValue("string_online_players") );
 					
 				} else if(this.server.equals("#offline")) {
-					temp.add("Tout les joueurs hors - ligne.");
+					temp.add(LangManager.getValue("string_offline_players") );
 					
 				}
 				
@@ -115,7 +116,7 @@ public class IdentifiableAuthors {
 				
 				StringBuilder b = new StringBuilder(names);
 				if(b.toString().contains(",")) {
-					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " et" );
+					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " " + LangManager.getValue("string_and") );
 				}
 				names = b.toString();
 				
@@ -123,7 +124,7 @@ public class IdentifiableAuthors {
 			}
 			
 			if(temp.isEmpty() ) {
-				temp.add("Aucun joueur");
+				temp.add(LangManager.getValue("string_no_players"));
 			}
 			
 			this.calculPreview = false;
