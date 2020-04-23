@@ -116,7 +116,7 @@ public class IdentifiableAuthors {
 				
 				StringBuilder b = new StringBuilder(names);
 				if(b.toString().contains(",")) {
-					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " " + LangManager.getValue("string_addition") );
+					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " " + LangManager.getValue("string_and") );
 				}
 				names = b.toString();
 				

@@ -40,7 +40,7 @@ public class Main extends JavaPlugin {
 			manager.init();
 			PlayerManager.getInstance().init();
 			
-			this.getCommand(Cmd_Mailbox.CMD_LABEL).setExecutor(new Cmd_Mailbox());
+			this.getCommand("mailbox").setExecutor(new Cmd_Mailbox());
 			this.registerListeners();
 			
 			
