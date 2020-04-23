@@ -35,7 +35,6 @@ public class LetterCreator implements Listener {
 	private IdentifiableAuthors recipients = new IdentifiableAuthors();
 	private String object;
 	private List<String> content;
-	private Boolean forcedStop = false;
 	private Boolean showLastStep = true;
 	
 	/* * * * * * * * * * * * * * * * *
@@ -60,7 +59,6 @@ public class LetterCreator implements Listener {
 	}
 	
 	public void stopCreation() {
-		this.setForcedStop(true);
 		getActivity().remove(this.getUuid());
 		AsyncPlayerChatEvent.getHandlerList().unregister(this);
 	}
@@ -131,10 +129,6 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void execute(Player ePlayer, String eMessage) {
-		if(this.getForcedStop() ) {
-			return;
-		}
-		
 		if(this.getObject() == null) {
 			ePlayer.sendMessage(LangManager.getValue("question_lettre_creation_object"));
 			this.setObject("");
@@ -194,7 +188,7 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void reObject(Player player) {
-		this.setShowLastStep(false);
+		this.setShowLastStep(true);
 		if(this.getContent() != null && this.getContent().isEmpty() ) {
 			this.setContent(null);
 		}
@@ -205,7 +199,7 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void reContent(Player player) {
-		this.setShowLastStep(false);
+		this.setShowLastStep(true);
 		if(this.getObject() != null && this.getObject().isEmpty() ) {
 			this.setObject(null);
 		}
@@ -217,7 +211,7 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void reRecipients(Player player) {
-		this.setShowLastStep(false);
+		this.setShowLastStep(true);
 		if(this.getObject() != null && this.getObject().isEmpty() ) {
 			this.setObject(null);
 		}
@@ -277,17 +271,6 @@ public class LetterCreator implements Listener {
 	private static List<UUID> getActivity() {
 		return activity;
 	}
-
-
-	public Boolean getForcedStop() {
-		return forcedStop;
-	}
-
-
-	public void setForcedStop(Boolean forcedStop) {
-		this.forcedStop = forcedStop;
-	}
-
 
 	public Boolean getShowLastStep() {
 		return showLastStep;
