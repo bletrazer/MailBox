@@ -88,24 +88,25 @@ public class MailBoxController {
 	}
 	
 	//FIXME si l'envoie echoue, ne pas faire le reste
-	public static void sendLetters(List<LetterData> letters) {
+	public static void sendLetters(Player player, List<LetterData> letters) {
 		List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
 
 		if(sent != null) {
 			for(LetterData letter : sent) {
-				DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
-				
-				if (holder != null) {
-					holder.addData(letter);
+				if(!letter.getAuthor().contentEquals(player.getName())) {
+					DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
+					
+					if (holder != null) {
+						holder.addData(letter);
+					}
+					
+					//notification
+					Player recipient = Bukkit.getPlayer(letter.getUuid() );
+					
+					if(recipient != null) {
+						recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
+					}
 				}
-				
-				//notification
-				Player recipient = Bukkit.getPlayer(letter.getUuid() );
-				
-				if(recipient != null) {
-					recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
-				}
-				
 			}
 			
 		} else {

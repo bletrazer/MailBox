@@ -1,5 +1,7 @@
 package fr.bletrazer.mailbox.inventory.builders;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.Main;
+import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.InventoryListener;
@@ -31,8 +34,9 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	private InventoryBuilder parent;
 	private Consumer<BukkitTask> onFinalQuit;
 	private Boolean finalClose = true;
-	private Builder anyBuilder;
-	
+
+	private List<OptionalClickableItem> fixeOptions = new ArrayList<>();
+	private List<OptionalClickableItem> staticOptions = new ArrayList<>();
 	
 	public InventoryBuilder(String id, String title, Integer rows) {
 		this.setId(id);
@@ -42,11 +46,7 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	}
 	
 	protected Builder getBuilder() {
-		Builder res = this.getSpecifiedBuilder();
-		
-		if(res == null) {
-			res = SmartInventory.builder().manager(Main.getManager());
-		}
+		Builder res = SmartInventory.builder().manager(Main.getManager());
 		
 		res.id(this.getId() )
 		        .provider(this)
@@ -144,12 +144,18 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	@Override
 	public void init(Player p, InventoryContents c) {
 		this.initializeInventory(p, c);
-		
+		for(OptionalClickableItem oci : this.getFixeOptions() ) {
+			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
+		}
 	}
 
 	@Override
 	public void update(Player p, InventoryContents c) {
 		this.updateInventory(p, c);
+		
+		for(OptionalClickableItem oci : this.getStaticOptions() ) {
+			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
+		}
 		
 	}
 
@@ -179,13 +185,22 @@ public abstract class InventoryBuilder implements InventoryProvider {
 		this.onFinalQuit = onFinalQuit;
 	}
 
-	public Builder getSpecifiedBuilder() {
-		return anyBuilder;
+	private List<OptionalClickableItem> getFixeOptions() {
+		return fixeOptions;
 	}
 
-	public InventoryBuilder setSpecificBuilder(Builder anyBuilder) {
-		this.anyBuilder = anyBuilder;
-		return this;
+	private List<OptionalClickableItem> getStaticOptions() {
+		return staticOptions;
+	}
+	
+	public void addOption(OptionalClickableItem oci) {
+		if(oci.doUpdate() ) {
+			this.getStaticOptions().add(oci);
+			
+		} else {
+			this.getFixeOptions().add(oci);
+		}
+			
 	}
 	
 }

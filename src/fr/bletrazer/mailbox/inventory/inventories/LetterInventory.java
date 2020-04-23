@@ -75,7 +75,7 @@ public class LetterInventory extends InventoryBuilder {
 		}
 
 		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getAuthorFilter().getPreview()).build(), e -> {
+				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getAuthorFilter().getPreviewLore()).build(), e -> {
 							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getAuthorFilter(), "§l"+LangManager.getValue("string_show_sender")+":", this);
 							selector.openInventory(player);
 

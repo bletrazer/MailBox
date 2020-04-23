@@ -92,7 +92,7 @@ public class IdentifiableAuthors {
 		return res;
 	}
 	
-	public List<String> getPreview() {
+	public List<String> getPreviewLore() {
 		if(this.calculPreview ) {
 			List<String> temp = new ArrayList<>();
 			
@@ -132,6 +132,10 @@ public class IdentifiableAuthors {
 		}
 		
 		return this.listPreview;
+	}
+	
+	public String getPreviewString() {
+		return this.getPreviewLore().toString().replace("[", "").replace("]", "");
 	}
 	
 	public List<PlayerInfo> getPlayerList(){

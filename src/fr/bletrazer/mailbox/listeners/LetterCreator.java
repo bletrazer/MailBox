@@ -23,6 +23,7 @@ import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.inventories.PlayerSelectorInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.minuskube.inv.ClickableItem;
@@ -72,11 +73,11 @@ public class LetterCreator implements Listener {
 		
 		sb.append("\n");
 		sb.append("§8"+LangManager.getValue("string_object")+":§r " + this.getObject() + "\n");
-		sb.append("§8"+LangManager.getValue("string_recipients")+":§r " + this.getRecipients().getPreview() + "\n");
+		sb.append("§8"+LangManager.getValue("string_recipients")+":§r " + this.getRecipients().getPreviewString() + "\n");
 		sb.append("§8Message:§r\n" + StringUtils.join(this.getContent(), " ") + "\n");
 		
 		if(this.getShowLastStep() ) {
-			sb.append("§o§6"+LangManager.getValue("string_recipients"));
+			sb.append("§o§6"+LangManager.getValue("help_letter_creation_send"));
 			this.setShowLastStep(false);
 		}
 		
@@ -92,35 +93,60 @@ public class LetterCreator implements Listener {
 		if(isCreatingLetter(ePlayer) ) {
 			
 			if(eMessage.startsWith("#")) {
+				
 				if(eMessage.equals("#stop")) {
 					ePlayer.sendMessage(LangManager.getValue("information_letter_creation_quit"));
 					this.stopCreation();
 					return;
-				}
-				
-				if(eMessage.equals("#recap")) {
+				} else if(eMessage.equals("#recap")) {
 					this.sendRecap(ePlayer);
 					return;
 					
-				}
-				
-				String[] args = eMessage.split(" ");
-				
-				if(args.length == 2 && args[0].equals("#clear")) {
-					eMessage = eMessage.toLowerCase();
-					if (args[1].equals("1")) {
-						this.reObject(ePlayer);
+				} else if(eMessage.equals("#send") ){
+					if(this.getContent() != null && !this.getContent().isEmpty() && this.getObject() != null && !this.getObject().isEmpty() && !this.getRecipients().getPlayerList().isEmpty() ) {
+						LetterType type = this.getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
+						
+						List<LetterData> toSend = new ArrayList<>();
+						
+						for(PlayerInfo pi : this.getRecipients().getPlayerList() ) {
+							Data data = new DataFactory(pi.getUuid(), ePlayer.getName(), this.getObject());
+							toSend.add(new LetterDataFactory(data, type, this.getContent(), false) );
+							
+						}
+						
+						MailBoxController.sendLetters(ePlayer, toSend);
+						
+						ePlayer.sendMessage(LangManager.getValue("send_item_notification", ": " + this.getRecipients().getPreviewString()) );
+						this.stopCreation();
 						return;
-		
-					} else if (args[1].equals("2")) {
-						this.reContent(ePlayer);
-						return;
-		
-					} else if (args[1].equals("3")) {
-						this.reRecipients(ePlayer);
+						
+					} else {
+						ePlayer.sendMessage(LangManager.getValue("string_incomplete_letter"));
 						return;
 					}
+					
+				} else {
+					String[] args = eMessage.split(" ");
+					
+					if(args.length == 2 && args[0].equals("#clear")) {
+						eMessage = eMessage.toLowerCase();
+						if (args[1].equals("1")) {
+							this.reObject(ePlayer);
+							return;
+			
+						} else if (args[1].equals("2")) {
+							this.reContent(ePlayer);
+							return;
+			
+						} else if (args[1].equals("3")) {
+							this.reRecipients(ePlayer);
+							return;
+						}
+					}
 				}
+				
+				ePlayer.sendMessage(LangManager.getValue("string_command_not_found"));
+				return;
 			}
 			
 			this.execute(ePlayer, eMessage);
@@ -153,12 +179,18 @@ public class LetterCreator implements Listener {
 			
 		} else if (this.getRecipients().getPlayerList().isEmpty() ) {
 			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getRecipients(), "§l"+LangManager.getValue("string_menu_target_selection"));
-			pci.setOptional(ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l"+LangManager.getValue("string_cancel")).build(), e -> {
-				pci.setFinalClose(true);
+			pci.addOption(new OptionalClickableItem(2, 0, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l"+LangManager.getValue("string_cancel")).build(), e -> {
+				pci.setFinalClose(false);
 				ePlayer.sendMessage(LangManager.getValue("information_letter_creation_quit"));
 				stopCreation();
 				ePlayer.closeInventory();
-			}));
+			})));
+			
+			pci.addOption(new OptionalClickableItem(2, 8, ClickableItem.of(new ItemStackBuilder(Material.FEATHER).setName("§e§l"+LangManager.getValue("string_end")).build(), e -> {
+				pci.setFinalClose(false);
+				this.next(ePlayer);
+				ePlayer.closeInventory();
+			})));
 			
 			pci.onFinalClose(e -> {
 				this.next(ePlayer);
@@ -166,29 +198,13 @@ public class LetterCreator implements Listener {
 			
 			pci.openInventory(ePlayer);
 			
-		} else if(eMessage.equals("#send") ){
-			LetterType type = this.getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
-			
-			List<LetterData> toSend = new ArrayList<>();
-			
-			for(PlayerInfo pi : this.getRecipients().getPlayerList() ) {
-				Data data = new DataFactory(pi.getUuid(), ePlayer.getName(), this.getObject());
-				toSend.add(new LetterDataFactory(data, type, this.getContent(), false) );
-				
-			}
-			
-			MailBoxController.sendLetters(toSend);
-			
-			ePlayer.sendMessage(LangManager.getValue("send_item_notification")+": " + this.getRecipients().getPreview().toString().replace("#", "").replace("]", "") );
-			this.stopCreation();
-			
 		} else {
 			this.sendRecap(ePlayer);
 		}
 	}
 	
 	private void reObject(Player player) {
-		this.setShowLastStep(true);
+		this.setShowLastStep(false);
 		if(this.getContent() != null && this.getContent().isEmpty() ) {
 			this.setContent(null);
 		}
@@ -199,7 +215,7 @@ public class LetterCreator implements Listener {
 	}
 	
 	private void reContent(Player player) {
-		this.setShowLastStep(true);
+		this.setShowLastStep(false);
 		if(this.getObject() != null && this.getObject().isEmpty() ) {
 			this.setObject(null);
 		}

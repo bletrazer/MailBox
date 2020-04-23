@@ -1,7 +1,5 @@
 package fr.bletrazer.mailbox.inventory.inventories;
 
-import java.util.Arrays;
-
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -23,7 +21,6 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 	
 	private IdentifiableAuthors identifiableAuthors;
 	private PlayerChatSelector selector = null;
-	private ClickableItem optional;
 	
 	public PlayerSelectorInventory(IdentifiableAuthors identifiableAuthors, String invTitle ) {
 		super("MailBox_Player_Selector", invTitle, 3);
@@ -64,17 +61,13 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 			ClickType clickType = e.getClick();
 			
 			if(clickType == ClickType.LEFT ) {
-				this.getAuthorFilter().addAllIdentifiers(Arrays.asList(new String[] {"#online"}) );
+				this.getAuthorFilter().addIdentifier("#online" );
 				
 			} else if (clickType == ClickType.RIGHT ) {
-				this.getAuthorFilter().addAllIdentifiers(Arrays.asList(new String[] {"#offline"}));
+				this.getAuthorFilter().addIdentifier("#offline");
 			}
 			
 		}));
-		
-		if(this.getOptional() != null) {
-			contents.set(2, 4, this.getOptional());
-		}
 		
 		if(this.getParent() != null) {
 			contents.set(2, 0, this.goBackItem(player) );
@@ -86,7 +79,7 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 	public void updateInventory(Player player, InventoryContents contents) {
 		contents.set(0, 4, ClickableItem.of(new ItemStackBuilder(Material.REDSTONE)
 				.setName("§f§l"+LangManager.getValue("string_displayed_players")+":")
-				.addLores(this.getAuthorFilter().getPreview())
+				.addLores(this.getAuthorFilter().getPreviewLore())
 				.addLore(LangManager.getValue("help_delete_player_filter"))
 				.build(), e -> {
 					if(e.getClick() == ClickType.RIGHT) {
@@ -94,9 +87,7 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 					}
 				}));
 		
-		if(this.getOptional() != null) {
-			contents.set(2, 4, this.getOptional());
-		}
+
 	}
 
 	public PlayerChatSelector getSelector() {
@@ -105,14 +96,6 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 
 	public void setSelector(PlayerChatSelector selector) {
 		this.selector = selector;
-	}
-
-	public ClickableItem getOptional() {
-		return optional;
-	}
-
-	public void setOptional(ClickableItem optional) {
-		this.optional = optional;
 	}
 
 	public IdentifiableAuthors getAuthorFilter() {
