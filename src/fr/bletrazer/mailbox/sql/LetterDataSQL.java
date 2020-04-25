@@ -106,57 +106,40 @@ public class LetterDataSQL extends DAO<LetterData> {
 		PreparedStatement query = null;
 		
 		try {
-			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
-			List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
+			Boolean transaction = SQLConnection.getInstance().startTransaction();
 			
-			List<LetterData> tempLetterList = new ArrayList<>();
-			
-			this.getConnection().setAutoCommit(false);
-			
-			for(Integer index = 0; index < list.size(); index++) {
-				LetterData tempLetterData = list.get(index).clone();
-				Data tempData = tempDataList.get(index);
+			if(transaction ) {
+				query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
+				List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
 				
-				tempLetterData.setId(tempData.getId());
-				tempLetterData.setCreationDate(tempData.getCreationDate());
+				List<LetterData> tempLetterList = new ArrayList<>();
 				
-				query.setLong(1, tempLetterData.getId());
-				query.setString(2, tempLetterData.getLetterType().name());
-				query.setString(3, toText(tempLetterData.getContent()));
-				query.setBoolean(4, tempLetterData.getIsRead());
+				for(Integer index = 0; index < list.size(); index++) {
+					LetterData tempLetterData = list.get(index).clone();
+					Data tempData = tempDataList.get(index);
+					
+					tempLetterData.setId(tempData.getId());
+					tempLetterData.setCreationDate(tempData.getCreationDate());
+					
+					query.setLong(1, tempLetterData.getId());
+					query.setString(2, tempLetterData.getLetterType().name());
+					query.setString(3, toText(tempLetterData.getContent()));
+					query.setBoolean(4, tempLetterData.getIsRead());
+					
+					query.execute();
+					
+					tempLetterList.add(tempLetterData);
+					
+				}
 				
-				query.execute();
-				
-				tempLetterList.add(tempLetterData);
-				
+				if(SQLConnection.getInstance().commit(query) ) {
+					res = tempLetterList;
+				}
 			}
-			
-			this.getConnection().commit();
-			this.getConnection().setAutoCommit(true);
-			res = tempLetterList;
 			
 		} catch (SQLException e) {
+			SQLConnection.getInstance().rollBack();
 	        e.printStackTrace();
-	        
-	        if (this.getConnection() != null) {
-	            try {
-	                System.err.print("Transaction is being rolled back");
-	                this.getConnection().rollback();
-	            } catch(SQLException excep) {
-	                excep.printStackTrace();
-	            }
-	        }
-	    } finally {
-
-	        try {
-		        if (query != null) {
-		        	query.close();
-		        }
-		        
-				this.getConnection().setAutoCommit(true);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 	    }
 		
 		return res;

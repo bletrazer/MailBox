@@ -110,10 +110,10 @@ public class DataSQL extends DAO<Data> {
 	public List<Data> createAll(List<Data> list) {
 		List<Data> res = null;
 		PreparedStatement query = null;
+		
 		try {
 			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			List<Data> temp = new ArrayList<>();
-			this.getConnection().setAutoCommit(false);
 			
 			for(Integer index = 0; index < list.size(); index++) {
 				Data tempData = list.get(index).clone();
@@ -134,30 +134,11 @@ public class DataSQL extends DAO<Data> {
 				
 			}
 			
-			this.getConnection().commit();
 			res = temp;
 			
 		} catch (SQLException e) {
+			res = null;
 	        e.printStackTrace();
-	        if (this.getConnection() != null) {
-	            try {
-	                System.err.print("Transaction is being rolled back");
-	                this.getConnection().rollback();
-	            } catch(SQLException excep) {
-	                excep.printStackTrace();
-	            }
-	        }
-	    } finally {
-
-	        try {
-		        if (query != null) {
-		        	query.close();
-		        }
-		        
-				this.getConnection().setAutoCommit(true);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 	    }
 		
 		return res;

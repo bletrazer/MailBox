@@ -122,56 +122,43 @@ public class ItemDataSQL extends DAO<ItemData>{
 	@Override
 	public List<ItemData> createAll(List<ItemData> list) {
 		List<ItemData> res = null;
-		PreparedStatement query = null;
 		
 		try {
-			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, durationInSeconds, itemStack) VALUES(?, ?, ?)");
-			List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
-			List<ItemData> tempItemList = new ArrayList<>();
-			
-			this.getConnection().setAutoCommit(false);
-			
-			for(Integer index = 0; index < list.size(); index++) {
-				ItemData tempItemData = list.get(index).clone();
-				Data tempData = tempDataList.get(index);
+			Boolean transaction = SQLConnection.getInstance().startTransaction();
+		
+			if(transaction ) {
+				PreparedStatement query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, durationInSeconds, itemStack) VALUES(?, ?, ?)");
+				List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
+				List<ItemData> tempItemList = new ArrayList<>();
 				
-				tempItemData.setId(tempData.getId());
-				tempItemData.setCreationDate(tempData.getCreationDate());
+				for(Integer index = 0; index < list.size(); index++) {
+					ItemData tempItemData = list.get(index).clone();
+					Data tempData = tempDataList.get(index);
+					
+					tempItemData.setId(tempData.getId());
+					tempItemData.setCreationDate(tempData.getCreationDate());
+					
+					query.setLong(1, tempItemData.getId());
+					query.setLong(2, tempItemData.getDuration().getSeconds());
+					query.setString(3, toBase64(tempItemData.getItem()));
+					
+					query.execute();
+					
+					tempItemList.add(tempItemData);
+					
+				}
 				
-				query.setLong(1, tempItemData.getId());
-				query.setLong(2, tempItemData.getDuration().getSeconds());
-				query.setString(3, toBase64(tempItemData.getItem()));
+				if(SQLConnection.getInstance().commit(query) ) {
+					res = tempItemList;
+				}
 				
-				query.execute();
-				
-				tempItemList.add(tempItemData);
 				
 			}
-			
-			this.getConnection().commit();
-			res = tempItemList;
 			
 		} catch (SQLException e) {
+			SQLConnection.getInstance().rollBack();
 	        e.printStackTrace();
-	        if (this.getConnection() != null) {
-	            try {
-	                System.err.print("Transaction is being rolled back");
-	                this.getConnection().rollback();
-	            } catch(SQLException excep) {
-	                excep.printStackTrace();
-	            }
-	        }
-	    } finally {
-
-	        try {
-		        if (query != null) {
-		        	query.close();
-		        }
-		        
-				this.getConnection().setAutoCommit(true);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+	        
 	    }
 		
 		return res;

@@ -35,8 +35,7 @@ public class SQLConnection {
 			setPassword(password);
 
 			try {
-				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false",
-						getUser(), getPassword()));
+				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false", getUser(), getPassword()));
 				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connected"));
 				
 			} catch (SQLException e) {
@@ -44,7 +43,59 @@ public class SQLConnection {
 			}
 		}
 	}
+	
+	public Boolean startTransaction() {
+		Boolean res = false;
+		try {
+			if(this.getConnection() != null) {
+				this.getConnection().setAutoCommit(false);
+				res = true;
+			}
+		} catch (SQLException e) {
+			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_sql"));
+			e.printStackTrace();
+		}
+		
+		return res;
+	}
+	
+	public void rollBack() {
+        try {
+        	
+        	if(!this.getConnection().getAutoCommit() ) {
+                Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_sql_rollback"));
+                this.getConnection().rollback();
+                
+        	}
+            
+        } catch(SQLException excep) {
+            excep.printStackTrace();
+        }
+	}
+	
+	/*
+	 * Commit transaction and close the parametrized query
+	 */
+	public Boolean commit(PreparedStatement query) {
+		Boolean res = false;
+		
+		try {
+			this.getConnection().commit();
+			this.getConnection().setAutoCommit(true);
+			query.close();
+			
+			res = true;
+			
+		} catch (SQLException e) {
+			res = false;
+	        e.printStackTrace();
+	        
 
+	    }
+		
+		return res;
+	}
+	
 	public void disconnect() {
 		if (isConnected()) {
 			try {
