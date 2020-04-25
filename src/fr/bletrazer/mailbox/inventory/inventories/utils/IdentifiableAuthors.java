@@ -76,14 +76,14 @@ public class IdentifiableAuthors {
 		this.calculPreview = true;
 	}
 	
-	public String addAllIdentifiers(List<String> list) {
+	public String addAllIdentifiers(String toIgnore, List<String> list) {
 		String res = null;
 
 		if (!list.isEmpty()) {
 			for (Integer index = 0; index < list.size() && res == null; index++) {
 				String identifier = list.get(index).replace(" ", "");
 				
-				if(!this.addIdentifier(identifier) ) {
+				if(!identifier.equals(toIgnore) && !this.addIdentifier(identifier) ) {
 					res = identifier;
 				}
 			}
@@ -116,7 +116,7 @@ public class IdentifiableAuthors {
 				
 				StringBuilder b = new StringBuilder(names);
 				if(b.toString().contains(",")) {
-					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " " + LangManager.getValue("string_and") );
+					b.replace(names.lastIndexOf(", "), names.lastIndexOf(", ") + 1, " " + LangManager.getValue("string_string_addition") );
 				}
 				names = b.toString();
 				
@@ -138,32 +138,34 @@ public class IdentifiableAuthors {
 		return this.getPreviewLore().toString().replace("[", "").replace("]", "");
 	}
 	
-	public List<PlayerInfo> getPlayerList(){
+	public List<PlayerInfo> getPlayerList(String toIgnore ){
 		if(this.calculList ) {
 			List<PlayerInfo> temp = new ArrayList<>();
 			
 			if(!this.server.isEmpty() ) {
 				if(this.server.equals("#registered")) {
-					temp.addAll(PlayerManager.getInstance().getRegisteredPlayers() );
+					temp.addAll(PlayerManager.getInstance().getRegisteredPlayers(toIgnore) );
 					
 				} else if (this.server.equals("#online")) {
-					temp.addAll(PlayerManager.getInstance().getOnlinePlayers() );
+					temp.addAll(PlayerManager.getInstance().getOnlinePlayers(toIgnore) );
 					
 				} else if (this.server.equals("#offline")) {
-					temp.addAll(PlayerManager.getInstance().getOfflinePlayers() );
+					temp.addAll(PlayerManager.getInstance().getOfflinePlayers(toIgnore) );
 					
 				}
 			}
 			
 			if(!this.precise.isEmpty() ) {
 				for(String name : this.precise ) {
-					UUID pUuid = PlayerManager.getInstance().getUUID(name);
-					
-					if(pUuid != null) {
-						PlayerInfo pi =  new PlayerInfo(name, pUuid);
+					if(!name.equals(toIgnore)) {
+						UUID pUuid = PlayerManager.getInstance().getUUID(name);
 						
-						if(!temp.contains(pi)) {
-							temp.add(pi);
+						if(pUuid != null) {
+							PlayerInfo pi =  new PlayerInfo(name, pUuid);
+							
+							if(!temp.contains(pi)) {
+								temp.add(pi);
+							}
 						}
 					}
 				}

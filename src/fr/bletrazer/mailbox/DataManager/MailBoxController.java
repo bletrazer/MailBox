@@ -93,19 +93,17 @@ public class MailBoxController {
 
 		if(sent != null) {
 			for(LetterData letter : sent) {
-				if(!letter.getAuthor().contentEquals(player.getName())) {
-					DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
-					
-					if (holder != null) {
-						holder.addData(letter);
-					}
-					
-					//notification
-					Player recipient = Bukkit.getPlayer(letter.getUuid() );
-					
-					if(recipient != null) {
-						recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
-					}
+				DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
+				
+				if (holder != null) {
+					holder.addData(letter);
+				}
+				
+				//notification
+				Player recipient = Bukkit.getPlayer(letter.getUuid() );
+				
+				if(recipient != null) {
+					recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
 				}
 			}
 			

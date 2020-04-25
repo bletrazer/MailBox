@@ -68,7 +68,7 @@ public class PlayerChatSelector implements Listener {
 			}
 			
 			List<String> splitedMsg = Arrays.asList(msg.split(",") );
-			String wrongName = this.getAuthorFilter().addAllIdentifiers(splitedMsg);
+			String wrongName = this.getAuthorFilter().addAllIdentifiers(player.getName(), splitedMsg);
 			
 			if(wrongName == null) {
 				player.sendMessage(LangManager.getValue("information_chat_selection_recipients", this.getAuthorFilter().getPreviewString() ) );

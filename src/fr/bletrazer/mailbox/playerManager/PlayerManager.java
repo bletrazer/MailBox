@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -43,18 +44,20 @@ public class PlayerManager {
 		
 	}
 	
-	public List<PlayerInfo> getOnlinePlayers() {
-		return this.getRegisteredPlayers().stream()
-			.filter(pi -> Bukkit.getPlayer(pi.getUuid()) != null )
-			.collect(Collectors.toList());
+	public List<PlayerInfo> getOnlinePlayers(String toIgnore) {
+		Stream<PlayerInfo> stream = this.getRegisteredPlayers(toIgnore).stream();
 		
+		stream.filter(pi -> Bukkit.getPlayer(pi.getUuid()) != null );
+		
+		return stream.collect(Collectors.toList());
 	}
 	
-	public List<PlayerInfo> getOfflinePlayers() {
-		return this.getRegisteredPlayers().stream()
-			.filter(pi -> Bukkit.getPlayer(pi.getUuid()) == null )
-			.collect(Collectors.toList());
+	public List<PlayerInfo> getOfflinePlayers(String toIgnore) {
+		Stream<PlayerInfo> stream = this.getRegisteredPlayers(toIgnore).stream();
+
+		stream.filter(pi -> Bukkit.getPlayer(pi.getUuid()) == null );
 		
+		return stream.collect(Collectors.toList());
 	}
 	
 	public UUID getUUID(String name) {
@@ -77,9 +80,15 @@ public class PlayerManager {
 		return this.cache;
 	}
 	
-	public List<PlayerInfo> getRegisteredPlayers(){
+	public List<PlayerInfo> getRegisteredPlayers(String toIgnore){
 		List<PlayerInfo> res = new ArrayList<>();
-		res.addAll(this.cache);
+		
+		if(toIgnore != null && !toIgnore.isEmpty() ) {
+			res.addAll(this.cache.stream().filter(pi -> pi.getName() != null && !pi.getName().equals(toIgnore)).collect(Collectors.toList()));
+			
+		} else {
+			res.addAll(this.cache);
+		}
 		return res;
 	}
 }

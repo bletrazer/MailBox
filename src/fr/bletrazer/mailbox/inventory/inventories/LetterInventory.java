@@ -112,8 +112,8 @@ public class LetterInventory extends InventoryBuilder {
 
 		}
 
-		if (!this.getAuthorFilter().getPlayerList().isEmpty()) {
-			this.setToShow(this.filterByAuthors(this.getToShow()));
+		if (!this.getAuthorFilter().getPlayerList(player.getName() ).isEmpty()) {
+			this.setToShow(this.filterByAuthors(player.getName(), this.getToShow()));
 			
 		}
 
@@ -167,8 +167,8 @@ public class LetterInventory extends InventoryBuilder {
 		contents.set(4, 6, generateNonReadLettersItem(player));
 	}
 
-	private List<LetterData> filterByAuthors(List<LetterData> list) {
-		List<String> authorsNames = this.getAuthorFilter().getPlayerList().stream()
+	private List<LetterData> filterByAuthors(String toIgnore, List<LetterData> list) {
+		List<String> authorsNames = this.getAuthorFilter().getPlayerList(toIgnore).stream()
 				.map(PlayerInfo::getName)
 				.collect(Collectors.toList());
 		

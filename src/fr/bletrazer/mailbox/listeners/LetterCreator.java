@@ -103,12 +103,13 @@ public class LetterCreator implements Listener {
 					return;
 					
 				} else if(eMessage.equals("#send") ){
-					if(this.getContent() != null && !this.getContent().isEmpty() && this.getObject() != null && !this.getObject().isEmpty() && !this.getRecipients().getPlayerList().isEmpty() ) {
-						LetterType type = this.getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
+					List<PlayerInfo> recipients = this.getRecipients().getPlayerList(ePlayer.getName() );
+					if(this.getContent() != null && !this.getContent().isEmpty() && this.getObject() != null && !this.getObject().isEmpty() && !recipients.isEmpty() ) {
+						LetterType type = recipients.size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
 						
 						List<LetterData> toSend = new ArrayList<>();
 						
-						for(PlayerInfo pi : this.getRecipients().getPlayerList() ) {
+						for(PlayerInfo pi : recipients ) {
 							Data data = new DataFactory(pi.getUuid(), ePlayer.getName(), this.getObject());
 							toSend.add(new LetterDataFactory(data, type, this.getContent(), false) );
 							
@@ -177,7 +178,7 @@ public class LetterCreator implements Listener {
 				this.next(ePlayer);
 			}
 			
-		} else if (this.getRecipients().getPlayerList().isEmpty() ) {
+		} else if (this.getRecipients().getPlayerList(ePlayer.getName()).isEmpty() ) {
 			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getRecipients(), "§l"+LangManager.getValue("string_menu_target_selection"));
 			pci.addOption(new OptionalClickableItem(2, 0, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l"+LangManager.getValue("string_cancel")).build(), e -> {
 				pci.setFinalClose(false);
