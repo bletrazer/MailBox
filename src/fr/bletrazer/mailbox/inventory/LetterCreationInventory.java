@@ -3,10 +3,12 @@ package fr.bletrazer.mailbox.inventory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.Data;
@@ -15,6 +17,7 @@ import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
+import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.PlayerSelectorInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
@@ -40,13 +43,14 @@ public class LetterCreationInventory extends InventoryBuilder {
 
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {// TODO
-		if(this.getRecipients() == null) {
-			this.setRecipients(new IdentifiersList(player.getName()) );
+		if (this.getRecipients() == null) {
+			this.setRecipients(new IdentifiersList(player.getName()));
 		}
-		
+
 		contents.set(1, 1,
 				ClickableItem.of(new ItemStackBuilder(Material.WRITABLE_BOOK).setName("§e§l" + "Message")
-						.setAutoFormatingLore(this.getContent().toString().isEmpty() ? "Aucun message" : content.toString(), 35)
+						.setAutoFormatingLore(
+								this.getContent().toString().isEmpty() ? "Aucun message" : content.toString(), 35)
 						.build(), e -> {
 							ClickType click = e.getClick();
 							ChatHooker chCheck = ChatHooker.get(player.getUniqueId());
@@ -77,7 +81,8 @@ public class LetterCreationInventory extends InventoryBuilder {
 
 		contents.set(1, 4,
 				ClickableItem.of(new ItemStackBuilder(Material.ITEM_FRAME).setName("§e§l" + "Objet")
-						.setAutoFormatingLore(this.getObject().toString().isEmpty() ? "Aucun objet" : this.getObject().toString(), 35)
+						.setAutoFormatingLore(
+								this.getObject().toString().isEmpty() ? "Aucun objet" : this.getObject().toString(), 35)
 						.build(), e -> {
 							ClickType click = e.getClick();
 							ChatHooker chCheck = ChatHooker.get(player.getUniqueId());
@@ -101,8 +106,7 @@ public class LetterCreationInventory extends InventoryBuilder {
 						}));
 
 		contents.set(1, 7, ClickableItem.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + "Destinataires")
-				.setLore(this.getRecipients().getPreviewLore())
-				.build(), e -> {
+				.setLore(this.getRecipients().getPreviewLore()).build(), e -> {
 					ClickType click = e.getClick();
 					ChatHooker chCheck = ChatHooker.get(player.getUniqueId());
 					if (chCheck == null) {
@@ -118,34 +122,59 @@ public class LetterCreationInventory extends InventoryBuilder {
 						}
 					}
 				}));
-		
+
 		if (!this.getObject().toString().isEmpty() && !this.getContent().toString().isEmpty() && !this.getRecipients().getPlayerList().isEmpty()) {
-			contents.set(2, 8, ClickableItem.of(new ItemStackBuilder(Material.FEATHER)
-					.setName("§e§l" + "CLick pour envoyer").build(), e -> {
+			contents.set(2, 8, ClickableItem
+					.of(new ItemStackBuilder(Material.FEATHER).setName("§e§l" + "CLick pour envoyer").build(), e -> {
 						ClickType click = e.getClick();
-					
+
 						if (click == ClickType.LEFT) {
-							LetterType type = this.getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
+							ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder(
+									"confirmation_sendLetter", "§e§l" + "Confirmation d'envoie") {
+
+								@Override
+								public void onUpdate(Player player, InventoryContents contents) {
+								}
+
+								@Override
+								public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
+									return e -> {
+										LetterType type = getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
+										List<LetterData> toSend = new ArrayList<>();
+
+										for (PlayerInfo pi : getRecipients().getPlayerList()) {
+											Data data = new DataFactory(pi.getUuid(), player.getName(),
+													getObject().toString());
+											toSend.add(new LetterDataFactory(data, type,
+													Arrays.asList(new String[] { getContent().toString() }), false));
+
+										}
+
+										MailBoxController.sendLetters(player, toSend);
+
+										player.sendMessage(LangManager.getValue("send_item_notification", ": " + getRecipients().getPreviewString()));
+										player.closeInventory();
+
+									};
+								}
+
+								@Override
+								public Consumer<InventoryClickEvent> onAnnulation(Player player,
+										InventoryContents contents) {
+									return null;
+								}
+							};
 							
-							List<LetterData> toSend = new ArrayList<>();
+							confInv.setParent(this);
 							
-							for(PlayerInfo pi : this.getRecipients().getPlayerList() ) {
-								Data data = new DataFactory(pi.getUuid(), player.getName(), this.getObject().toString() );
-								toSend.add(new LetterDataFactory(data, type, Arrays.asList(new String[] {this.getContent().toString()}), false) );
-								
-							}
-							
-							MailBoxController.sendLetters(player, toSend);
-							
-							player.sendMessage(LangManager.getValue("send_item_notification", ": " + this.getRecipients().getPreviewString()) );
-							player.closeInventory();
-							return;
-							
-							
+							confInv.openInventory(player);
+
 						}
 					}));
 
 		}
+		
+		contents.set(2, 0, this.goBackItem(player));
 
 	}
 

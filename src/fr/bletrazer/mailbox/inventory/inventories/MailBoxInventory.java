@@ -43,6 +43,7 @@ public class MailBoxInventory extends InventoryBuilder {
 			ItemStack cursor = e.getCursor();
 			
 			LetterCreationInventory inv = new LetterCreationInventory();
+			inv.setParent(this);
 			inv.openInventory(player);
 			
 			/*
