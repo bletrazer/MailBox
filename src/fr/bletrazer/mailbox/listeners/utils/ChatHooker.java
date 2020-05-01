@@ -1,5 +1,7 @@
 package fr.bletrazer.mailbox.listeners.utils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -13,19 +15,22 @@ import fr.bletrazer.mailbox.lang.LangManager;
 
 public abstract class ChatHooker {
 	
-	private String Id;
+	private static Map<UUID, ChatHooker> map = new HashMap<>();
 	
+	private String Id;
 	private UUID target;
 	private Listener listener;
 	private Consumer<AsyncPlayerChatEvent> execution;
+	private String startMessage;
 
-	public ChatHooker(String id) {
+	public ChatHooker(String id, String startMessage) {
 		this.setId(id);
+		this.setStartMessage(startMessage);
 		
 	}
 
 	public void start(Player player) {
-		player.sendMessage(LangManager.getValue("information_chat_selection_start"));
+		player.sendMessage(startMessage + " " + LangManager.getValue("information_ch_stop_selection"));
 
 		this.setTarget(player.getUniqueId());
 		this.setListener(new Listener() {
@@ -48,9 +53,18 @@ public abstract class ChatHooker {
 		AsyncPlayerChatEvent.getHandlerList().unregister(this.getListener());
 	}
 	
-	public abstract void load(UUID uuid);
-	public abstract void unload(UUID uuid);
-
+	public void load(UUID uuid) {
+		map.put(uuid, this);
+	}
+	
+	public void unload(UUID uuid) {
+		map.remove(uuid);
+	}
+	
+	public static ChatHooker get(UUID uuid) {
+		return map.get(uuid);
+	}
+	
 	public UUID getTarget() {
 		return target;
 	}
@@ -82,4 +96,13 @@ public abstract class ChatHooker {
 	public void setId(String id) {
 		Id = id;
 	}
+
+	public String getStartMessage() {
+		return startMessage;
+	}
+
+	public void setStartMessage(String startMessage) {
+		this.startMessage = startMessage;
+	}
+
 }

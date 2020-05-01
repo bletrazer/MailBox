@@ -101,8 +101,7 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
-	public ItemStackBuilder setAutoFormatingLore(String str) {
-		Integer size = 22;
+	public ItemStackBuilder setAutoFormatingLore(String str, Integer size) {
 		Integer t = (int) Math.ceil((str.length() / size)) +1;
 	    StringBuilder[] res = new StringBuilder[t];
 	    Integer index = 0;

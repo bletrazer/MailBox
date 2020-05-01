@@ -210,7 +210,7 @@ public class LetterInventory extends InventoryBuilder {
 		
 		ItemStack itemStack = new ItemStackBuilder(NON_READ_LETTERS_MATERIAL)
 				.setName("§e§l" + LangManager.getValue("string_non_read_letters", list.size()) )
-				.setAutoFormatingLore(help_mark_all)
+				.setAutoFormatingLore(help_mark_all, 23)
 				.setStackSize(list.size(), false )
 				.build();
 

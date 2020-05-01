@@ -4,13 +4,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
+import fr.bletrazer.mailbox.inventory.LetterCreationInventory;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.lang.LangManager;
-import fr.bletrazer.mailbox.listeners.LetterCreator;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
@@ -43,6 +42,10 @@ public class MailBoxInventory extends InventoryBuilder {
 			ClickType click = e.getClick();
 			ItemStack cursor = e.getCursor();
 			
+			LetterCreationInventory inv = new LetterCreationInventory();
+			inv.openInventory(player);
+			
+			/*
 			if (click == ClickType.LEFT ) {
 				if(!LetterCreator.isCreatingLetter(player)) {
 					if(cursor.getType() == Material.WRITTEN_BOOK && cursor.hasItemMeta() ) { // avancé
@@ -66,6 +69,8 @@ public class MailBoxInventory extends InventoryBuilder {
 				}
 				
 			}
+			
+			*/
 		}));
 	}
 

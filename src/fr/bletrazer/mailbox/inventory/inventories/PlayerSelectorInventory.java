@@ -8,6 +8,7 @@ import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.lang.LangManager;
+import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
@@ -45,11 +46,11 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 		*/
 		
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
-			CH_Player ch_player = CH_Player.get(player.getUniqueId());
+			ChatHooker chatHooker = ChatHooker.get(player.getUniqueId());
 			
-			if(ch_player == null) {
-				ch_player = new CH_Player(this.getIdentifiersList(), this);
-				ch_player.start(player);
+			if(chatHooker == null) {
+				chatHooker = new CH_Player(this.getIdentifiersList(), this);
+				chatHooker.start(player);
 				
 			}
 			

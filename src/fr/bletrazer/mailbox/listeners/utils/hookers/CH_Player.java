@@ -1,10 +1,7 @@
 package fr.bletrazer.mailbox.listeners.utils.hookers;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
@@ -16,12 +13,11 @@ import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 public class CH_Player extends ChatHooker {
 	
 	public static final String ID = "MailBox_Player_ChatHooker";
-	private static Map<UUID, CH_Player> map = new HashMap<>();
 	
 	private IdentifiersList idList;
 
 	public CH_Player(IdentifiersList identifiersList, InventoryBuilder parentInv) {
-		super(ID);
+		super(ID, LangManager.getValue("information_ch_player_selection_start") );
 		this.setIdList(identifiersList);
 
 		this.setExecution(event -> {
@@ -30,7 +26,7 @@ public class CH_Player extends ChatHooker {
 			event.setCancelled(true);
 
 			if (eMessage.equals("#stop")) {
-				parentInv.returnToParent(ePlayer);
+				parentInv.openInventory(ePlayer);
 				this.stop();
 				return;
 			}
@@ -39,9 +35,8 @@ public class CH_Player extends ChatHooker {
 			String wrongName = this.getIdList().addAllIdentifiers(splitedMsg);
 
 			if (wrongName == null) {
-				ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients",
-						this.getIdList().getPreviewString()));
-				parentInv.returnToParent(ePlayer);
+				ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", this.getIdList().getPreviewString()));
+				parentInv.openInventory(ePlayer);
 				this.stop();
 
 			} else {
@@ -57,20 +52,6 @@ public class CH_Player extends ChatHooker {
 
 	public void setIdList(IdentifiersList idList) {
 		this.idList = idList;
-	}
-
-	@Override
-	public void load(UUID uuid) {
-		map.put(uuid, this);
-	}
-
-	@Override
-	public void unload(UUID uuid) {
-		map.remove(uuid);
-	}
-	
-	public static CH_Player get(UUID uuid) {
-		return map.get(uuid);
 	}
 
 }
