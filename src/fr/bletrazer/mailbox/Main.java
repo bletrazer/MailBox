@@ -46,6 +46,7 @@ public class Main extends JavaPlugin {
 			
 		} else {
 			this.getLogger().log(Level.SEVERE, LangManager.getValue("connection_needed"));
+			this.getServer().getPluginManager().disablePlugin(this);
 		}
 
 	}
