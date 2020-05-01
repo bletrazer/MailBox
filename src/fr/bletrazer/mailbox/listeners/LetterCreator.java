@@ -22,7 +22,7 @@ import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.inventories.PlayerSelectorInventory;
-import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
@@ -32,8 +32,8 @@ public class LetterCreator implements Listener {
 	
 	private static List<UUID> activity = new ArrayList<>();
 	
-	private UUID uuid;
-	private IdentifiableAuthors recipients = new IdentifiableAuthors();
+	private UUID target;
+	private IdentifiersList idList;
 	private String object;
 	private List<String> content;
 	private Boolean showLastStep = true;
@@ -50,7 +50,7 @@ public class LetterCreator implements Listener {
 	 * * * * * manipulation * * * * *
 	 * * * * * * * * * * * * * * * */
 	public void startCreation(Player player) {
-		this.setUuid(player.getUniqueId());
+		this.setTarget(player.getUniqueId());
 		getActivity().add(player.getUniqueId());
 		player.sendMessage(LangManager.getValue("help_letter_creation_start_1"));
 		player.sendMessage(LangManager.getValue("help_letter_creation_start_2"));
@@ -60,7 +60,7 @@ public class LetterCreator implements Listener {
 	}
 	
 	public void stopCreation() {
-		getActivity().remove(this.getUuid());
+		getActivity().remove(this.getTarget());
 		AsyncPlayerChatEvent.getHandlerList().unregister(this);
 	}
 	
@@ -73,7 +73,7 @@ public class LetterCreator implements Listener {
 		
 		sb.append("\n");
 		sb.append("§8"+LangManager.getValue("string_object")+":§r " + this.getObject() + "\n");
-		sb.append("§8"+LangManager.getValue("string_recipients")+":§r " + this.getRecipients().getPreviewString() + "\n");
+		sb.append("§8"+LangManager.getValue("string_recipients")+":§r " + this.getIdList().getPreviewString() + "\n");
 		sb.append("§8Message:§r\n" + StringUtils.join(this.getContent(), " ") + "\n");
 		
 		if(this.getShowLastStep() ) {
@@ -90,7 +90,10 @@ public class LetterCreator implements Listener {
 		Player ePlayer = event.getPlayer();
 		String eMessage = event.getMessage();
 		
-		if(isCreatingLetter(ePlayer) ) {
+		if(ePlayer.getUniqueId().equals(this.getTarget()) ) {
+			if(this.getIdList() == null) {
+				this.setIdList(new IdentifiersList(ePlayer.getName()) );
+			}
 			
 			if(eMessage.startsWith("#")) {
 				
@@ -103,7 +106,7 @@ public class LetterCreator implements Listener {
 					return;
 					
 				} else if(eMessage.equals("#send") ){
-					List<PlayerInfo> recipients = this.getRecipients().getPlayerList(ePlayer.getName() );
+					List<PlayerInfo> recipients = this.getIdList().getPlayerList();
 					if(this.getContent() != null && !this.getContent().isEmpty() && this.getObject() != null && !this.getObject().isEmpty() && !recipients.isEmpty() ) {
 						LetterType type = recipients.size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
 						
@@ -117,7 +120,7 @@ public class LetterCreator implements Listener {
 						
 						MailBoxController.sendLetters(ePlayer, toSend);
 						
-						ePlayer.sendMessage(LangManager.getValue("send_item_notification", ": " + this.getRecipients().getPreviewString()) );
+						ePlayer.sendMessage(LangManager.getValue("send_item_notification", ": " + this.getIdList().getPreviewString()) );
 						this.stopCreation();
 						return;
 						
@@ -178,8 +181,8 @@ public class LetterCreator implements Listener {
 				this.next(ePlayer);
 			}
 			
-		} else if (this.getRecipients().getPlayerList(ePlayer.getName()).isEmpty() ) {
-			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getRecipients(), "§l"+LangManager.getValue("string_menu_target_selection"));
+		} else if (this.getIdList().getPlayerList().isEmpty() ) {
+			PlayerSelectorInventory pci = new PlayerSelectorInventory(this.getIdList(), "§l"+LangManager.getValue("string_menu_target_selection"));
 			pci.addOption(new OptionalClickableItem(2, 0, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l"+LangManager.getValue("string_cancel")).build(), e -> {
 				pci.setFinalClose(false);
 				ePlayer.sendMessage(LangManager.getValue("information_letter_creation_quit"));
@@ -236,7 +239,7 @@ public class LetterCreator implements Listener {
 			this.setContent(null);
 		}
 		
-		this.setRecipients(new IdentifiableAuthors());
+		this.setIdList(new IdentifiersList(player.getName()) );
 		
 		player.sendMessage(LangManager.getValue("information_letter_creation_recipients_deletion"));
 		this.next(player);
@@ -249,22 +252,6 @@ public class LetterCreator implements Listener {
 	/* * * * * * * * * * * * * * * * 
 	 * * * setters * getters * * * *
 	 * * * * * * * * * * * * * * * */
-	public IdentifiableAuthors getRecipients() {
-		return recipients;
-	}
-
-	public void setRecipients(IdentifiableAuthors recipients) {
-		this.recipients = recipients;
-	}
-
-	public UUID getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
-	}
-
 	public String getObject() {
 		return object;
 	}
@@ -296,6 +283,26 @@ public class LetterCreator implements Listener {
 
 	public void setShowLastStep(Boolean showLastStep) {
 		this.showLastStep = showLastStep;
+	}
+
+
+	public IdentifiersList getIdList() {
+		return idList;
+	}
+
+
+	public void setIdList(IdentifiersList idList) {
+		this.idList = idList;
+	}
+
+
+	public UUID getTarget() {
+		return target;
+	}
+
+
+	public void setTarget(UUID target) {
+		this.target = target;
 	}
 
 }

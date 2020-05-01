@@ -6,9 +6,9 @@ import org.bukkit.event.inventory.ClickType;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
-import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.lang.LangManager;
-import fr.bletrazer.mailbox.listeners.PlayerChatSelector;
+import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
@@ -19,40 +19,38 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 	public static final Material CHOOSE_FACTION_MATERIAL = Material.MAGENTA_BANNER;
 	public static final Material CHOOSE_PRECISE_PLAYER_MATERIAL = Material.PLAYER_HEAD;
 	
-	private IdentifiableAuthors identifiableAuthors;
-	private PlayerChatSelector selector = null;
+	private IdentifiersList identifiersList;
 	
-	public PlayerSelectorInventory(IdentifiableAuthors identifiableAuthors, String invTitle ) {
+	public PlayerSelectorInventory(IdentifiersList identifiersList, String invTitle ) {
 		super("MailBox_Player_Selector", invTitle, 3);
-		this.setAuthorFilter(identifiableAuthors);
+		this.setIdentifiersList(identifiersList);
 	}
 	
-	public PlayerSelectorInventory(IdentifiableAuthors identifiableAuthors, String invTitle, InventoryBuilder parent) {
+	public PlayerSelectorInventory(IdentifiersList identifiersList, String invTitle, InventoryBuilder parent) {
 		super("MailBox_Player_Selector", invTitle, 3);
 		super.setParent(parent);
-		this.setAuthorFilter(identifiableAuthors);
+		this.setIdentifiersList(identifiersList);
 	}
 	
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
-		if(this.getSelector() == null) {
-			this.setSelector(new PlayerChatSelector(this.getAuthorFilter(), this));
-			
-		}
-		
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 		pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
 		
+		/*
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_FACTION_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_faction")).build(), e -> {
 			
 		}));
+		*/
 		
-		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
-			if(!PlayerChatSelector.isUsingPCS(player) ) {
-				this.setFinalClose(false);
-				this.getSelector().start(player);
-				player.closeInventory();
+		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
+			CH_Player ch_player = CH_Player.get(player.getUniqueId());
+			
+			if(ch_player == null) {
+				ch_player = new CH_Player(this.getIdentifiersList(), this);
+				ch_player.start(player);
+				
 			}
 			
 		}));
@@ -61,10 +59,10 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 			ClickType clickType = e.getClick();
 			
 			if(clickType == ClickType.LEFT ) {
-				this.getAuthorFilter().addIdentifier("#online" );
+				this.getIdentifiersList().addIdentifier("#online" );
 				
 			} else if (clickType == ClickType.RIGHT ) {
-				this.getAuthorFilter().addIdentifier("#offline");
+				this.getIdentifiersList().addIdentifier("#offline");
 			}
 			
 		}));
@@ -79,30 +77,21 @@ public class PlayerSelectorInventory extends InventoryBuilder {
 	public void updateInventory(Player player, InventoryContents contents) {
 		contents.set(0, 4, ClickableItem.of(new ItemStackBuilder(Material.REDSTONE)
 				.setName("§f§l"+LangManager.getValue("string_displayed_players")+":")
-				.addLores(this.getAuthorFilter().getPreviewLore())
+				.addLores(this.getIdentifiersList().getPreviewLore())
 				.addLore(LangManager.getValue("help_delete_player_filter"))
 				.build(), e -> {
 					if(e.getClick() == ClickType.RIGHT) {
-						this.getAuthorFilter().reset();
+						this.getIdentifiersList().reset();
 					}
 				}));
 		
 
 	}
 
-	public PlayerChatSelector getSelector() {
-		return selector;
+	public IdentifiersList getIdentifiersList() {
+		return identifiersList;
 	}
-
-	public void setSelector(PlayerChatSelector selector) {
-		this.selector = selector;
+	public void setIdentifiersList(IdentifiersList identifiersList) {
+		this.identifiersList = identifiersList;
 	}
-
-	public IdentifiableAuthors getAuthorFilter() {
-		return identifiableAuthors;
-	}
-	public void setAuthorFilter(IdentifiableAuthors identifiableAuthors) {
-		this.identifiableAuthors = identifiableAuthors;
-	}
-	
 }

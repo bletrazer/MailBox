@@ -17,7 +17,7 @@ import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
-import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
@@ -34,11 +34,13 @@ public class LetterInventory extends InventoryBuilder {
 	public static Material DATE_SORT_MATERIAL = Material.REPEATER;
 
 	// primary
+	public static final String ID = "MailBox_Letters";
+		
 	private DataHolder dataSource;
 
 	// secondary
 	private List<LetterData> toShow = new ArrayList<>();
-	private IdentifiableAuthors filter = new IdentifiableAuthors();
+	private IdentifiersList idList;
 	private LetterType showedLetterType = LetterType.NO_TYPE;
 	private Integer letterTypeIndex = 0;
 	private Integer notReadYet = 0;
@@ -46,14 +48,14 @@ public class LetterInventory extends InventoryBuilder {
 
 	// builder
 	public LetterInventory(DataHolder dataSource) {
-		super("MailBox_Letters", "§l"+LangManager.getValue("string_menu_letters"), 5);
+		super(ID, "§l"+LangManager.getValue("string_menu_letters"), 5);
 
 		this.setDataSource(dataSource);
 
 	}
 
 	public LetterInventory(DataHolder dataSource, InventoryBuilder parent) {
-		super("MailBox_Letters", "§l"+LangManager.getValue("string_menu_letters"), 5);
+		super(ID, "§l"+LangManager.getValue("string_menu_letters"), 5);
 
 		this.setDataSource(dataSource);
 		this.setParent(parent);
@@ -61,6 +63,10 @@ public class LetterInventory extends InventoryBuilder {
 
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
+		if(this.getIdList() == null) {
+			this.setIdList(new IdentifiersList(player.getName()) );
+		}
+		
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 
@@ -75,8 +81,8 @@ public class LetterInventory extends InventoryBuilder {
 		}
 
 		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getAuthorFilter().getPreviewLore()).build(), e -> {
-							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getAuthorFilter(), "§l"+LangManager.getValue("string_show_sender")+":", this);
+				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getIdList().getPreviewLore()).build(), e -> {
+							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getIdList(), "§l"+LangManager.getValue("string_show_sender")+":", this);
 							selector.openInventory(player);
 
 						}));
@@ -112,8 +118,8 @@ public class LetterInventory extends InventoryBuilder {
 
 		}
 
-		if (!this.getAuthorFilter().getPlayerList(player.getName() ).isEmpty()) {
-			this.setToShow(this.filterByAuthors(player.getName(), this.getToShow()));
+		if (!this.getIdList().getPlayerList().isEmpty()) {
+			this.setToShow(this.filterByAuthors(this.getToShow()));
 			
 		}
 
@@ -167,8 +173,8 @@ public class LetterInventory extends InventoryBuilder {
 		contents.set(4, 6, generateNonReadLettersItem(player));
 	}
 
-	private List<LetterData> filterByAuthors(String toIgnore, List<LetterData> list) {
-		List<String> authorsNames = this.getAuthorFilter().getPlayerList(toIgnore).stream()
+	private List<LetterData> filterByAuthors(List<LetterData> list) {
+		List<String> authorsNames = this.getIdList().getPlayerList().stream()
 				.map(PlayerInfo::getName)
 				.collect(Collectors.toList());
 		
@@ -331,19 +337,19 @@ public class LetterInventory extends InventoryBuilder {
 		this.toShow = toShow;
 	}
 
-	public IdentifiableAuthors getAuthorFilter() {
-		return filter;
-	}
-
-	public void setAuthorFilter(IdentifiableAuthors filter) {
-		this.filter = filter;
-	}
-
 	public Integer getNotReadYet() {
 		return notReadYet;
 	}
 
 	public void setNotReadYet(Integer notReadYet) {
 		this.notReadYet = notReadYet;
+	}
+
+	public IdentifiersList getIdList() {		
+		return idList;
+	}
+
+	public void setIdList(IdentifiersList idList) {
+		this.idList = idList;
 	}
 }

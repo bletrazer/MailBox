@@ -16,7 +16,7 @@ import fr.bletrazer.mailbox.DataManager.DataManager;
 import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.inventories.MailBoxInventory;
-import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiableAuthors;
+import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 
@@ -32,7 +32,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 	 * 
 	 */
 	
-	private Map<UUID, IdentifiableAuthors> map = new HashMap<>();
+	private Map<UUID, IdentifiersList> map = new HashMap<>();
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -141,7 +141,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 		
 	}
 
-	public Map<UUID, IdentifiableAuthors> getMap() {
+	public Map<UUID, IdentifiersList> getMap() {
 		return map;
 	}
 }
