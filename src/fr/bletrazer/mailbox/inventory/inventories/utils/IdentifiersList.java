@@ -10,7 +10,10 @@ import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 
-public class IdentifiableAuthors {
+public class IdentifiersList {
+	
+	private String sender;
+	
 	private String server = "";
 	private String faction = "";
 	private List<String> precise = new ArrayList<>();
@@ -18,6 +21,10 @@ public class IdentifiableAuthors {
 	private List<PlayerInfo> list = new ArrayList<>();
 	private List<String> listPreview = new ArrayList<>();
 	private Boolean calculPreview = true;
+	
+	public IdentifiersList(String sender) {
+		this.setSender(sender);
+	}
 	
 	public Boolean addIdentifier(String str) {
 		Boolean res = false;
@@ -49,21 +56,18 @@ public class IdentifiableAuthors {
 			UUID pUuid = PlayerManager.getInstance().getUUID(identifier);
 
 			if (pUuid != null) {
-				this.addPrecise(identifier);
-				this.calculList = true;
-				this.calculPreview = true;
+				if(!this.precise.contains(identifier)) {
+					this.precise.add(identifier);
+					this.calculList = true;
+					this.calculPreview = true;
+				}
+
 				res = true;
 				
 			}
 		}
 		
 		return res;
-	}
-	
-	private void addPrecise(String id) {
-		if(!this.precise.contains(id)) {
-			this.precise.add(id);
-		}
 	}
 	
 	public void reset() {
@@ -76,14 +80,14 @@ public class IdentifiableAuthors {
 		this.calculPreview = true;
 	}
 	
-	public String addAllIdentifiers(String toIgnore, List<String> list) {
+	public String addAllIdentifiers(List<String> list) {
 		String res = null;
 
 		if (!list.isEmpty()) {
 			for (Integer index = 0; index < list.size() && res == null; index++) {
 				String identifier = list.get(index).replace(" ", "");
 				
-				if(!identifier.equals(toIgnore) && !this.addIdentifier(identifier) ) {
+				if((this.getSender() == null || !identifier.equals(this.getSender()) ) && !this.addIdentifier(identifier) ) {
 					res = identifier;
 				}
 			}
@@ -138,26 +142,26 @@ public class IdentifiableAuthors {
 		return this.getPreviewLore().toString().replace("[", "").replace("]", "");
 	}
 	
-	public List<PlayerInfo> getPlayerList(String toIgnore ){
+	public List<PlayerInfo> getPlayerList(){
 		if(this.calculList ) {
 			List<PlayerInfo> temp = new ArrayList<>();
 			
 			if(!this.server.isEmpty() ) {
 				if(this.server.equals("#registered")) {
-					temp.addAll(PlayerManager.getInstance().getRegisteredPlayers(toIgnore) );
+					temp.addAll(PlayerManager.getInstance().getRegisteredPlayers(this.getSender()) );
 					
 				} else if (this.server.equals("#online")) {
-					temp.addAll(PlayerManager.getInstance().getOnlinePlayers(toIgnore) );
+					temp.addAll(PlayerManager.getInstance().getOnlinePlayers(this.getSender()) );
 					
 				} else if (this.server.equals("#offline")) {
-					temp.addAll(PlayerManager.getInstance().getOfflinePlayers(toIgnore) );
+					temp.addAll(PlayerManager.getInstance().getOfflinePlayers(this.getSender()) );
 					
 				}
 			}
 			
 			if(!this.precise.isEmpty() ) {
 				for(String name : this.precise ) {
-					if(!name.equals(toIgnore)) {
+					if(this.getSender() == null || !name.equals(this.getSender()) ) {
 						UUID pUuid = PlayerManager.getInstance().getUUID(name);
 						
 						if(pUuid != null) {
@@ -175,6 +179,14 @@ public class IdentifiableAuthors {
 		}
 		
 		return this.list;
+	}
+
+	private String getSender() {
+		return sender;
+	}
+
+	private void setSender(String sender) {
+		this.sender = sender;
 	}
 	
 }
