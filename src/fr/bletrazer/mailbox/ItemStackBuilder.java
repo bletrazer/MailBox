@@ -101,26 +101,35 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
-	public ItemStackBuilder setAutoFormatingLore(String str, Integer size) {
+	private List<String> format(String str, Integer size){
 		Integer t = (int) Math.ceil((str.length() / size)) +1;
-	    StringBuilder[] res = new StringBuilder[t];
+	    StringBuilder[] temp = new StringBuilder[t];
 	    Integer index = 0;
 	    
 	    for(String word : str.split(" ")) {
-	    	if(res[index] == null) {
-	    		res[index] = new StringBuilder();
+	    	if(temp[index] == null) {
+	    		temp[index] = new StringBuilder(this.getLoreFormat());
 	    	}
 	    	
-	    	res[index].append(word + " ");
+	    	temp[index].append(word + " ");
 	    	
-	    	if(res[index].toString().length() >= size) {
+	    	if(temp[index].toString().length() >= size) {
 	    		index++;
 	    		
 	    	}
 	    }
 		
-	    this.setLore(Arrays.asList(res).stream().filter(e -> e!=null).map(StringBuilder::toString).collect(Collectors.toList()));
-	    
+	    List<String> res = Arrays.asList(temp).stream().filter(e -> e!=null).map(StringBuilder::toString).collect(Collectors.toList());
+	    return res;
+	}
+	
+	public ItemStackBuilder setAutoFormatingLore(String str, Integer size) {
+	    this.setLore(format(str, size) );
+		return this;
+	}
+	
+	public ItemStackBuilder addAutoFormatingLore(String str, Integer size) {
+	    this.getLore().addAll(format(str, size) );
 		return this;
 	}
 

@@ -82,9 +82,9 @@ public class DataSQL extends DAO<Data> {
 		Data res = null;
 		
 		try {
-			DataFactory temp = new DataFactory(null, obj.getUuid(), obj.getAuthor(), obj.getObject(), Timestamp.from(Instant.now()));
+			DataFactory temp = new DataFactory(null, obj.getOwnerUuid(), obj.getAuthor(), obj.getObject(), Timestamp.from(Instant.now()));
 			PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-			query.setString(1, temp.getUuid().toString());
+			query.setString(1, temp.getOwnerUuid().toString());
 			query.setString(2, temp.getAuthor());
 			query.setString(3, temp.getObject());
 			query.setTimestamp(4, temp.getCreationDate());
@@ -118,7 +118,7 @@ public class DataSQL extends DAO<Data> {
 			for(Integer index = 0; index < list.size(); index++) {
 				Data tempData = list.get(index).clone();
 				tempData.setCreationDate(Timestamp.from(Instant.now()));
-				query.setString(1, tempData.getUuid().toString());
+				query.setString(1, tempData.getOwnerUuid().toString());
 				query.setString(2, tempData.getAuthor());
 				query.setString(3, tempData.getObject());
 				query.setTimestamp(4, tempData.getCreationDate());
@@ -175,7 +175,7 @@ public class DataSQL extends DAO<Data> {
 		Data res = null;
 		try {
 			PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, author = ?, object = ?, creationDate = ? WHERE id = ?");
-			query.setString(1, obj.getUuid().toString());
+			query.setString(1, obj.getOwnerUuid().toString());
 			query.setString(2, obj.getAuthor());
 			query.setString(3, obj.getObject());
 			query.setTimestamp(4, obj.getCreationDate());

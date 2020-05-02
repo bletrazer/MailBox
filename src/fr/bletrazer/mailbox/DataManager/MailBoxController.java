@@ -70,13 +70,13 @@ public class MailBoxController {
 		LetterData temp = LetterDataSQL.getInstance().create(letterData);
 
 		if(temp != null) {
-			DataHolder holder = DataManager.getDataHolder(temp.getUuid());
+			DataHolder holder = DataManager.getDataHolder(temp.getOwnerUuid());
 			if (holder != null) {
 				holder.addData(temp);
 			}
 			
 			//notification
-			Player recipient = Bukkit.getPlayer(temp.getUuid() );
+			Player recipient = Bukkit.getPlayer(temp.getOwnerUuid() );
 			
 			if(recipient != null) {
 				recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letterData.getAuthor()) );
@@ -88,46 +88,64 @@ public class MailBoxController {
 	}
 	
 	//FIXME si l'envoie echoue, ne pas faire le reste
-	public static void sendLetters(Player player, List<LetterData> letters) {
-		List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
-
-		if(sent != null) {
-			for(LetterData letter : sent) {
-				DataHolder holder = DataManager.getDataHolder(letter.getUuid() );
-				
-				if (holder != null) {
-					holder.addData(letter);
+	public static Boolean sendLetters(List<LetterData> letters) {
+		Boolean res = false;
+		
+		if(letters != null && !letters.isEmpty() ) {
+			List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
+	
+			if(sent != null) {
+				for(LetterData letter : sent) {
+					DataHolder holder = DataManager.getDataHolder(letter.getOwnerUuid() );
+					
+					if (holder != null) {
+						holder.addData(letter);
+					}
+					
+					//notification
+					Player recipient = Bukkit.getPlayer(letter.getOwnerUuid() );
+					
+					if(recipient != null) {
+						recipient.getPlayer().sendMessage(LangManager.getValue("receive_letter_notification", letter.getAuthor()) );
+					}
 				}
 				
-				//notification
-				Player recipient = Bukkit.getPlayer(letter.getUuid() );
+				res = true;
 				
-				if(recipient != null) {
-					recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", letter.getAuthor()) );
-				}
 			}
-			
-		} else {
-			//TODO null pointer (erreur d'acces a la BDD
 		}
 		
+		return res;
 	}
 	
-	public static void sendLetter(UUID recipientUuid, ItemStack book) {//FIXME changer player par UUID ? TODO modifier parametres -> ajouter lettertype
-		if (recipientUuid != null) {
-			if (book.getType() == Material.WRITTEN_BOOK && book.hasItemMeta() && book.getItemMeta() instanceof BookMeta) {
-				BookMeta bookMeta = (BookMeta) book.getItemMeta();
-
-				String author = bookMeta.getAuthor();
-				String object = bookMeta.getTitle();
-				List<String> content = bookMeta.getPages();
-
-				Data data = new DataFactory(recipientUuid, author, object);
-				LetterData letterData = new LetterData(data, LetterType.STANDARD, content, false);
+	//FIXME si l'envoie echoue, ne pas faire le reste
+	public static Boolean sendItems(List<ItemData> items) {
+		Boolean res = false;
+		
+		if(items != null && !items.isEmpty() ) {
+			List<ItemData> sent = ItemDataSQL.getInstance().createAll(items);
+	
+			if(sent != null) {
+				for(ItemData item : sent) {
+					DataHolder holder = DataManager.getDataHolder(item.getOwnerUuid() );
+					
+					if (holder != null) {
+						holder.addData(item);
+					}
+					
+					//notification
+					Player recipient = Bukkit.getPlayer(item.getOwnerUuid() );
+					
+					if(recipient != null) {
+						recipient.getPlayer().sendMessage(LangManager.getValue("receive_item_notification", item.getAuthor()) );
+					}
+				}
+				res = true;
 				
-				sendLetter(letterData);
 			}
 		}
+			
+		return res;
 	}
 
 	public static void respondToLetter(Player player, Long id, ItemStack book) {// TODO
@@ -161,7 +179,7 @@ public class MailBoxController {
 	public static void readLetter(Player player, LetterData letterData) {
 		player.openBook(getBookView(letterData));
 		
-		if(letterData.getUuid().equals(player.getUniqueId())) {
+		if(letterData.getOwnerUuid().equals(player.getUniqueId())) {
 			letterData.setIsRead(true);
 			LetterDataSQL.getInstance().update(letterData);
 			

@@ -22,7 +22,7 @@ public class LetterDataFactory extends LetterData {
 		this.setAuthor(data.getAuthor() );
 		this.setObject(data.getObject() );
 		this.setCreationDate(data.getCreationDate());
-		this.setUuid(data.getUuid() );
+		this.setOwnerUuid(data.getOwnerUuid() );
 	}
 	
 }

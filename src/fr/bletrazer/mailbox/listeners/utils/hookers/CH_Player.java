@@ -14,11 +14,8 @@ public class CH_Player extends ChatHooker {
 	
 	public static final String ID = "MailBox_Player_ChatHooker";
 	
-	private IdentifiersList idList;
-
 	public CH_Player(IdentifiersList identifiersList, InventoryBuilder parentInv) {
 		super(ID, LangManager.getValue("information_ch_player_selection_start") );
-		this.setIdList(identifiersList);
 
 		this.setExecution(event -> {
 			Player ePlayer = event.getPlayer();
@@ -32,10 +29,10 @@ public class CH_Player extends ChatHooker {
 			}
 
 			List<String> splitedMsg = Arrays.asList(eMessage.split(","));
-			String wrongName = this.getIdList().addAllIdentifiers(splitedMsg);
+			String wrongName = identifiersList.addAllIdentifiers(splitedMsg);
 
 			if (wrongName == null) {
-				ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", this.getIdList().getPreviewString()));
+				ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", identifiersList.getPreviewString()));
 				parentInv.openInventory(ePlayer);
 				this.stop();
 
@@ -44,14 +41,6 @@ public class CH_Player extends ChatHooker {
 
 			}
 		});
-	}
-
-	public IdentifiersList getIdList() {
-		return idList;
-	}
-
-	public void setIdList(IdentifiersList idList) {
-		this.idList = idList;
 	}
 
 }

@@ -12,11 +12,9 @@ import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
 public abstract class ConfirmationInventoryBuilder extends InventoryBuilder {
-	public static Material CONFIRMATION_MATERIAL = Material.RED_TERRACOTTA;
-	public static Material ANNULATION_MATERIAL = Material.GREEN_TERRACOTTA;
-	
-	//TODO rajouter un preview ?
-	
+	public static Material CONFIRMATION_MATERIAL = Material.GREEN_TERRACOTTA;
+	public static Material ANNULATION_MATERIAL = Material.RED_TERRACOTTA;
+
 	public ConfirmationInventoryBuilder(String subId, String title) {
 		super("MailBox_Confirmation_" + subId, title, 3);
 		
@@ -32,7 +30,7 @@ public abstract class ConfirmationInventoryBuilder extends InventoryBuilder {
 		
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(ANNULATION_MATERIAL).setName("§f§l" + LangManager.getValue("string_cancel")).build(), consumer) );
 		
-		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CONFIRMATION_MATERIAL).setName("§4§l" + LangManager.getValue("string_confirm")).build(), onConfirmation(player, contents)) );
+		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CONFIRMATION_MATERIAL).setName("§c§l" + LangManager.getValue("string_confirm")).build(), onConfirmation(player, contents)) );
 		
 	}
 	

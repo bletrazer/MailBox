@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
-import fr.bletrazer.mailbox.inventory.LetterCreationInventory;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.lang.LangManager;
 import fr.minuskube.inv.ClickableItem;
@@ -42,7 +41,7 @@ public class MailBoxInventory extends InventoryBuilder {
 			ClickType click = e.getClick();
 			ItemStack cursor = e.getCursor();
 			
-			LetterCreationInventory inv = new LetterCreationInventory();
+			LetterDataCreatorInventory inv = new LetterDataCreatorInventory();
 			inv.setParent(this);
 			inv.openInventory(player);
 			

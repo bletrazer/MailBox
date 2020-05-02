@@ -1,5 +1,5 @@
 name: MailBox
-version: 0.1a
+version: 0.6.1a
 depend: [SmartInvs]
 description: Envoyer et recevoir des objets et des mails.
 author: Bletrazer
@@ -7,5 +7,67 @@ api-version: 1.13
 main: fr.bletrazer.mailbox.Main
 commands:
   mailbox:
-    description: commande par defaut
-    permission: mailbox.admin
+    description: commande du plugin.
+    
+permissions:
+  mailbox.admin:
+    description: Toutes les permissions du plugin.
+    default: op
+    children:
+     - mailbox.openmenu.*
+     - mailbox.send.*
+     - mailbox.delete.*
+     
+  mailbox.openmenu.*:
+    description: Permission d'ouvrir n'importe quel menu.
+    children:
+     - mailbox.openmenu.self
+     - mailbox.openmenu.other
+
+  mailbox.openmenu.self:
+    description: Permission d'ouvrir son propre menu.
+    default: true
+  mailbox.openmenu.other:
+    description: Permission d'ouvrir le menu d'autres joueurs.
+  
+  mailbox.send.*:
+    description: Permission d'envoyer des objet ou des lettres.
+    children:
+     - mailbox.send.item
+     - mailbox.send.letter
+     - mailbox.send.announce
+  
+  mailbox.send.item:
+    description: Envoyer des objets.
+  mailbox.send.letter:
+    description: Envoyer des lettres.
+    default: true
+  mailbox.send.announce:
+    description: Permission d'envoyer de lettre ou des objets a plusieurs joueurs à la fois.
+    
+  mailbox.delete.*:
+    description: Permission de supprimer des lettres et des objets d'une boite de reception.
+    children:
+     - mailbox.delete.item.*
+     - mailbox.delete.letter.*
+  
+  mailbox.delete.item.*:
+    description: Permission de supprimer des lettres.
+    children:
+     - mailbox.delete.item.self
+     - mailbox.delete.item.other
+  mailbox.delete.item.self:
+    description: Permission de supprimer des objet de sa boite.
+  mailbox.delete.item.other:
+    description: Permission de supprimer des objet de la boite d'un autre joueur.
+  
+  mailbox.delete.letter.*:
+    description: Permission de supprimer des objets.
+    children:
+     - mailbox.delete.letter.self
+     - mailbox.delete.letter.other
+  mailbox.delete.letter.self:
+    default: true
+    description: Permission de supprimer des lettre de sa boite.
+  mailbox.delete.letter.other:
+    description: Permission de supprimer des lettre de la boite d'un autre joueur.

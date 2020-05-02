@@ -2,11 +2,13 @@ package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
@@ -16,6 +18,7 @@ import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
+import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.lang.LangManager;
@@ -86,17 +89,20 @@ public class LetterInventory extends InventoryBuilder {
 							selector.openInventory(player);
 
 						}));
-
-		contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
-				.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
-			        List<Long> idList = getToShow().stream()
-			                .map(LetterData::getId)
-			                .collect(Collectors.toList());
-
-					DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
-					inv.openInventory(player); 
-					
-				}));
+		
+		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
+			contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
+					.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
+				        List<Long> idList = getToShow().stream()
+				                .map(LetterData::getId)
+				                .collect(Collectors.toList());
+	
+						DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
+						inv.openInventory(player); 
+						
+					}));
+			
+		}
 
 		if (!pagination.isLast()) {
 			contents.set(4, 7, this.nextPageItem(player, contents));
@@ -118,7 +124,7 @@ public class LetterInventory extends InventoryBuilder {
 
 		}
 
-		if (!this.getIdList().getPlayerList().isEmpty()) {
+		if (!this.getIdList().isEmpty() ) {
 			this.setToShow(this.filterByAuthors(this.getToShow()));
 			
 		}
@@ -144,21 +150,21 @@ public class LetterInventory extends InventoryBuilder {
 					if (cursor.getType() == Material.WRITTEN_BOOK) {
 						System.out.println("OK");
 
-					} else {// lecture dans le chat
+					} else {// lecture dans un livre
 						MailBoxController.readLetter(player, tempData);
 
 					}
 
-				} else if (clickType == ClickType.RIGHT && player.getUniqueId().equals(tempData.getUuid())) {//Toggle read state
-					if(tempData.getUuid().equals(player.getUniqueId()) ){
-						tempData.setIsRead(!tempData.getIsRead());
-						LetterDataSQL.getInstance().update(tempData);
-					}
+				} else if (clickType == ClickType.RIGHT && player.getUniqueId().equals(tempData.getOwnerUuid()) ) {//Toggle read state
+					tempData.setIsRead(!tempData.getIsRead());
+					LetterDataSQL.getInstance().update(tempData);
 
 				} else if (clickType == ClickType.CONTROL_DROP) {// supprimer
-					DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
-					inv.openInventory(player);
-
+					
+					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
+						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
+						inv.openInventory(player);
+					}
 				}
 
 			});
@@ -215,18 +221,36 @@ public class LetterInventory extends InventoryBuilder {
 				.build();
 
 		return ClickableItem.of(itemStack, e -> {
-			//TODO confirmation de marquages des lettres 
-			//DeletionDatasInventory inv = new DeletionDatasInventory(this.getDataSource(), list.stream().map(LetterData::getId).collect(Collectors.toList()), "§lMarque tout les lettres commes lues ?", this);
-			if(e.getClick() == ClickType.DROP) {
-				for (LetterData letterData : list ) {
-					if(letterData.getUuid().equals(player.getUniqueId()) ){
-						letterData.setIsRead(true);
-						LetterDataSQL.getInstance().update(letterData);
-					} else {
-						break;
-					}
+			ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + String.format("Vous allez marquer %s lettre commes lues", list.size())) {
+				
+				@Override
+				public void onUpdate(Player player, InventoryContents contents) {
 				}
-			}
+				
+				@Override
+				public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
+					return event -> {
+						if(event.getClick() == ClickType.DROP) {
+							if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
+								for (LetterData letterData : list) {
+
+									letterData.setIsRead(true);
+									LetterDataSQL.getInstance().update(letterData);
+
+								}
+							}
+						}
+						
+					};
+				}
+				
+				@Override
+				public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
+					return null;
+				}
+			};
+			confInv.setParent(this);
+			confInv.openInventory(player);
 		});
 	}
 
@@ -254,7 +278,8 @@ public class LetterInventory extends InventoryBuilder {
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(this.getShowedLetterType().getMaterial())
 						.setName("§e§l"+LangManager.getValue("string_filter_by_type")+": ")
 						.addLore(str)
-						.addLore(LangManager.getValue("help_choose_type_filter"))
+						.addLore(LangManager.getValue("help_choose_type_filter_1"))
+						.addLore(LangManager.getValue("help_choose_type_filter_2"))
 						.addLore(LangManager.getValue("help_delete_type_filter"));
 
 		this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);

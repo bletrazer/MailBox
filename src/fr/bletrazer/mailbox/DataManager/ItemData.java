@@ -18,7 +18,7 @@ public class ItemData extends Data {
 	}
 	
 	public ItemData(Data data, ItemStack itemstack, Duration duration) {
-		super(data.getId(), data.getUuid(), data.getAuthor(), data.getObject(), data.getCreationDate());
+		super(data.getId(), data.getOwnerUuid(), data.getAuthor(), data.getObject(), data.getCreationDate());
 		this.setItem(itemstack);
 		this.setDuration(duration);
 		
@@ -48,7 +48,7 @@ public class ItemData extends Data {
 	}
 
 	public ItemData clone() {
-		ItemData res = new ItemData(this.getUuid(), this.getAuthor(), this.getObject(), this.getItem(), this.getDuration());
+		ItemData res = new ItemData(this.getOwnerUuid(), this.getAuthor(), this.getObject(), this.getItem(), this.getDuration());
 		res.setId(this.getId());
 		return res;
 	}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -45,19 +44,11 @@ public class PlayerManager {
 	}
 	
 	public List<PlayerInfo> getOnlinePlayers(String toIgnore) {
-		Stream<PlayerInfo> stream = this.getRegisteredPlayers(toIgnore).stream();
-		
-		stream.filter(pi -> Bukkit.getPlayer(pi.getUuid()) != null );
-		
-		return stream.collect(Collectors.toList());
+		return this.getRegisteredPlayers(toIgnore).stream().filter(pi -> Bukkit.getPlayer(pi.getUuid()) != null ).collect(Collectors.toList());
 	}
 	
 	public List<PlayerInfo> getOfflinePlayers(String toIgnore) {
-		Stream<PlayerInfo> stream = this.getRegisteredPlayers(toIgnore).stream();
-
-		stream.filter(pi -> Bukkit.getPlayer(pi.getUuid()) == null );
-		
-		return stream.collect(Collectors.toList());
+		return this.getRegisteredPlayers(toIgnore).stream().filter(pi -> Bukkit.getPlayer(pi.getUuid()) == null ).collect(Collectors.toList());
 	}
 	
 	public UUID getUUID(String name) {

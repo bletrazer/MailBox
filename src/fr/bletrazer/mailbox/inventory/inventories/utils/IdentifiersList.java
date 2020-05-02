@@ -15,7 +15,7 @@ public class IdentifiersList {
 	private String sender;
 	
 	private String server = "";
-	private String faction = "";
+	//private String faction = "";
 	private List<String> precise = new ArrayList<>();
 	private Boolean calculList = false;
 	private List<PlayerInfo> list = new ArrayList<>();
@@ -24,6 +24,10 @@ public class IdentifiersList {
 	
 	public IdentifiersList(String sender) {
 		this.setSender(sender);
+	}
+	
+	public Boolean isEmpty() {
+		return this.server.isEmpty() && this.precise.isEmpty();
 	}
 	
 	public Boolean addIdentifier(String str) {
@@ -72,7 +76,7 @@ public class IdentifiersList {
 	
 	public void reset() {
 		this.server = "";
-		this.faction = "";
+		//this.faction = "";
 		this.precise = new ArrayList<>();
 		this.calculList = false;
 		this.list = new ArrayList<>();

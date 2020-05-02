@@ -22,7 +22,7 @@ public class CH_SimpleMessage extends ChatHooker {
 			}
 			
 			if(content.toString() != null && !content.toString().isEmpty() ) {
-				content.delete(0, content.length() -1);
+				content.delete(0, content.length());
 				
 			}
 			

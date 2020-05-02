@@ -11,11 +11,11 @@ public abstract class Data {
 	private String author;
 	private String object;
 	private Timestamp creationDate;
-	private UUID uuid;
+	private UUID ownerUuid;
 	
-	protected Data(Long id, UUID uuid, String author, String object, Timestamp creationDate) {
+	protected Data(Long id, UUID ownerUuid, String author, String object, Timestamp creationDate) {
 		this.setId(id);
-		this.setUuid(uuid);
+		this.setOwnerUuid(ownerUuid);
 		this.setAuthor(author);
 		this.setObject(object);
 		this.setCreationDate(creationDate);
@@ -60,17 +60,17 @@ public abstract class Data {
 	public void setCreationDate(Timestamp creationDate) {
 		this.creationDate = creationDate;
 	}
-
-	public UUID getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
-	}
 	
 	public Data clone() {
-		return new DataFactory(this.getId(), this.getUuid(), this.getAuthor(), this.getObject(), this.getCreationDate());
+		return new DataFactory(this.getId(), this.getOwnerUuid(), this.getAuthor(), this.getObject(), this.getCreationDate());
+	}
+
+	public UUID getOwnerUuid() {
+		return ownerUuid;
+	}
+
+	public void setOwnerUuid(UUID ownerUuid) {
+		this.ownerUuid = ownerUuid;
 	}
 
 }
