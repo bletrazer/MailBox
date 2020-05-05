@@ -15,7 +15,12 @@ import fr.minuskube.inv.InventoryManager;
 
 public class Main extends JavaPlugin {
 	private static InventoryManager manager;
-
+	
+	/*
+	 * TODO ajouter message '' d'aide '' dans les menu (lores)
+	 * 
+	 */
+	
 	public static InventoryManager getManager() {
 		return manager;
 	}

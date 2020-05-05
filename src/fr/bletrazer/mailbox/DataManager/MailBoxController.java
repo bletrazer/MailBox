@@ -126,12 +126,8 @@ public class MailBoxController {
 
 					}
 				} else {
-					Player sender = Bukkit.getPlayer(toSend.getAuthor());
-
-					if (sender != null) {
-						LangManager.getValue("string_error_player");
-
-					}
+					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+					
 				}
 			}
 		}
@@ -202,12 +198,8 @@ public class MailBoxController {
 
 					}
 				} else {
-					Player sender = Bukkit.getPlayer(toSend.getAuthor());
-
-					if (sender != null) {
-						LangManager.getValue("string_error_player");
-
-					}
+					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+					
 				}
 			}
 		}

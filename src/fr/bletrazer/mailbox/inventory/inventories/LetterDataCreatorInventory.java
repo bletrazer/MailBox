@@ -48,7 +48,7 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 	private Boolean showClock = false;
 	
 	public LetterDataCreatorInventory() {
-		super(ID, "§l" + LangManager.getValue("string_menu_letter_creation"), 3);
+		super(ID, "§l" + LangManager.getValue("string_menu_creation"), 3);
 
 	}
 

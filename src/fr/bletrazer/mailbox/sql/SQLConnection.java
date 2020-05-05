@@ -63,7 +63,7 @@ public class SQLConnection {
         try {
         	
         	if(!this.getConnection().getAutoCommit() ) {
-                Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_sql_rollback"));
+                Main.getInstance().getLogger().log(Level.SEVERE, "Transaction is being rolled back");
                 this.getConnection().rollback();
                 
         	}

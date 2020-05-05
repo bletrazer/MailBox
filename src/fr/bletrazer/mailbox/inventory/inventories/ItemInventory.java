@@ -139,6 +139,7 @@ public class ItemInventory extends InventoryBuilder {
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			for (ItemData itemData : DataManager.getTypeData(this.getDataSource(), ItemData.class)) {
 				if (!MailBoxController.recoverItem(player, itemData.getId()) ) {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
 					break;
 				}
 			}
