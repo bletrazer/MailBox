@@ -171,6 +171,9 @@ public class LetterInventory extends InventoryBuilder {
 					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
 						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
 						inv.openInventory(player);
+						
+					} else {
+						player.sendMessage(LangManager.getValue("string_permission_needed"));
 					}
 				}
 

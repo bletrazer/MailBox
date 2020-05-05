@@ -56,12 +56,6 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 			}));
 		}
 		
-		/*
-		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_FACTION_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_faction")).build(), e -> {
-			
-		}));
-		*/
-		
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
 			ChatHooker chatHooker = ChatHooker.get(player.getUniqueId());
 			

@@ -289,8 +289,6 @@ public class MailBoxController {
 				success = true;
 
 			}
-		} else {
-			player.sendMessage(LangManager.getValue("string_not_enought_space"));
 		}
 
 		return success;

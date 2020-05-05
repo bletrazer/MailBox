@@ -48,6 +48,7 @@ public class CH_Player extends ChatHooker {
 				
 			} else {
 				ePlayer.sendMessage(LangManager.getValue("string_permission_needed"));
+				
 			}
 		});
 	}

@@ -57,27 +57,31 @@ public class ItemInventory extends InventoryBuilder {
 				clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData),
 						e -> {
 							ClickType clickType = e.getClick();
-							if(player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) ) {
-								if(clickType == ClickType.LEFT ) {
+							
+							if (clickType == ClickType.LEFT) {
+
+								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other")) {
 									
-									if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other") ) {
-										MailBoxController.recoverItem(player, dataId);
+									if(!MailBoxController.recoverItem(player, dataId) ) {
+										player.sendMessage(LangManager.getValue("string_not_enought_space"));
 									}
 									
+								} else {
+									player.sendMessage(LangManager.getValue("string_permission_needed"));
 								}
-							}
-							
-							if (clickType == ClickType.CONTROL_DROP) {
-								if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
-									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l"+LangManager.getValue("question_delete_item"), this);
+
+							} else if (clickType == ClickType.CONTROL_DROP) {
+								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other")) {
+									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l" + LangManager.getValue("question_delete_item"), this);
 									inv.openInventory(player);
-									
+
+								} else {
+									player.sendMessage(LangManager.getValue("string_permission_needed"));
 								}
 							}
-							
-							
+
 						});
-				
+
 			}
 		}
 		
