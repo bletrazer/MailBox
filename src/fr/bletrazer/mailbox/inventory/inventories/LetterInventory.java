@@ -43,7 +43,7 @@ public class LetterInventory extends InventoryBuilder {
 
 	// secondary
 	private List<LetterData> toShow = new ArrayList<>();
-	private IdentifiersList idList;
+	private IdentifiersList idList = new IdentifiersList(null);
 	private LetterType showedLetterType = LetterType.NO_TYPE;
 	private Integer letterTypeIndex = 0;
 	private Integer notReadYet = 0;
@@ -66,10 +66,6 @@ public class LetterInventory extends InventoryBuilder {
 
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
-		if(this.getIdList() == null) {
-			this.setIdList(new IdentifiersList(player.getName()) );
-		}
-		
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 
@@ -82,13 +78,8 @@ public class LetterInventory extends InventoryBuilder {
 		if (!pagination.isFirst()) {
 			contents.set(4, 1, this.previousPageItem(player, contents));
 		}
-
-		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getIdList().getPreviewLore()).build(), e -> {
-							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getIdList(), "§l"+LangManager.getValue("string_show_sender")+":", this);
-							selector.openInventory(player);
-
-						}));
+		
+		this.setPlayerFilter(player, contents);
 		
 		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
 			contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
@@ -110,7 +101,23 @@ public class LetterInventory extends InventoryBuilder {
 
 		contents.set(4, 0, this.goBackItem(player));
 	}
+	
+	private void setPlayerFilter(Player player, InventoryContents contents) {
+		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
+				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getIdList().getPreviewLore()).build(), e -> {
+					ClickType click = e.getClick();
 
+					if (click == ClickType.LEFT) {
+						PlayerSelectionInventory selector = new PlayerSelectionInventory(this.getIdList(), "§l"+LangManager.getValue("string_show_sender")+":", this);
+						selector.openInventory(player);
+
+					} else if (click == ClickType.DROP) {
+						this.getIdList().clear();
+						this.setPlayerFilter(player, contents);
+					}
+				}));
+	}
+	
 	@Override
 	public void updateInventory(Player player, InventoryContents contents) {
 		this.dynamicContent(player, contents);
@@ -219,47 +226,60 @@ public class LetterInventory extends InventoryBuilder {
 				.setAutoFormatingLore(help_mark_all, 23)
 				.setStackSize(list.size(), false )
 				.build();
-
-		return ClickableItem.of(itemStack, e -> {
-			ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + String.format("Vous allez marquer %s lettre commes lues", list.size())) {
-				
-				@Override
-				public void onUpdate(Player player, InventoryContents contents) {
-				}
-				
-				@Override
-				public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
-					return event -> {
-						if(event.getClick() == ClickType.DROP) {
-							if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
-								for (LetterData letterData : list) {
-
-									letterData.setIsRead(true);
-									LetterDataSQL.getInstance().update(letterData);
-
-								}
+		
+		Consumer<InventoryClickEvent> consumer = null;
+		
+		if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
+			consumer = e -> {
+				ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + String.format("Vous allez marquer %s lettre commes lues", list.size())) {
+					
+					@Override
+					public void onUpdate(Player player, InventoryContents contents) {
+					}
+					
+					@Override
+					public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
+						return event -> {
+							for (LetterData letterData : list) {
+								letterData.setIsRead(true);
+								LetterDataSQL.getInstance().update(letterData);
+								
 							}
-						}
-						
-					};
-				}
-				
-				@Override
-				public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
-					return null;
-				}
+							
+							this.returnToParent(player);
+							
+						};
+					}
+					
+					@Override
+					public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
+						return null;
+					}
+				};
+				confInv.setParent(this);
+				confInv.openInventory(player);
 			};
-			confInv.setParent(this);
-			confInv.openInventory(player);
-		});
+			
+		}
+		
+		ClickableItem res;
+		
+		if(consumer != null) {
+			res = ClickableItem.of(itemStack, consumer);
+			
+		} else {
+			res = ClickableItem.empty(itemStack);
+		}
+		
+		return res;
 	}
 
 	private ClickableItem generateSortByDateItem() {
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(DATE_SORT_MATERIAL).setName("§e§l"+LangManager.getValue("string_display") + ":");
 
 		if (this.getIsSortingByDecreasingDate()) {
-
 			itemStackBuilder.addLore(LangManager.getValue("string_descending_order"));
+			
 		} else {
 			itemStackBuilder.addLore(LangManager.getValue("string_ascending_order"));
 

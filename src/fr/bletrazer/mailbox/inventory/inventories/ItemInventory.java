@@ -62,11 +62,17 @@ public class ItemInventory extends InventoryBuilder {
 									MailBoxController.recoverItem(player, dataId);
 									
 								}
-							} else if (clickType == ClickType.DROP || clickType == ClickType.CONTROL_DROP) {
-								DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l"+LangManager.getValue("question_delete_item"), this);
-								inv.openInventory(player);
-
 							}
+							
+							if (clickType == ClickType.DROP || clickType == ClickType.CONTROL_DROP) {
+								if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
+									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l"+LangManager.getValue("question_delete_item"), this);
+									inv.openInventory(player);
+									
+								}
+							}
+							
+							
 						});
 				
 			}
@@ -90,7 +96,7 @@ public class ItemInventory extends InventoryBuilder {
 			contents.set(4, 1, this.previousPageItem(player, contents));
 		}
 		
-		if(!this.getDataSource().getOwnerUuid().equals(player.getUniqueId())) { //TODO add permission delete all other
+		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
 			contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
 				List<ItemData> dataList = DataManager.getTypeData(this.dataSource, ItemData.class);
 				List<Long> listDataId = new ArrayList<>();

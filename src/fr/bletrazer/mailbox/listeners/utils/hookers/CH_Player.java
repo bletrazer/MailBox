@@ -29,16 +29,25 @@ public class CH_Player extends ChatHooker {
 			}
 
 			List<String> splitedMsg = Arrays.asList(eMessage.split(","));
-			String wrongName = identifiersList.addAllIdentifiers(splitedMsg);
-
-			if (wrongName == null) {
-				ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", identifiersList.getPreviewString()));
-				parentInv.openInventory(ePlayer);
-				this.stop();
-
+			
+			if(splitedMsg.size() == 1 || splitedMsg.size() > 1 && ePlayer.hasPermission("mailbox.send.announce") ) {
+				String wrongName = identifiersList.addAllIdentifiers(splitedMsg);
+	
+				if (wrongName == null) {
+					ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", identifiersList.getPreviewString()));
+					parentInv.openInventory(ePlayer);
+					this.stop();
+	
+				} else if (wrongName.equals(ePlayer.getName()) ) {
+					ePlayer.sendMessage(LangManager.getValue("string_player_not_yourself"));
+					
+				} else {
+					ePlayer.sendMessage(LangManager.getValue("string_player_not_found", wrongName));
+	
+				}
+				
 			} else {
-				ePlayer.sendMessage((LangManager.getValue("error_chat_selection_recipients", wrongName)));
-
+				ePlayer.sendMessage(LangManager.getValue("string_permission_needed"));
 			}
 		});
 	}

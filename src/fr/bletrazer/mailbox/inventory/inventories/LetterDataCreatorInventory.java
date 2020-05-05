@@ -27,6 +27,7 @@ import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.utils.AbstractDuration;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Duration;
+import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_SimpleMessage;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.minuskube.inv.ClickableItem;
@@ -59,23 +60,36 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 			this.setClock(player, contents);
 		}
 		
-		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + "Destinataires")
-				.setLore(this.getRecipients().getPreviewLore()).build(), e -> {
-					ClickType click = e.getClick();
-					ChatHooker chCheck = ChatHooker.get(player.getUniqueId());
-					
-					if (click == ClickType.LEFT) {
-						if (chCheck == null) {
-							PlayerSelectorInventory selector = new PlayerSelectorInventory(this.getRecipients(),
-									"§l" + "Choix du/des destinataires" + ":", this);
-							selector.openInventory(player);
-
-						}
-					}
-				}));
+		this.setPlayerFilter(player, contents);
 
 		contents.set(2, 0, this.goBackItem(player));
 
+	}
+	
+	private void setPlayerFilter(Player player, InventoryContents contents) {
+		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + "Destinataires")
+				.setLore(this.getRecipients().getPreviewLore()).build(), e -> {
+					ClickType click = e.getClick();
+					
+					if (click == ClickType.LEFT) {
+							if(player.hasPermission("mailbox.send.announce")) {
+								PlayerSelectionInventory selector = new PlayerSelectionInventory(this.getRecipients(),
+										"§l" + "Choix du/des destinataires" + ":", this);
+								selector.setFilterMode(false);
+								selector.openInventory(player);
+								
+							} else {
+								ChatHooker chCheck = new CH_Player(this.getRecipients(), this);
+								player.closeInventory();
+								chCheck.start(player);
+							}
+					} else if (click == ClickType.DROP ) {
+						this.getRecipients().clear();
+						this.setPlayerFilter(player, contents);
+					}
+					
+					
+				}));
 	}
 	
 	private void dynamicContent(Player player, InventoryContents contents) {

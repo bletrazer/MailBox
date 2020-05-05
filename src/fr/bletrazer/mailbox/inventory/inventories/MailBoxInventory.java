@@ -2,8 +2,6 @@ package fr.bletrazer.mailbox.inventory.inventories;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemStack;
 
 import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.DataHolder;
@@ -38,39 +36,10 @@ public class MailBoxInventory extends InventoryBuilder {
 		}));
 		
 		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§l"+LangManager.getValue("string_send_letter")).build(), e ->  {
-			ClickType click = e.getClick();
-			ItemStack cursor = e.getCursor();
-			
 			LetterDataCreatorInventory inv = new LetterDataCreatorInventory();
 			inv.setParent(this);
 			inv.openInventory(player);
 			
-			/*
-			if (click == ClickType.LEFT ) {
-				if(!LetterCreator.isCreatingLetter(player)) {
-					if(cursor.getType() == Material.WRITTEN_BOOK && cursor.hasItemMeta() ) { // avancé
-						if(player.getInventory().firstEmpty() > -1) {
-							BookMeta meta = (BookMeta) cursor.getItemMeta();
-							player.getInventory().addItem(cursor);
-							e.setCursor(null);
-							player.closeInventory();
-							LetterCreator creator = new LetterCreator();
-							creator.setContent(meta.getPages() );
-							creator.startCreation(player);
-							
-						} else {
-							player.sendMessage(LangManager.getValue("string_not_enought_space"));
-						}
-					} else {//simple
-						player.closeInventory();
-						LetterCreator creator = new LetterCreator();
-						creator.startCreation(player);
-					}
-				}
-				
-			}
-			
-			*/
 		}));
 	}
 

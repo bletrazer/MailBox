@@ -37,9 +37,7 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 				MailBoxController.deleteData(this.getHolder(), id);
 				
 			}
-			
-			this.getParent().openInventory(player);
-			
+			this.returnToParent(player);
 		};
 	}
 

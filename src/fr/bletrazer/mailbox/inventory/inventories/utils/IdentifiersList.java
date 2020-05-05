@@ -57,24 +57,24 @@ public class IdentifiersList {
 			
 			
 		} else {
-			UUID pUuid = PlayerManager.getInstance().getUUID(identifier);
-
-			if (pUuid != null) {
-				if(!this.precise.contains(identifier)) {
-					this.precise.add(identifier);
-					this.calculList = true;
-					this.calculPreview = true;
+			if(this.getSender() == null || !identifier.contentEquals(this.getSender()) ) {
+				UUID pUuid = PlayerManager.getInstance().getUUID(identifier);
+	
+				if (pUuid != null) {
+					if(!this.precise.contains(identifier)) {
+						this.precise.add(identifier);
+						this.calculList = true;
+						this.calculPreview = true;
+					}
+					res = true;
 				}
-
-				res = true;
-				
 			}
 		}
 		
 		return res;
 	}
 	
-	public void reset() {
+	public void clear() {
 		this.server = "";
 		//this.faction = "";
 		this.precise = new ArrayList<>();
@@ -90,8 +90,9 @@ public class IdentifiersList {
 		if (!list.isEmpty()) {
 			for (Integer index = 0; index < list.size() && res == null; index++) {
 				String identifier = list.get(index).replace(" ", "");
+				Boolean s = this.addIdentifier(identifier);
 				
-				if((this.getSender() == null || !identifier.equals(this.getSender()) ) && !this.addIdentifier(identifier) ) {
+				if(!s ) {
 					res = identifier;
 				}
 			}
