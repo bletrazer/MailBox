@@ -108,8 +108,6 @@ public class ItemDataSQL extends DAO<ItemData>{
 				query.close();
 				res = temp;
 				
-			} else {
-				//TODO logg data null
 			}
 
 		} catch (SQLException e) {
@@ -151,7 +149,6 @@ public class ItemDataSQL extends DAO<ItemData>{
 				if(SQLConnection.getInstance().commit(query) ) {
 					res = tempItemList;
 				}
-				
 				
 			}
 			

@@ -17,7 +17,19 @@ permissions:
      - mailbox.openmenu.*
      - mailbox.send.*
      - mailbox.delete.*
+     - mailbox.recover.*
      
+  mailbox.item.recover.*:
+    description: Permission de recuperer les objets des boites.
+    children:
+     - mailbox.recover.item.self
+     - mailbox.recover.item.other
+     
+  mailbox.recover.item.self:
+    description: Permission de recuperer ses objets de sa boite d'objet
+  mailbox.recover.item.other:
+    description: Permission de recuperer les objets dans la boite de reception d'autres joueurs.
+    
   mailbox.openmenu.*:
     description: Permission d'ouvrir n'importe quel menu.
     children:

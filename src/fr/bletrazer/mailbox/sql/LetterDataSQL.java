@@ -90,8 +90,6 @@ public class LetterDataSQL extends DAO<LetterData> {
 				query.close();
 				
 				res = temp;
-			} else {
-				//TODO logg data null
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
