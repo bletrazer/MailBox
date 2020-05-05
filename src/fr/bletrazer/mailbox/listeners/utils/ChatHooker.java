@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import fr.bletrazer.mailbox.Main;
-import fr.bletrazer.mailbox.lang.LangManager;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public abstract class ChatHooker {
 	

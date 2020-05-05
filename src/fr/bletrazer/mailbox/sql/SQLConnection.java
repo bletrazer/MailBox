@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 import fr.bletrazer.mailbox.Main;
-import fr.bletrazer.mailbox.lang.LangManager;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 
 public class SQLConnection {

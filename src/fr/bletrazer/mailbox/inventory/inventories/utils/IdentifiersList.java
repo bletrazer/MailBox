@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public class IdentifiersList {
 	

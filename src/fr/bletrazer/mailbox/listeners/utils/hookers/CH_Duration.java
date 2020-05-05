@@ -6,9 +6,9 @@ import java.time.format.DateTimeParseException;
 import org.bukkit.entity.Player;
 
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.utils.AbstractDuration;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public class CH_Duration extends ChatHooker {
 

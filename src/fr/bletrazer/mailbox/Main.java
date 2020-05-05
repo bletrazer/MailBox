@@ -5,11 +5,11 @@ import java.util.logging.Level;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.bletrazer.mailbox.commands.Cmd_Mailbox;
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.JoinListener;
 import fr.bletrazer.mailbox.listeners.QuitListener;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 import fr.bletrazer.mailbox.sql.SQLConnection;
+import fr.bletrazer.mailbox.utils.LangManager;
 import fr.minuskube.inv.InventoryManager;
 
 public class Main extends JavaPlugin {

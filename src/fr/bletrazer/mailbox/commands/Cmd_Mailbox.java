@@ -12,8 +12,8 @@ import fr.bletrazer.mailbox.DataManager.DataManager;
 import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.inventories.MailBoxInventory;
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public class Cmd_Mailbox implements CommandExecutor {
 	

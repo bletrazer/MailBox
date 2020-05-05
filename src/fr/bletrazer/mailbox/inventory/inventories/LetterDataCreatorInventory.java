@@ -12,7 +12,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.LetterData;
@@ -23,13 +22,14 @@ import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.listeners.utils.AbstractDuration;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Duration;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_SimpleMessage;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
+import fr.bletrazer.mailbox.utils.ItemStackBuilder;
+import fr.bletrazer.mailbox.utils.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 

@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.lang;
+package fr.bletrazer.mailbox.utils;
 
 import java.io.File;
 import java.io.IOException;

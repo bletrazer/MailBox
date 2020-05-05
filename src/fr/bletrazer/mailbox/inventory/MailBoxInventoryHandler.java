@@ -7,11 +7,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.LetterData;
-import fr.bletrazer.mailbox.lang.LangManager;
+import fr.bletrazer.mailbox.utils.ItemStackBuilder;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public class MailBoxInventoryHandler {
 	

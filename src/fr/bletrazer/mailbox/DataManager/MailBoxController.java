@@ -11,11 +11,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import fr.bletrazer.mailbox.ItemStackBuilder;
-import fr.bletrazer.mailbox.lang.LangManager;
 import fr.bletrazer.mailbox.sql.DataSQL;
 import fr.bletrazer.mailbox.sql.ItemDataSQL;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
+import fr.bletrazer.mailbox.utils.ItemStackBuilder;
+import fr.bletrazer.mailbox.utils.LangManager;
 
 public class MailBoxController {
 

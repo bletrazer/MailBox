@@ -11,10 +11,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.scheduler.BukkitTask;
 
-import fr.bletrazer.mailbox.ItemStackBuilder;
 import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
-import fr.bletrazer.mailbox.lang.LangManager;
+import fr.bletrazer.mailbox.utils.ItemStackBuilder;
+import fr.bletrazer.mailbox.utils.LangManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.InventoryListener;
 import fr.minuskube.inv.SmartInventory;
