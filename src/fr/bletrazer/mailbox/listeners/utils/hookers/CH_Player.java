@@ -9,6 +9,8 @@ import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public class CH_Player extends ChatHooker {
 	
@@ -34,20 +36,21 @@ public class CH_Player extends ChatHooker {
 				String wrongName = identifiersList.addAllIdentifiers(splitedMsg);
 	
 				if (wrongName == null) {
-					ePlayer.sendMessage(LangManager.getValue("information_chat_selection_recipients", identifiersList.getPreviewString()));
+					MessageUtils.sendMessage(ePlayer, MessageLevel.INFO, LangManager.getValue("information_chat_selection_recipients", identifiersList.getPreviewString()) );
 					parentInv.openInventory(ePlayer);
 					this.stop();
 	
 				} else if (wrongName.equals(ePlayer.getName()) ) {
-					ePlayer.sendMessage(LangManager.getValue("string_player_not_yourself"));
+					MessageUtils.sendMessage(ePlayer, MessageLevel.ERROR, LangManager.getValue("string_player_not_yourself") );
 					
 				} else {
-					ePlayer.sendMessage(LangManager.getValue("string_player_not_found", wrongName));
+					MessageUtils.sendMessage(ePlayer, MessageLevel.ERROR, LangManager.getValue("string_player_not_found", wrongName) );
+					
 	
 				}
 				
 			} else {
-				ePlayer.sendMessage(LangManager.getValue("string_permission_needed"));
+				MessageUtils.sendMessage(ePlayer, MessageLevel.ERROR, LangManager.getValue("string_permission_needed") );
 				
 			}
 		});

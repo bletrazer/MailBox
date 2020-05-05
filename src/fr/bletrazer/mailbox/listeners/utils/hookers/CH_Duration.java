@@ -9,6 +9,8 @@ import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.listeners.utils.AbstractDuration;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public class CH_Duration extends ChatHooker {
 
@@ -41,7 +43,7 @@ public class CH_Duration extends ChatHooker {
 				this.stop();
 
 			} catch (DateTimeParseException e) {
-				ePlayer.sendMessage("Impossible de transformer \"" + eMessage + "\" en durée, veuillez réessayer.");
+				MessageUtils.sendMessage(ePlayer, MessageLevel.ERROR, LangManager.getValue("error_parsing_duration") );
 				
 			}
 		});

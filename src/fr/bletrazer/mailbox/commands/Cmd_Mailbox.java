@@ -14,6 +14,8 @@ import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.inventories.MailBoxInventory;
 import fr.bletrazer.mailbox.playerManager.PlayerManager;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public class Cmd_Mailbox implements CommandExecutor {
 	
@@ -34,7 +36,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 					mailBox.openInventory(player);
 					
 				} else {
-					player.sendMessage(LangManager.getValue("string_permission_needed"));
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 				}
 				
 			} else if (args.length == 1) {
@@ -43,15 +45,15 @@ public class Cmd_Mailbox implements CommandExecutor {
 					
 					if(player.hasPermission("mailbox.check.self")) {
 						Integer number = DataManager.getTypeData(DataManager.getDataHolder(player.getUniqueId()), LetterData.class).size();
-						player.sendMessage(LangManager.getValue("result_command_check_self", number));
+						MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", number));
 						
 					} else {
-						player.sendMessage(LangManager.getValue("string_permission_needed"));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 					}
 					
 				} else if (args[0].equalsIgnoreCase("open")) {
 					res = true;
-					player.sendMessage(LangManager.getValue("string_command_usage", "/mailbox open <joueur>") );
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_command_usage", "/mailbox open <joueur>"));
 					
 				}
 			} else if (args.length == 2) {
@@ -65,18 +67,18 @@ public class Cmd_Mailbox implements CommandExecutor {
 							Integer number = DataManager.getTypeData(sHolder, LetterData.class).size();
 							
 							if(sourceUuid.equals(player.getUniqueId())) {
-								player.sendMessage(LangManager.getValue("result_command_check_self", number));
+								MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", number));
 								
 							} else {
-								player.sendMessage(LangManager.getValue("result_command_check_other", args[1], number));
+								MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_other", args[1], number));
 							}
 							
 						} else {
-							player.sendMessage(LangManager.getValue("string_permission_needed"));
+							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 						}
 
 					} else {
-						player.sendMessage(LangManager.getValue("string_player_not_found", args[1]));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_player_not_found", args[1]));
 					}
 					
 				} else if(args[0].equalsIgnoreCase("open")) {
@@ -89,11 +91,11 @@ public class Cmd_Mailbox implements CommandExecutor {
 							inv.openInventory(player);
 							
 						} else {
-							player.sendMessage(LangManager.getValue("string_permission_needed"));
+							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 						}
 
 					} else {
-						player.sendMessage(LangManager.getValue("string_player_not_found", args[1]));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_player_not_found", args[1]));
 					}
 					
 				}
@@ -102,11 +104,11 @@ public class Cmd_Mailbox implements CommandExecutor {
 			
 		} else {
 			res = true;
-			sender.sendMessage(LangManager.getValue("string_command_player_only"));
+			MessageUtils.sendMessage(sender, MessageLevel.ERROR, LangManager.getValue("string_command_player_only"));
 		}
 		
 		if(!res ) {
-			sender.sendMessage(LangManager.getValue("string_command_not_found"));
+			MessageUtils.sendMessage(sender, MessageLevel.ERROR, LangManager.getValue("string_command_not_found"));
 		}
 		
 		return res;

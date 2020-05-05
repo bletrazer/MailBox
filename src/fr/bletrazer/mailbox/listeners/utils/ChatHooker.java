@@ -12,6 +12,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public abstract class ChatHooker {
 	
@@ -30,8 +32,8 @@ public abstract class ChatHooker {
 	}
 
 	public void start(Player player) {
-		player.sendMessage(startMessage + " " + LangManager.getValue("information_ch_stop_selection"));
-
+		MessageUtils.sendMessage(player, MessageLevel.INFO, startMessage + " " + LangManager.getValue("information_ch_stop_selection"));
+		
 		this.setTarget(player.getUniqueId());
 		this.setListener(new Listener() {
 

@@ -24,6 +24,8 @@ import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
@@ -173,7 +175,7 @@ public class LetterInventory extends InventoryBuilder {
 						inv.openInventory(player);
 						
 					} else {
-						player.sendMessage(LangManager.getValue("string_permission_needed"));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 					}
 				}
 
@@ -234,7 +236,7 @@ public class LetterInventory extends InventoryBuilder {
 		
 		if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
 			consumer = e -> {
-				ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + String.format("Vous allez marquer %s lettre commes lues", list.size())) {
+				ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + LangManager.getValue("string_mark_all_as_read", list.size()) ) {
 					
 					@Override
 					public void onUpdate(Player player, InventoryContents contents) {
@@ -297,7 +299,7 @@ public class LetterInventory extends InventoryBuilder {
 	}
 
 	private ClickableItem generateCycleFilters() {
-		String str = this.getShowedLetterType() == LetterType.NO_TYPE ? LangManager.getValue("string_no") : this.getShowedLetterType().name().toLowerCase();
+		String str = this.getShowedLetterType() == LetterType.NO_TYPE ? LangManager.getValue("string_empty") : this.getShowedLetterType().name().toLowerCase();
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(this.getShowedLetterType().getMaterial())
 						.setName("§e§l"+LangManager.getValue("string_filter_by_type")+": ")
 						.addLore(str)

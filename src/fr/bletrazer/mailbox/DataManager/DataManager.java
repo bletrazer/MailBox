@@ -24,7 +24,7 @@ public class DataManager {
 	public static <T extends Data> List<T> getTypeData(DataHolder dataHolder, Class<T> c) {
 		List<T> res = new ArrayList<>();
 
-		for (Data data : dataHolder.getDataList()) {
+		for (Data data : dataHolder.getDataList() ) {
 			if (c.isInstance(data)) {
 				res.add(c.cast(data));
 			}

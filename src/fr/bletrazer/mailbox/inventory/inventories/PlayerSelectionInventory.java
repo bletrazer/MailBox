@@ -39,7 +39,6 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 		pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
-		//SlotPos fac = new SlotPos(1, 4);
 		
 		if (this.getFilterMode() || player.hasPermission("mailbox.send.annouce")) {
 			

@@ -15,6 +15,8 @@ import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.Pagination;
@@ -63,11 +65,11 @@ public class ItemInventory extends InventoryBuilder {
 								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other")) {
 									
 									if(!MailBoxController.recoverItem(player, dataId) ) {
-										player.sendMessage(LangManager.getValue("string_not_enought_space"));
+										MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
 									}
 									
 								} else {
-									player.sendMessage(LangManager.getValue("string_permission_needed"));
+									MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 								}
 
 							} else if (clickType == ClickType.CONTROL_DROP) {
@@ -76,7 +78,7 @@ public class ItemInventory extends InventoryBuilder {
 									inv.openInventory(player);
 
 								} else {
-									player.sendMessage(LangManager.getValue("string_permission_needed"));
+									MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 								}
 							}
 
