@@ -16,6 +16,7 @@ permissions:
     children:
      - mailbox.openmenu.*
      - mailbox.send.*
+     - mailbox.letter.reply.*
      - mailbox.delete.*
      - mailbox.recover.*
      
@@ -24,6 +25,16 @@ permissions:
     children:
      - mailbox.recover.item.self
      - mailbox.recover.item.other
+  mailbox.letter.reply.*:
+    description: Permission de répondre a une lettre.
+    children:
+     - mailbox.letter.reply.self
+     - mailbox.letter.reply.other
+  mailbox.letter.reply.self:
+    description: Permission de répondre a une lettre dont vous êtes le destinataire.
+    default: true
+  mailbox.letter.reply.other:
+    description: Permission de répondre a une lettre dont vous n'êtes pas le destinataire.
      
   mailbox.recover.item.self:
     description: Permission de recuperer ses objets de sa boite d'objet

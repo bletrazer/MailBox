@@ -290,6 +290,10 @@ public class CreationInventory extends InventoryBuilder {
 	public StringBuilder getStrDuration() {
 		return strDuration;
 	}
+	
+	public void setObject(String str) {
+		this.object = new StringBuilder(str);
+	}
 
 	public void setStrDuration(StringBuilder strDuration) {
 		this.strDuration = strDuration;

@@ -21,7 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemStackBuilder {
 	
 	private Material material = Material.STONE;
-	private String name = "";
+	private String name = " ";
 	private String loreFormat = "§7";
 	private List<String> lore = new ArrayList<>();
 	private Map<Enchantment, Integer> enchantments = new HashMap<>();

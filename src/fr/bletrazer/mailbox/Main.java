@@ -18,7 +18,6 @@ public class Main extends JavaPlugin {
 	
 	/*
 	 * TODO lettre non envoyés/en cours
-	 * TODO répondre a un lettre WIP
 	 * 
 	 */
 	

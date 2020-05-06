@@ -39,9 +39,11 @@ public class MailBoxInventoryHandler {
 	private static	 ItemStack generateLetterDataRepresentation(LetterData data) {
 		SimpleDateFormat sdf =  new SimpleDateFormat(LangManager.getValue("string_date_format"));
 		ItemStackBuilder itemGenerator = new ItemStackBuilder(data.getLetterType().getMaterial())
-				.setName(LangManager.getValue("string_object") + ": " + data.getObject())
-				.addLore(LangManager.getValue("string_author") + ": " + data.getAuthor())
-				.addLore(LangManager.getValue("string_reception_date") + ": " + sdf.format(data.getCreationDate()) );
+				.setLoreFormat("§f")
+				.addAutoFormatingLore("§e§l" + LangManager.getValue("string_object") +":§r§f " + data.getObject(), 35)
+				.addAutoFormatingLore("§e§l" + LangManager.getValue("string_author") +":§r§f " + data.getAuthor(), 35)
+				.addAutoFormatingLore("§e§l" + LangManager.getValue("string_reception_date") +":§r§f " + sdf.format(data.getCreationDate()), 35 )
+				.addLore(" ");
 		
 		if(!data.getIsRead()) {
 			itemGenerator.enchant(Enchantment.ARROW_FIRE, 1).addFlag(ItemFlag.HIDE_ENCHANTS);

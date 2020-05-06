@@ -158,23 +158,32 @@ public class LetterInventory extends InventoryBuilder {
 		
 		ClickableItem[] clickableItems = new ClickableItem[toShow.size()];
 
-		for (Integer index = 0; index < toShow.size(); index++) {
-			LetterData tempData = toShow.get(index);
+		for (Integer index = 0; index < getToShow().size(); index++) {
+			LetterData tempData = getToShow().get(index);
 
 			clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData), e -> {
 				ClickType clickType = e.getClick();
 				
-				System.out.println(clickType );
-				
-				if (clickType == ClickType.LEFT) {
+				if (clickType == ClickType.LEFT) {//lire
 					MailBoxController.readLetter(player, tempData);
 
-				} else if (clickType == ClickType.RIGHT && player.getUniqueId().equals(tempData.getOwnerUuid()) ) {//Toggle read state
-					tempData.setIsRead(!tempData.getIsRead());
-					LetterDataSQL.getInstance().update(tempData);
-
-				} else if (clickType == ClickType.CONTROL_DROP) {// supprimer
+				} else if (clickType == ClickType.RIGHT ) {//répondre
+					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.reply.self") || player.hasPermission("mailbox.letter.reply.other") ) {
+						CreationInventory ci = new CreationInventory();
+						IdentifiersList tempIdList = new IdentifiersList(null);
+						tempIdList.addIdentifier(tempData.getAuthor());
+						ci.setRecipients(tempIdList);
+						String tempObj = tempData.getObject().replace(LangManager.getValue("string_reply_identifier") + ": ", "");
+						ci.setObject(LangManager.getValue("string_reply_identifier") + ": " + tempObj);
+						ci.setParent(this);
+						
+						ci.openInventory(player);
+						
+					} else {
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+					}
 					
+				} else if (clickType == ClickType.CONTROL_DROP) {// supprimer
 					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
 						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
 						inv.openInventory(player);
