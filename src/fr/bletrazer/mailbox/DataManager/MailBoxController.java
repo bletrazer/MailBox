@@ -74,13 +74,6 @@ public class MailBoxController {
 				holder.addData(temp);
 			}
 
-			// notification
-			Player recipient = Bukkit.getPlayer(temp.getOwnerUuid());
-
-			if (recipient != null) {
-				MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_item_notification", letterData.getAuthor()) );
-			}
-
 			res = true;
 		}
 
@@ -107,7 +100,7 @@ public class MailBoxController {
 						Player recipient = Bukkit.getPlayer(letter.getOwnerUuid());
 
 						if (recipient != null) {
-							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_letter_notification", letter.getAuthor()) );
+							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", letter.getAuthor()) );
 						}
 					}
 
@@ -123,7 +116,7 @@ public class MailBoxController {
 					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
 
 					if (recipient != null) {
-						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_letter_notification", toSend.getAuthor()) );
+						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", toSend.getAuthor()) );
 
 					}
 					res = true;
@@ -147,13 +140,6 @@ public class MailBoxController {
 
 			if (holder != null) {
 				holder.addData(temp);
-			}
-
-			// notification
-			Player recipient = Bukkit.getPlayer(temp.getOwnerUuid());
-
-			if (recipient != null) {
-				MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_item_notification", itemData.getAuthor()) );
 			}
 
 			res = true;
@@ -183,7 +169,7 @@ public class MailBoxController {
 						Player recipient = Bukkit.getPlayer(item.getOwnerUuid());
 
 						if (recipient != null) {
-							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_item_notification", item.getAuthor()) );
+							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_item_notification", item.getAuthor()) );
 						}
 					}
 					res = true;
@@ -197,7 +183,7 @@ public class MailBoxController {
 					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
 
 					if (recipient != null) {
-						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_letter_notification", toSend.getAuthor()) );
+						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_item_notification", toSend.getAuthor()) );
 
 					}
 					res = true;

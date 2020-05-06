@@ -188,24 +188,24 @@ public class CreationInventory extends InventoryBuilder {
 												for (PlayerInfo pi : getRecipients().getPlayerList() ) {
 													Data data = new DataFactory(pi.getUuid(), player.getName(), getObject().toString());
 													
-													if(getContent() != null) {
-														letters.add(new LetterDataFactory(data, type, Arrays.asList(new String[] { getContent().toString() }), false));
+													if(!getContent().toString().isEmpty() ) {
+														letters.add(new LetterDataFactory(data.clone(), type, Arrays.asList(new String[] { getContent().toString() }), false));
 													}
 													
 													if(getItem() != null) {
 														Duration tempDuration = getStrDuration().toString().equals("infini") ? Duration.ofSeconds(0) : CH_Duration.transform(getStrDuration().toString());
-														items.add(new ItemData(data, getItem(), tempDuration) );
+														items.add(new ItemData(data.clone(), getItem(), tempDuration) );
 													}
 													
 												}
 												
-												if(getContent() != null && !getContent().toString().isEmpty() ) {
+												if(!letters.isEmpty() ) {
 													if(MailBoxController.sendLetters(letters) ) {
 														MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_letter", ": " + getRecipients().getPreviewString()) );
 													}
 												}
 												
-												if(getItem() != null ) {
+												if(!items.isEmpty() ) {
 													if(MailBoxController.sendItems(items) ) {
 														MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_item", ": " + getRecipients().getPreviewString()) );
 													}

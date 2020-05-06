@@ -163,16 +163,11 @@ public class LetterInventory extends InventoryBuilder {
 
 			clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData), e -> {
 				ClickType clickType = e.getClick();
-				ItemStack cursor = e.getCursor();
-
+				
+				System.out.println(clickType );
+				
 				if (clickType == ClickType.LEFT) {
-					if (cursor.getType() == Material.WRITTEN_BOOK) {
-						System.out.println("OK");
-
-					} else {// lecture dans un livre
-						MailBoxController.readLetter(player, tempData);
-
-					}
+					MailBoxController.readLetter(player, tempData);
 
 				} else if (clickType == ClickType.RIGHT && player.getUniqueId().equals(tempData.getOwnerUuid()) ) {//Toggle read state
 					tempData.setIsRead(!tempData.getIsRead());
@@ -230,7 +225,7 @@ public class LetterInventory extends InventoryBuilder {
 		return res;
 	};
 	
-	private static final String help_mark_all = LangManager.getValue("help_mark_all");
+	private static final String help_mark_all = LangManager.getValue("string_help_mark_all");
 	
 	// generate items
 	private ClickableItem generateNonReadLettersItem(Player player) {
@@ -325,10 +320,10 @@ public class LetterInventory extends InventoryBuilder {
 			ClickType click = e.getClick();
 
 			if (click == ClickType.RIGHT) {
-				this.cycleAddIndex(true);
+				this.cycleIndex(true);
 
 			} else if (click == ClickType.LEFT) {
-				this.cycleAddIndex(false);
+				this.cycleIndex(false);
 
 			} else if (click == ClickType.DROP) {
 				this.setLetterTypeIndex(0);
@@ -338,12 +333,12 @@ public class LetterInventory extends InventoryBuilder {
 	}
 	
 	// manipulation
-	private void cycleAddIndex(Boolean b) {
+	private void cycleIndex(Boolean isPositive) {
 		Integer index = this.letterTypeIndex;
 		Integer minIndex = 0;
 		Integer maxIndex = LetterType.values().length - 1;
 
-		if (b) {
+		if (isPositive) {
 			index = index + 1;
 
 		} else {

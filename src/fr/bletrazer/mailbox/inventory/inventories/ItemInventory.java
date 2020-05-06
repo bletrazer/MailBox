@@ -43,6 +43,7 @@ public class ItemInventory extends InventoryBuilder {
 	}
 	
 	private void dynamicContent(Player player, InventoryContents contents) {
+		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class) );
 		getToShow().sort(DataManager.ascendingDateComparator().reversed());
 		
 		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
@@ -109,8 +110,6 @@ public class ItemInventory extends InventoryBuilder {
 
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
-		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class) );
-		
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 		
