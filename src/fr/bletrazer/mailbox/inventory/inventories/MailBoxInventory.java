@@ -36,7 +36,7 @@ public class MailBoxInventory extends InventoryBuilder {
 		}));
 		
 		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_creation")).build(), e ->  {
-			LetterDataCreatorInventory inv = new LetterDataCreatorInventory();
+			CreationInventory inv = new CreationInventory();
 			inv.setParent(this);
 			inv.openInventory(player);
 			

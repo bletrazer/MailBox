@@ -44,7 +44,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 					res = true;
 					
 					if(player.hasPermission("mailbox.check.self")) {
-						Integer number = DataManager.getTypeData(DataManager.getDataHolder(player.getUniqueId()), LetterData.class).size();
+						Integer number = DataManager.getTypeData(MailBoxController.getDataHolder(player.getUniqueId()), LetterData.class).size();
 						MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", number));
 						
 					} else {
@@ -63,7 +63,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 					
 					if(sourceUuid != null ) {
 						if(sourceUuid.equals(player.getUniqueId()) && player.hasPermission("mailbox.check.self") || player.hasPermission("mailbox.check.other") ) {
-							DataHolder sHolder = DataManager.getDataHolder(sourceUuid);
+							DataHolder sHolder = MailBoxController.getDataHolder(sourceUuid);
 							Integer number = DataManager.getTypeData(sHolder, LetterData.class).size();
 							
 							if(sourceUuid.equals(player.getUniqueId())) {

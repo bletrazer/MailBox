@@ -25,10 +25,16 @@ public class ItemData extends Data {
 	}
 	
 	public Boolean isOutOfDate() {
-		LocalDateTime date = this.getCreationDate().toLocalDateTime();
-		LocalDateTime added = date.plus(this.getDuration());
+		Boolean res = false;
 		
-		return added.compareTo(LocalDateTime.now()) < 0 ;
+		if(!this.getDuration().isZero() ) {
+			LocalDateTime date = this.getCreationDate().toLocalDateTime();
+			LocalDateTime added = date.plus(this.getDuration());
+			res = added.compareTo(LocalDateTime.now()) < 0 ;
+		}
+		
+		
+		return res;
 	}
 
 	public Duration getDuration() {

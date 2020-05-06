@@ -75,5 +75,4 @@ information_ch_duration_start: "Entrez une durée: exemple: '1D 12H 15M 30S' -> 
 string_player_not_yourself: "Vous ne pouvez pas vous cibler vous - même."
 string_duration: "Durée"
 string_click_to_send: "Cliquez pour envoyer"
-string_default_duration: "Par défaut: '0' >> reste indéfiniment"
 string_mark_all_as_read: "Confirmez pour marquer .#* lettre commes lues"

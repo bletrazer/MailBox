@@ -18,6 +18,7 @@ public class Main extends JavaPlugin {
 	
 	/*
 	 * TODO ajouter message '' d'aide '' dans les menu (lores)
+	 * TODO afficher plus d'info sur les items dans le menu des items
 	 * 
 	 */
 	

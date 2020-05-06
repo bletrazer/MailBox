@@ -22,7 +22,6 @@ import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
-import fr.bletrazer.mailbox.listeners.utils.AbstractDuration;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Duration;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
@@ -35,19 +34,19 @@ import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
-public class LetterDataCreatorInventory extends InventoryBuilder {
+public class CreationInventory extends InventoryBuilder {
 
-	public static final String ID = "MailBox_letter_creation";
+	public static final String ID = "MailBox_creation";
 
 	private IdentifiersList recipients;
 	private StringBuilder object = new StringBuilder(LangManager.getValue("string_no_object"));
 	private StringBuilder content = new StringBuilder();
 	private ItemStack item;
-	private AbstractDuration absDur = new AbstractDuration();
+	private StringBuilder strDuration = new StringBuilder("infini");
 	
 	private Boolean showClock = false;
 	
-	public LetterDataCreatorInventory() {
+	public CreationInventory() {
 		super(ID, "§l" + LangManager.getValue("string_menu_creation"), 3);
 
 	}
@@ -135,7 +134,7 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 			ItemStack toShow = this.getItem();
 			
 			if(toShow == null) {
-				toShow = new ItemStackBuilder(this.getItem() == null ? Material.ITEM_FRAME : this.getItem().getType()).setName("§e§l" + "Objet")
+				toShow = new ItemStackBuilder(this.getItem() == null ? Material.ITEM_FRAME : this.getItem().getType()).setName("§e§l" + LangManager.getValue("string_object"))
 					.build();
 			}
 			
@@ -154,7 +153,7 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 								} else if (click == ClickType.CONTROL_DROP ) {
 									this.setItem(null);
 									removeClock(contents);
-									this.getAbsDur().setDuration(Duration.ofSeconds(0) );
+									this.setStrDuration(new StringBuilder("infini") );
 									this.showClock = false;
 								}
 	
@@ -189,12 +188,13 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 												}
 												
 												if(getItem() != null) {
-													items.add(new ItemData(data, getItem(), getAbsDur().getDuration() ));
+													Duration tempDuration = getStrDuration().toString().equals("infini") ? Duration.ofSeconds(0) : CH_Duration.transform(getStrDuration().toString());
+													items.add(new ItemData(data, getItem(), tempDuration) );
 												}
 												
 											}
-	
-											if(getContent() != null ) {
+											
+											if(getContent() != null && !getContent().toString().isEmpty() ) {
 												if(MailBoxController.sendLetters(letters) ) {
 													MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_letter", ": " + getRecipients().getPreviewString()) );
 												}
@@ -234,15 +234,15 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 	
 	private void setClock(Player player, InventoryContents contents) {
 		contents.set(0, 3, ClickableItem.of(new ItemStackBuilder(Material.CLOCK).setName("§e§l" + LangManager.getValue("string_duration"))
-				.addLore(this.getAbsDur().getDuration().toString() )
-				.addAutoFormatingLore(LangManager.getValue("string_default_duration"), 35)//TODO changer absDur par String (pour affichage dans GUI)
+				.addLore(getStrDuration().toString() )
 				.build(), e -> {
 					ClickType click = e.getClick();
 					ChatHooker chCheck = ChatHooker.get(player.getUniqueId());
 					
 					if (click == ClickType.LEFT) {
 						if (chCheck == null) {
-							CH_Duration ch_duration = new CH_Duration(this.getAbsDur(), this);
+							player.closeInventory();
+							CH_Duration ch_duration = new CH_Duration(this.getStrDuration(), this);
 							ch_duration.start(player);
 						}
 					}
@@ -277,12 +277,12 @@ public class LetterDataCreatorInventory extends InventoryBuilder {
 		this.item = item;
 	}
 
-	public AbstractDuration getAbsDur() {
-		return absDur;
+	public StringBuilder getStrDuration() {
+		return strDuration;
 	}
 
-	public void setAbsDur(AbstractDuration absDur) {
-		this.absDur = absDur;
+	public void setStrDuration(StringBuilder strDuration) {
+		this.strDuration = strDuration;
 	}
 
 }

@@ -49,8 +49,9 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 		Data data = this.getHolder().getData(this.getDataId());
 		
 		if(data instanceof ItemData) {
-			if(((ItemData) data).isOutOfDate()) {
-				MailBoxController.deleteItem(this.getHolder(), data.getId());
+			ItemData tempData = (ItemData) data;
+			if(tempData.isOutOfDate()) {
+				MailBoxController.deleteItem(this.getHolder(), tempData);
 				contents.inventory().getParent().get().open(player);
 			}
 		}

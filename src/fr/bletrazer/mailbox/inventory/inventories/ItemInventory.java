@@ -1,7 +1,7 @@
 package fr.bletrazer.mailbox.inventory.inventories;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -50,10 +50,9 @@ public class ItemInventory extends InventoryBuilder {
 		
 		for(Integer index = 0; index < itemList.size(); index ++ ) {
 			ItemData tempData = itemList.get(index);
-			Long dataId = tempData.getId();
 			
 			if(tempData.isOutOfDate() ) {
-				MailBoxController.deleteItem(this.getDataSource(), dataId);
+				MailBoxController.deleteItem(this.getDataSource(), tempData);
 				
 			} else {
 				clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData),
@@ -64,7 +63,7 @@ public class ItemInventory extends InventoryBuilder {
 
 								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other")) {
 									
-									if(!MailBoxController.recoverItem(player, dataId) ) {
+									if(!MailBoxController.recoverItem(player, getDataSource(), tempData) ) {
 										MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
 									}
 									
@@ -72,9 +71,9 @@ public class ItemInventory extends InventoryBuilder {
 									MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 								}
 
-							} else if (clickType == ClickType.CONTROL_DROP) {
+							} else if (clickType == ClickType.CONTROL_DROP || clickType == ClickType.DROP) {
 								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other")) {
-									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), dataId, "§c§l" + LangManager.getValue("question_delete_item"), this);
+									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§c§l" + LangManager.getValue("question_delete_item"), this);
 									inv.openInventory(player);
 
 								} else {
@@ -106,16 +105,19 @@ public class ItemInventory extends InventoryBuilder {
 		}
 		
 		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
-			contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
-				List<ItemData> dataList = DataManager.getTypeData(this.getDataSource(), ItemData.class);
-				List<Long> listDataId = new ArrayList<>();
-				for(ItemData data : dataList) {
-					listDataId.add(data.getId());
-				}
+			List<ItemData> dataList = DataManager.getTypeData(this.getDataSource(), ItemData.class);
+			
+			if(dataList.size() > 0) {
+				List<Long> listDataId = dataList.stream().map(ItemData::getId).collect(Collectors.toList());
 				
-				DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), listDataId, "§4§l" + LangManager.getValue("question_clean_items", listDataId.size()), this);
-				deletionDatasInventory.openInventory(player);
-			}));
+				contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
+
+					
+					DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), listDataId, "§4§l" + LangManager.getValue("question_clean_items", listDataId.size()), this);
+					deletionDatasInventory.openInventory(player);
+				}));
+				
+			}
 		}
 		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other") ) {
 			contents.set(4, 5, generateRecoverAll(player, contents) );
@@ -138,7 +140,7 @@ public class ItemInventory extends InventoryBuilder {
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			for (ItemData itemData : DataManager.getTypeData(this.getDataSource(), ItemData.class)) {
-				if (!MailBoxController.recoverItem(player, itemData.getId()) ) {
+				if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData) ) {
 					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
 					break;
 				}

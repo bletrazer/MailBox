@@ -117,6 +117,7 @@ public class MailBoxController {
 
 			} else {
 				LetterData toSend = letters.get(0);
+				
 				if (sendLetter(toSend)) {
 					// notification
 					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
@@ -125,6 +126,8 @@ public class MailBoxController {
 						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_letter_notification", toSend.getAuthor()) );
 
 					}
+					res = true;
+					
 				} else {
 					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
 					
@@ -197,6 +200,8 @@ public class MailBoxController {
 						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("receive_letter_notification", toSend.getAuthor()) );
 
 					}
+					res = true;
+					
 				} else {
 					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
 					
@@ -245,13 +250,9 @@ public class MailBoxController {
 		}
 	}
 
-	public static void deleteLetter(DataHolder holder, Long id) {
-		Data data = holder.getData(id);
-
-		if (data instanceof LetterData) {
-			holder.removeData(id);
-			LetterDataSQL.getInstance().delete((LetterData) data);
-		}
+	public static void deleteLetter(DataHolder holder, LetterData letterData) {
+		holder.removeData(letterData.getId() );
+		LetterDataSQL.getInstance().delete(letterData);
 
 	}
 
@@ -259,38 +260,28 @@ public class MailBoxController {
 		Data data = holder.getData(id);
 
 		if (data instanceof ItemData) {
-			deleteItem(holder, data.getId());
+			deleteItem(holder, (ItemData) data);
 
 		} else if (data instanceof LetterData) {
-			deleteLetter(holder, data.getId());
+			deleteLetter(holder, (LetterData) data);
 		}
 	}
 
-	public static Boolean recoverItem(Player player, Long id) {
+	public static Boolean recoverItem(Player player, DataHolder holder, ItemData itemData) {
 		Boolean success = false;
+		
+		if (player.getInventory().firstEmpty() >= 0) {
+			player.getInventory().addItem(itemData.getItem() );
+			deleteItem(holder, itemData);
+			success = true;
 
-		if (player.getInventory().firstEmpty() != -1) {
-			DataHolder pHolder = DataManager.getDataHolder(player.getUniqueId());
-			Data data = pHolder.getData(id);
-
-			if (data instanceof ItemData) {
-				ItemData itemData = (ItemData) data;
-				player.getInventory().addItem(itemData.getItem());
-				deleteItem(pHolder, id);
-				success = true;
-
-			}
 		}
 
 		return success;
 	}
 
-	public static void deleteItem(DataHolder holder, Long id) {
-		Data data = holder.getData(id);
-
-		if (data != null && data instanceof ItemData) {
-			holder.removeData(id);
-			ItemDataSQL.getInstance().delete((ItemData) data);
-		}
+	public static void deleteItem(DataHolder holder, ItemData itemData) {
+		holder.removeData(itemData.getId() );
+		ItemDataSQL.getInstance().delete(itemData);
 	}
 }
