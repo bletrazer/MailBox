@@ -130,7 +130,7 @@ public class CreationInventory extends InventoryBuilder {
 							}
 						}));
 		
-		if(player.hasPermission("mailbox.send.items")) {
+		if(player.hasPermission("mailbox.item.send")) {
 			ItemStack toShow = this.getItem();
 			
 			if(toShow == null) {

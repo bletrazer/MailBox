@@ -137,7 +137,7 @@ public class LetterInventory extends InventoryBuilder {
 		
 		
 		if(this.getToShow().size() > 0 ) {
-			if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
+			if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other") ) {
 				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
 						.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
 							if(e.getClick() == ClickType.LEFT ) {
@@ -165,7 +165,12 @@ public class LetterInventory extends InventoryBuilder {
 				ClickType clickType = e.getClick();
 				
 				if (clickType == ClickType.LEFT) {//lire
-					MailBoxController.readLetter(player, tempData);
+					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.read.self") || player.hasPermission("mailbox.letter.read.other") ) {
+						MailBoxController.readLetter(player, tempData);
+						
+					} else {
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+					}
 
 				} else if (clickType == ClickType.RIGHT ) {//répondre
 					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.reply.self") || player.hasPermission("mailbox.letter.reply.other") ) {
@@ -183,8 +188,8 @@ public class LetterInventory extends InventoryBuilder {
 						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
 					}
 					
-				} else if (clickType == ClickType.CONTROL_DROP) {// supprimer
-					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
+				} else if (clickType == ClickType.CONTROL_DROP || clickType == ClickType.DROP) {// supprimer
+					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other") ) {
 						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
 						inv.openInventory(player);
 						
@@ -250,33 +255,39 @@ public class LetterInventory extends InventoryBuilder {
 		
 		if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
 			consumer = e -> {
-				ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + LangManager.getValue("string_mark_all_as_read", list.size()) ) {
-					
-					@Override
-					public void onUpdate(Player player, InventoryContents contents) {
-					}
-					
-					@Override
-					public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
-						return event -> {
-							for (LetterData letterData : list) {
-								letterData.setIsRead(true);
-								LetterDataSQL.getInstance().update(letterData);
+				
+				if(player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) && player.hasPermission("mailbox.letter.markall.self") || player.hasPermission("mailbox.letter.markall.other") ) {
+					ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + LangManager.getValue("string_mark_all_as_read", list.size()) ) {
+						
+						@Override
+						public void onUpdate(Player player, InventoryContents contents) {
+						}
+						
+						@Override
+						public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
+							return event -> {
+								for (LetterData letterData : list) {
+									letterData.setIsRead(true);
+									LetterDataSQL.getInstance().update(letterData);
+									
+								}
 								
-							}
-							
-							this.returnToParent(player);
-							
-						};
-					}
+								this.returnToParent(player);
+								
+							};
+						}
+						
+						@Override
+						public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
+							return null;
+						}
+					};
+					confInv.setParent(this);
+					confInv.openInventory(player);
 					
-					@Override
-					public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
-						return null;
-					}
-				};
-				confInv.setParent(this);
-				confInv.openInventory(player);
+				} else {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+				}
 			};
 			
 		}

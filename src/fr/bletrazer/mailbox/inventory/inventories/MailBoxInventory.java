@@ -14,7 +14,7 @@ import fr.minuskube.inv.content.InventoryContents;
 public class MailBoxInventory extends InventoryBuilder {
 	public static Material LETTER_MENU_MATERIAL = Material.LECTERN;
 	public static Material ITEM_MENU_MATERIAL = Material.CHEST;
-	public static Material SEND_LETTER_MATERIAL = Material.HOPPER;
+	public static Material CREATE = Material.HOPPER;
 	
 	private DataHolder dataSource;
 	
@@ -40,15 +40,17 @@ public class MailBoxInventory extends InventoryBuilder {
 			}
 		}));
 		
-		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_creation")).build(), e ->  {
-			if(e.getClick() == ClickType.LEFT ) {
-				CreationInventory inv = new CreationInventory();
-				inv.setParent(this);
-				inv.openInventory(player);
+		if(player.hasPermission("mailbox.send.standard") ) {
+			contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(CREATE).setName("§f§l"+LangManager.getValue("string_menu_creation")).build(), e ->  {
+				if(e.getClick() == ClickType.LEFT ) {
+					CreationInventory inv = new CreationInventory();
+					inv.setParent(this);
+					inv.openInventory(player);
+					
+				}
 				
-			}
-			
-		}));
+			}));
+		}
 	}
 
 	@Override

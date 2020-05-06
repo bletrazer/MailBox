@@ -31,7 +31,7 @@ public class Cmd_Mailbox implements CommandExecutor {
 			if(args.length == 0) {
 				res = true;
 				
-				if(player.hasPermission("mailbox.openmenu.self")){
+				if(player.hasPermission("mailbox.openmenu.self") ){
 					MailBoxInventory mailBox = new MailBoxInventory(MailBoxController.getDataHolder(player.getUniqueId()) );
 					mailBox.openInventory(player);
 					

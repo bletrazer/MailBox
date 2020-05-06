@@ -17,8 +17,8 @@ public class Main extends JavaPlugin {
 	private static InventoryManager manager;
 	
 	/*
-	 * TODO lettre non envoyés/en cours
-	 * 
+	 * TODO lettre non envoyés/en cours *-}
+	 * TODO reprendre une lettre        *-}
 	 */
 	
 	public static InventoryManager getManager() {

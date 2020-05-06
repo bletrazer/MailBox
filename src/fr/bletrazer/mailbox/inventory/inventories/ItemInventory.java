@@ -46,7 +46,7 @@ public class ItemInventory extends InventoryBuilder {
 		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class) );
 		getToShow().sort(DataManager.ascendingDateComparator().reversed());
 		
-		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
+		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.delete.self") || player.hasPermission("mailbox.item.delete.other") ) {
 			
 			if(getToShow().size() > 0) {
 				List<Long> listDataId = getToShow().stream().map(ItemData::getId).collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class ItemInventory extends InventoryBuilder {
 							
 							if (clickType == ClickType.LEFT) {
 
-								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other")) {
+								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
 									
 									if(!MailBoxController.recoverItem(player, getDataSource(), tempData) ) {
 										MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
@@ -89,7 +89,7 @@ public class ItemInventory extends InventoryBuilder {
 								}
 
 							} else if (clickType == ClickType.CONTROL_DROP || clickType == ClickType.DROP) {
-								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other")) {
+								if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.delete.self") || player.hasPermission("mailbox.item.delete.other")) {
 									DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§c§l" + LangManager.getValue("question_delete_item"), this);
 									inv.openInventory(player);
 
@@ -121,7 +121,7 @@ public class ItemInventory extends InventoryBuilder {
 			contents.set(4, 1, this.previousPageItem(player, contents));
 		}
 		
-		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other") ) {
+		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other") ) {
 			contents.set(4, 2, generateRecoverAll(player, contents) );
 		}
 			

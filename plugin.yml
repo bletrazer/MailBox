@@ -15,16 +15,40 @@ permissions:
     default: op
     children:
      - mailbox.openmenu.*
-     - mailbox.send.*
-     - mailbox.letter.reply.*
-     - mailbox.delete.*
-     - mailbox.recover.*
+     - mailbox.letter.*
+     - mailbox.item.*
+     - mailbox.check.*
      
-  mailbox.item.recover.*:
-    description: Permission de recuperer les objets des boites.
+  mailbox.openmenu.*:
+    description: Permission d'ouvrir toutes les boîtes de récéptions.
     children:
-     - mailbox.recover.item.self
-     - mailbox.recover.item.other
+     - mailbox.openmenu.self
+     - mailbox.openmenu.other
+  mailbox.openmenu.self:
+    description: Permission d'ouvrir sa propre bo^te de récéption.
+    default: true
+  mailbox.openmenu.other:
+    description: Permission d'ouvrir la boîte de récéption des autres joueurs.
+    
+  mailbox.letter.*:
+    description: Permissions d'envoyer, de répondre et de lire les lettres.
+    children:
+     - mailbox.letter.delete.*
+     - mailbox.letter.reply.*
+     - mailbox.letter.send.*
+     - mailbox.letter.read.*
+     - mailbox.letter.markall.*
+     
+  mailbox.letter.delete.*:
+    description: Permissions pour supprimer des lettres.
+    children:
+     - mailbox.letter.delete.self
+     - mailbox.letter.delete.other
+  mailbox.letter.delete.self:
+    default: true
+    description: Permission de supprimer des lettre de sa boite.
+  mailbox.letter.delete.other:
+    description: Permission de supprimer des lettre de la boite d'un autre joueur.
   mailbox.letter.reply.*:
     description: Permission de répondre a une lettre.
     children:
@@ -35,62 +59,70 @@ permissions:
     default: true
   mailbox.letter.reply.other:
     description: Permission de répondre a une lettre dont vous n'êtes pas le destinataire.
-     
-  mailbox.recover.item.self:
+  mailbox.letter.read.*:
+    description: Permissions de lire les lettres.
+    children:
+     - mailbox.letter.read.self
+     - mailbox.letter.read.other
+  mailbox.letter.read.self:
+    description: Permission de lire ses lettres reçues.
+    default: true
+  mailbox.letter.read.other:
+    description: Permission de lire les lettre reçu par d'autres joueurs.
+  mailbox.letter.markall.*:
+    description: Permission de marquer des lettres comme ayant été lues.
+    children:
+     - mailbox.letter.markall.self
+     - mailbox.letter.markall.other
+  mailbox.letter.markall.self:
+    description: Permission de marquer ses lettres comme ayant été lues.
+  mailbox.letter.markall.other:
+    description: Permission de marquer les lettres d'autres joueurs comme ayant été lues.
+  
+  mailbox.item.*:
+    description: Permission d'envoyer, de supprimer et de recupérer des objets.
+    children:
+     - mailbox.item.send
+     - mailbox.item.recover
+     - mailbox.item.delete
+  mailbox.item.send:
+    description: Permission d'envoyer des objets
+  mailbox.item.recover.*:
+    description: Permission de recuperer les objets des boites.
+    children:
+     - mailbox.recover.item.self
+     - mailbox.recover.item.other
+  mailbox.item.recover.self:
     description: Permission de recuperer ses objets de sa boite d'objet
-  mailbox.recover.item.other:
+    default: true
+  mailbox.item.recover.other:
     description: Permission de recuperer les objets dans la boite de reception d'autres joueurs.
-    
-  mailbox.openmenu.*:
-    description: Permission d'ouvrir n'importe quel menu.
+  mailbox.item.delete.*:
+    description: Permissions pour supprimer des objets
     children:
-     - mailbox.openmenu.self
-     - mailbox.openmenu.other
-
-  mailbox.openmenu.self:
-    description: Permission d'ouvrir son propre menu.
-    default: true
-  mailbox.openmenu.other:
-    description: Permission d'ouvrir le menu d'autres joueurs.
-  
+     - mailbox.item.delete.self
+     - mailbox.item.delete.other
+  mailbox.item.delete.self:
+    description: Permission de supprimer ses objets de sa boîte de récéption d'objets.
+  mailbox.item.delete.other:
+    description: permission de supprimer des objets de la boîte de récéption d'autres joueurs.
+  mailbox.check.*:
+    description: Permissions de demander l'état des boîtes de récéptions.
+    children:
+     - mailbox.check.self
+     - mailbox.check.other
+  mailbox.check.self:
+    description: Permission de demander l'état de sa boîte de récéption.
+  mailbox.check.other:
+    description: Permission de demander l'état de la boîte de récéption d'autres joueurs.
+    
   mailbox.send.*:
-    description: Permission d'envoyer des objet ou des lettres.
+    description: Permissions pour les choix des cibles.
     children:
-     - mailbox.send.item
-     - mailbox.send.letter
+     - mailbox.send.standard
      - mailbox.send.announce
-  
-  mailbox.send.item:
-    description: Envoyer des objets.
-  mailbox.send.letter:
-    description: Envoyer des lettres.
-    default: true
   mailbox.send.announce:
-    description: Permission d'envoyer de lettre ou des objets a plusieurs joueurs à la fois.
-    
-  mailbox.delete.*:
-    description: Permission de supprimer des lettres et des objets d'une boite de reception.
-    children:
-     - mailbox.delete.item.*
-     - mailbox.delete.letter.*
-  
-  mailbox.delete.item.*:
-    description: Permission de supprimer des lettres.
-    children:
-     - mailbox.delete.item.self
-     - mailbox.delete.item.other
-  mailbox.delete.item.self:
-    description: Permission de supprimer des objet de sa boite.
-  mailbox.delete.item.other:
-    description: Permission de supprimer des objet de la boite d'un autre joueur.
-  
-  mailbox.delete.letter.*:
-    description: Permission de supprimer des objets.
-    children:
-     - mailbox.delete.letter.self
-     - mailbox.delete.letter.other
-  mailbox.delete.letter.self:
+    description: Permission d'envoyer une lettre a plusieurs destinataires à la fois.
+  mailbox.send.standard:
+    description: Permission d'effectuer un envoie.
     default: true
-    description: Permission de supprimer des lettre de sa boite.
-  mailbox.delete.letter.other:
-    description: Permission de supprimer des lettre de la boite d'un autre joueur.
