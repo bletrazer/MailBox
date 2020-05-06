@@ -82,20 +82,6 @@ public class LetterInventory extends InventoryBuilder {
 		}
 		
 		this.setPlayerFilter(player, contents);
-		
-		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
-			contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
-					.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
-				        List<Long> idList = getToShow().stream()
-				                .map(LetterData::getId)
-				                .collect(Collectors.toList());
-	
-						DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
-						inv.openInventory(player); 
-						
-					}));
-			
-		}
 
 		if (!pagination.isLast()) {
 			contents.set(4, 7, this.nextPageItem(player, contents));
@@ -106,7 +92,10 @@ public class LetterInventory extends InventoryBuilder {
 	
 	private void setPlayerFilter(Player player, InventoryContents contents) {
 		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" ).setLore(this.getIdList().getPreviewLore()).build(), e -> {
+				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" )
+				.addLores(this.getIdList().getPreviewLore())
+				.addAutoFormatingLore(LangManager.getValue("help_delete_filter"), 35)
+				.build(), e -> {
 					ClickType click = e.getClick();
 
 					if (click == ClickType.LEFT) {
@@ -144,6 +133,27 @@ public class LetterInventory extends InventoryBuilder {
 		} else {
 			this.getToShow().sort(DataManager.ascendingDateComparator());
 
+		}
+		
+		
+		if(this.getToShow().size() > 0 ) {
+			if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.letter.self") || player.hasPermission("mailbox.delete.letter.other") ) {
+				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
+						.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
+							if(e.getClick() == ClickType.LEFT ) {
+						        List<Long> idList = getToShow().stream()
+						                .map(LetterData::getId)
+						                .collect(Collectors.toList());
+			
+								DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
+								inv.openInventory(player); 
+								
+							}
+							
+						}));
+			}
+		} else {
+			contents.set(4, 4, null);
 		}
 		
 		ClickableItem[] clickableItems = new ClickableItem[toShow.size()];
@@ -293,7 +303,9 @@ public class LetterInventory extends InventoryBuilder {
 		itemStackBuilder.addLore(LangManager.getValue("help_toggle_date_order"));
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
-			this.setIsSortingByDecreasingDate(!this.getIsSortingByDecreasingDate());
+			if(e.getClick() == ClickType.LEFT ) {
+				this.setIsSortingByDecreasingDate(!this.getIsSortingByDecreasingDate());
+			}
 		});
 
 	}
@@ -305,7 +317,7 @@ public class LetterInventory extends InventoryBuilder {
 						.addLore(str)
 						.addLore(LangManager.getValue("help_choose_type_filter_1"))
 						.addLore(LangManager.getValue("help_choose_type_filter_2"))
-						.addLore(LangManager.getValue("help_delete_type_filter"));
+						.addLore(LangManager.getValue("help_delete_filter"));
 
 		this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);
 

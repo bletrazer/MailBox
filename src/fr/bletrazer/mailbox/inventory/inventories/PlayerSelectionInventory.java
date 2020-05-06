@@ -42,7 +42,11 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 		
 		if (this.getFilterMode() || player.hasPermission("mailbox.send.annouce")) {
 			
-			contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CHOOSE_ALL_MATERIAL) .setName("§f§l" + LangManager.getValue("string_choose_server")).build(), e -> {
+			contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(CHOOSE_ALL_MATERIAL)
+					.setName("§f§l" + LangManager.getValue("string_choose_server"))
+					.addAutoFormatingLore(LangManager.getValue("string_choose_server_online"), 35)
+					.addAutoFormatingLore(LangManager.getValue("string_choose_server_offline"), 35)
+					.build(), e -> {
 				ClickType clickType = e.getClick();
 
 				if (clickType == ClickType.LEFT) {
@@ -56,15 +60,16 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 		}
 		
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(CHOOSE_PRECISE_PLAYER_MATERIAL).setName("§f§l"+LangManager.getValue("string_choose_precise_player")).build(), e -> {
-			ChatHooker chatHooker = ChatHooker.get(player.getUniqueId());
-			
-			if(chatHooker == null) {
-				chatHooker = new CH_Player(this.getIdentifiersList(), this);
-				player.closeInventory();
-				chatHooker.start(player);
+			if(e.getClick() == ClickType.LEFT ) {
+				ChatHooker chatHooker = ChatHooker.get(player.getUniqueId());
 				
+				if(chatHooker == null) {
+					chatHooker = new CH_Player(this.getIdentifiersList(), this);
+					player.closeInventory();
+					chatHooker.start(player);
+					
+				}
 			}
-			
 		}));
 		
 		if(this.getParent() != null) {
@@ -80,7 +85,7 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 				.addLores(this.getIdentifiersList().getPreviewLore())
 				.addLore(LangManager.getValue("help_delete_player_filter"))
 				.build(), e -> {
-					if(e.getClick() == ClickType.RIGHT) {
+					if(e.getClick() == ClickType.DROP || e.getClick() == ClickType.CONTROL_DROP ) {
 						this.getIdentifiersList().clear();
 					}
 				}));

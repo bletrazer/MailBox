@@ -68,7 +68,7 @@ public class CreationInventory extends InventoryBuilder {
 	}
 	
 	private void setPlayerFilter(Player player, InventoryContents contents) {
-		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + LangManager.getValue("string_recipients"))
+		contents.set(1, 4, ClickableItem.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + LangManager.getValue("string_recipients")+ ":")
 				.setLore(this.getRecipients().getPreviewLore()).build(), e -> {
 					ClickType click = e.getClick();
 					
@@ -96,7 +96,7 @@ public class CreationInventory extends InventoryBuilder {
 	private void dynamicContent(Player player, InventoryContents contents) {
 		
 		contents.set(1, 1,
-				ClickableItem.of(new ItemStackBuilder(Material.WHITE_BANNER).setName("§e§l" + LangManager.getValue("string_no_message") )
+				ClickableItem.of(new ItemStackBuilder(Material.WHITE_BANNER).setName("§e§l" + LangManager.getValue("string_object")+ ":" )
 						.addAutoFormatingLore(this.getObject().toString(), 35)
 						.build(), e -> {
 							ClickType click = e.getClick();
@@ -134,8 +134,10 @@ public class CreationInventory extends InventoryBuilder {
 			ItemStack toShow = this.getItem();
 			
 			if(toShow == null) {
-				toShow = new ItemStackBuilder(this.getItem() == null ? Material.ITEM_FRAME : this.getItem().getType()).setName("§e§l" + LangManager.getValue("string_object"))
-					.build();
+				toShow = new ItemStackBuilder(this.getItem() == null ? Material.ITEM_FRAME : this.getItem().getType()).setName("§e§l" + LangManager.getValue("string_item"))
+						.addAutoFormatingLore(LangManager.getValue("string_drop_item_to_configure"), 35)
+						.addAutoFormatingLore(LangManager.getValue("string_delete_creation_item"), 35)
+						.build();
 			}
 			
 			contents.set(1, 3, ClickableItem.of(toShow, e -> {
@@ -150,7 +152,7 @@ public class CreationInventory extends InventoryBuilder {
 										
 									}
 									
-								} else if (click == ClickType.CONTROL_DROP ) {
+								} else if (click == ClickType.CONTROL_DROP || click == ClickType.DROP ) {
 									this.setItem(null);
 									removeClock(contents);
 									this.setStrDuration(new StringBuilder("infini") );
@@ -176,38 +178,42 @@ public class CreationInventory extends InventoryBuilder {
 									@Override
 									public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 										return e -> {
-											LetterType type = getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
-											List<LetterData> letters = new ArrayList<>();
-											List<ItemData> items = new ArrayList<>();
+											ClickType click = e.getClick();
 											
-											for (PlayerInfo pi : getRecipients().getPlayerList() ) {
-												Data data = new DataFactory(pi.getUuid(), player.getName(), getObject().toString());
+											if(click == ClickType.LEFT ) {
+												LetterType type = getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
+												List<LetterData> letters = new ArrayList<>();
+												List<ItemData> items = new ArrayList<>();
 												
-												if(getContent() != null) {
-													letters.add(new LetterDataFactory(data, type, Arrays.asList(new String[] { getContent().toString() }), false));
+												for (PlayerInfo pi : getRecipients().getPlayerList() ) {
+													Data data = new DataFactory(pi.getUuid(), player.getName(), getObject().toString());
+													
+													if(getContent() != null) {
+														letters.add(new LetterDataFactory(data, type, Arrays.asList(new String[] { getContent().toString() }), false));
+													}
+													
+													if(getItem() != null) {
+														Duration tempDuration = getStrDuration().toString().equals("infini") ? Duration.ofSeconds(0) : CH_Duration.transform(getStrDuration().toString());
+														items.add(new ItemData(data, getItem(), tempDuration) );
+													}
+													
 												}
 												
-												if(getItem() != null) {
-													Duration tempDuration = getStrDuration().toString().equals("infini") ? Duration.ofSeconds(0) : CH_Duration.transform(getStrDuration().toString());
-													items.add(new ItemData(data, getItem(), tempDuration) );
+												if(getContent() != null && !getContent().toString().isEmpty() ) {
+													if(MailBoxController.sendLetters(letters) ) {
+														MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_letter", ": " + getRecipients().getPreviewString()) );
+													}
 												}
 												
-											}
-											
-											if(getContent() != null && !getContent().toString().isEmpty() ) {
-												if(MailBoxController.sendLetters(letters) ) {
-													MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_letter", ": " + getRecipients().getPreviewString()) );
+												if(getItem() != null ) {
+													if(MailBoxController.sendItems(items) ) {
+														MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_item", ": " + getRecipients().getPreviewString()) );
+													}
 												}
+												
+												player.closeInventory();
+		
 											}
-											
-											if(getItem() != null ) {
-												if(MailBoxController.sendItems(items) ) {
-													MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("string_send_item", ": " + getRecipients().getPreviewString()) );
-												}
-											}
-											
-											player.closeInventory();
-	
 										};
 									}
 	
@@ -223,7 +229,11 @@ public class CreationInventory extends InventoryBuilder {
 							}
 						}));
 	
+			} else {
+				contents.set(1, 7, null);
 			}
+		} else {
+			contents.set(1, 7, null);
 		}
 	}
 

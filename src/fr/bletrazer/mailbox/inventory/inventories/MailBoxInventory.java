@@ -2,6 +2,7 @@ package fr.bletrazer.mailbox.inventory.inventories;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 
 import fr.bletrazer.mailbox.DataManager.DataHolder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
@@ -26,19 +27,26 @@ public class MailBoxInventory extends InventoryBuilder {
 	public void initializeInventory(Player player, InventoryContents contents) {
 		
 		contents.set(1, 2, ClickableItem.of(new ItemStackBuilder(LETTER_MENU_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_letters")).build(), e -> {
-			LetterInventory inv = new LetterInventory(this.getDataSource(), this);
-			inv.openInventory(player);
+			if(e.getClick() == ClickType.LEFT ) {
+				LetterInventory inv = new LetterInventory(this.getDataSource(), this);
+				inv.openInventory(player);
+			}
 		}));
 		
 		contents.set(1, 6, ClickableItem.of(new ItemStackBuilder(ITEM_MENU_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_items")).build(), e ->  {
-			ItemInventory inv = new ItemInventory(this.getDataSource(), this);
-			inv.openInventory(player);
+			if(e.getClick() == ClickType.LEFT ) {
+				ItemInventory inv = new ItemInventory(this.getDataSource(), this);
+				inv.openInventory(player);
+			}
 		}));
 		
 		contents.set(2, 4, ClickableItem.of(new ItemStackBuilder(SEND_LETTER_MATERIAL).setName("§f§l"+LangManager.getValue("string_menu_creation")).build(), e ->  {
-			CreationInventory inv = new CreationInventory();
-			inv.setParent(this);
-			inv.openInventory(player);
+			if(e.getClick() == ClickType.LEFT ) {
+				CreationInventory inv = new CreationInventory();
+				inv.setParent(this);
+				inv.openInventory(player);
+				
+			}
 			
 		}));
 	}

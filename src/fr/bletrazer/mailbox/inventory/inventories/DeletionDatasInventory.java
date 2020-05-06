@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import fr.bletrazer.mailbox.DataManager.Data;
@@ -33,11 +34,14 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	@Override
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
-			for(Long id : this.getDataIdList() ) {
-				MailBoxController.deleteData(this.getHolder(), id);
+			if(e.getClick() == ClickType.LEFT ) {
+				for(Long id : this.getDataIdList() ) {
+					MailBoxController.deleteData(this.getHolder(), id);
+					
+				}
+				this.returnToParent(player);
 				
 			}
-			this.returnToParent(player);
 		};
 	}
 

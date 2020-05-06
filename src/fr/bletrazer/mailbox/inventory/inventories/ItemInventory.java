@@ -28,6 +28,7 @@ public class ItemInventory extends InventoryBuilder {
 	public static Material RECOVER_ALL_MATERIAl = Material.CHEST;
 	
 	private DataHolder dataSource;
+	private List<ItemData> toShow;
 	
 	public ItemInventory(DataHolder dataSource) {
 		super("MailBox_Items", "§l"+LangManager.getValue("string_menu_items"), 5);
@@ -42,14 +43,29 @@ public class ItemInventory extends InventoryBuilder {
 	}
 	
 	private void dynamicContent(Player player, InventoryContents contents) {
-		List<ItemData> itemList = DataManager.getTypeData(this.getDataSource(), ItemData.class);
+		getToShow().sort(DataManager.ascendingDateComparator().reversed());
 		
-		itemList.sort(DataManager.ascendingDateComparator().reversed());
+		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
+			
+			if(getToShow().size() > 0) {
+				List<Long> listDataId = getToShow().stream().map(ItemData::getId).collect(Collectors.toList());
+				
+				contents.set(4,  6, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
+
+					if(e.getClick() == ClickType.LEFT ) {
+						DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), listDataId, "§4§l" + LangManager.getValue("question_clean_items", listDataId.size()), this);
+						deletionDatasInventory.openInventory(player);
+						
+					}
+				}));
+				
+			}
+		}
 		
-		ClickableItem[] clickableItems = new ClickableItem[itemList.size()];
+		ClickableItem[] clickableItems = new ClickableItem[getToShow().size()];
 		
-		for(Integer index = 0; index < itemList.size(); index ++ ) {
-			ItemData tempData = itemList.get(index);
+		for(Integer index = 0; index < getToShow().size(); index ++ ) {
+			ItemData tempData = getToShow().get(index);
 			
 			if(tempData.isOutOfDate() ) {
 				MailBoxController.deleteItem(this.getDataSource(), tempData);
@@ -93,6 +109,8 @@ public class ItemInventory extends InventoryBuilder {
 
 	@Override
 	public void initializeInventory(Player player, InventoryContents contents) {
+		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class) );
+		
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
 		
@@ -104,23 +122,8 @@ public class ItemInventory extends InventoryBuilder {
 			contents.set(4, 1, this.previousPageItem(player, contents));
 		}
 		
-		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.delete.item.self") || player.hasPermission("mailbox.delete.item.other") ) {
-			List<ItemData> dataList = DataManager.getTypeData(this.getDataSource(), ItemData.class);
-			
-			if(dataList.size() > 0) {
-				List<Long> listDataId = dataList.stream().map(ItemData::getId).collect(Collectors.toList());
-				
-				contents.set(4,  4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL).setName("§4§l"+LangManager.getValue("string_clean_inbox")).build(), e -> {
-
-					
-					DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), listDataId, "§4§l" + LangManager.getValue("question_clean_items", listDataId.size()), this);
-					deletionDatasInventory.openInventory(player);
-				}));
-				
-			}
-		}
 		if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.recover.item.self") || player.hasPermission("mailbox.recover.item.other") ) {
-			contents.set(4, 5, generateRecoverAll(player, contents) );
+			contents.set(4, 2, generateRecoverAll(player, contents) );
 		}
 			
 		if (!pagination.isLast()) {
@@ -132,17 +135,19 @@ public class ItemInventory extends InventoryBuilder {
 
 	@Override
 	public void updateInventory(Player player, InventoryContents contents) {
-		dynamicContent(player, contents);		
+		dynamicContent(player, contents);
 	}
 	
 	private ClickableItem generateRecoverAll(Player player, InventoryContents contents) {
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(RECOVER_ALL_MATERIAl).setName("§e§l" + LangManager.getValue("string_retreive_all"));
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
-			for (ItemData itemData : DataManager.getTypeData(this.getDataSource(), ItemData.class)) {
-				if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData) ) {
-					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
-					break;
+			if(e.getClick() == ClickType.LEFT ) {
+				for (ItemData itemData : DataManager.getTypeData(this.getDataSource(), ItemData.class)) {
+					if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData) ) {
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
+						break;
+					}
 				}
 			}
 		});
@@ -154,6 +159,14 @@ public class ItemInventory extends InventoryBuilder {
 
 	public void setDataSource(DataHolder dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public List<ItemData> getToShow() {
+		return toShow;
+	}
+
+	public void setToShow(List<ItemData> toShow) {
+		this.toShow = toShow;
 	}
 	
 }

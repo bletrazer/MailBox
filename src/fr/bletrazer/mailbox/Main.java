@@ -17,8 +17,8 @@ public class Main extends JavaPlugin {
 	private static InventoryManager manager;
 	
 	/*
-	 * TODO ajouter message '' d'aide '' dans les menu (lores)
-	 * TODO afficher plus d'info sur les items dans le menu des items
+	 * TODO lettre non envoyés/en cours
+	 * TODO répondre a un lettre
 	 * 
 	 */
 	
