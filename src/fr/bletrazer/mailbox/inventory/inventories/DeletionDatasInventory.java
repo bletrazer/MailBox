@@ -15,9 +15,6 @@ import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
-import fr.bletrazer.mailbox.utils.LangManager;
-import fr.bletrazer.mailbox.utils.MessageLevel;
-import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.content.InventoryContents;
 
 public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
@@ -40,15 +37,12 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
 			if(e.getClick() == ClickType.LEFT ) {
-				for(Data data : this.getDataList() ) {
-					if(!MailBoxController.deleteData(player, this.getDataSource(), data) ) {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
-						player.closeInventory();
-						return;
-					}
+				if(MailBoxController.deleteDatas(player, this.getDataSource(), getDataList()) ) {
+					this.returnToParent(player);
 					
+				} else {
+					player.closeInventory();
 				}
-				this.returnToParent(player);
 				
 			}
 		};
@@ -71,15 +65,18 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 					if (data instanceof ItemData ) {
 						ItemData tempData = (ItemData) data;
 						
-						if(!MailBoxController.deleteItem(player, this.getDataSource(), tempData) ) {
-							return;
-						}
-						
-						it.remove();
-	
-						if (this.getDataList().isEmpty()) {
-							this.returnToParent(player);
-	
+						if(tempData.isOutOfDate() ) {
+							if(MailBoxController.deleteItem(player, this.getDataSource(), tempData) ) {
+								if (this.getDataList().isEmpty()) {
+									this.returnToParent(player);
+			
+								}
+							} else {
+								player.closeInventory();
+							}
+							it.remove();
+		
+
 						}
 					}
 				} else {

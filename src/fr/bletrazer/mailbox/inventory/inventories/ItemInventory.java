@@ -46,20 +46,20 @@ public class ItemInventory extends InventoryBuilder {
 		this.setParent(parent);
 
 	}
-	
+
 	private void deleteAllButton(Player player, InventoryContents contents) {
 		if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.delete.self") || player.hasPermission("mailbox.item.delete.other")) {
 
 			contents.set(4, 6, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l" + CLEAN).build(), e -> {
 
 				if (e.getClick() == ClickType.LEFT) {
-					if(SQLConnection.getInstance().isConnected() ) {
+					if (SQLConnection.getInstance().isConnected()) {
 						DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), this.getToShow().stream().collect(Collectors.toList()),
 								"§4§l" + LangManager.format(QUESTION_CLEAN, this.getToShow().size()), this, true);
 						deletionDatasInventory.openInventory(player);
 
 					} else {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 						player.closeInventory();
 						return;
 					}
@@ -68,7 +68,7 @@ public class ItemInventory extends InventoryBuilder {
 
 		}
 	}
-	
+
 	private void dynamicContent(Player player, InventoryContents contents) {
 		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class));
 
@@ -86,9 +86,9 @@ public class ItemInventory extends InventoryBuilder {
 					if (clickType == ClickType.LEFT) {
 						if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
 							if (!MailBoxController.recoverItem(player, getDataSource(), tempData)) {
-								
-							} else if (!getToShow().isEmpty() ) {
-								contents.set(4,  6, null);
+
+							} else if (!getToShow().isEmpty()) {
+								contents.set(4, 6, null);
 							}
 						} else {
 							MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
@@ -118,13 +118,13 @@ public class ItemInventory extends InventoryBuilder {
 	public void initializeInventory(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
 		pagination.setItemsPerPage(27);
-		
+
 		this.dynamicContent(player, contents);
-		
+
 		if (!getToShow().isEmpty()) {
 			deleteAllButton(player, contents);
 		}
-		
+
 		contents.fillRow(3, ClickableItem.empty(new ItemStackBuilder(Material.BLACK_STAINED_GLASS_PANE).setName(" ").build()));
 
 		if (!pagination.isFirst()) {
@@ -154,7 +154,7 @@ public class ItemInventory extends InventoryBuilder {
 				List<ItemData> dataList = getToShow();
 				dataList.sort(DataManager.ascendingDateComparator());
 				Boolean b = true;
-				
+
 				if (!dataList.isEmpty()) {
 					for (ItemData itemData : dataList) {
 						if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData)) {
@@ -163,8 +163,8 @@ public class ItemInventory extends InventoryBuilder {
 						}
 					}
 				}
-				
-				if (b ) {
+
+				if (b) {
 					contents.set(4, 6, null);
 				}
 			}

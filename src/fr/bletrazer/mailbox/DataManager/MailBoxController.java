@@ -1,5 +1,6 @@
 package fr.bletrazer.mailbox.DataManager;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -270,7 +271,38 @@ public class MailBoxController {
 		
 		return res;
 	}
-
+	
+	public static Boolean deleteDatas(Player player, DataHolder holder, List<Data> dataList) {
+		Boolean res = true;
+		
+		if(SQLConnection.getInstance().startTransaction() ) {
+			
+			for(Data data : dataList) {
+				if(!deleteData(player, holder, data) ) {
+					res = false;
+					break;
+				}
+			}
+			
+			if(res ) {
+				try {
+					if(SQLConnection.getInstance().isConnected() ) {
+						SQLConnection.getInstance().getConnection().commit();
+						SQLConnection.getInstance().getConnection().setAutoCommit(true);
+					} else {
+						
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			res = false;
+		}
+		
+		return res;
+	}
 	public static Boolean recoverItem(Player player, DataHolder holder, ItemData itemData) {
 		Boolean success = false;
 		

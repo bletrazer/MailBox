@@ -47,12 +47,8 @@ public class SQLConnection {
 	public Boolean startTransaction() {
 		Boolean res = false;
 		try {
-			if(this.isConnected() ) {
-				this.getConnection().setAutoCommit(false);
-				res = true;
-			} else {
-				Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
-			}
+			this.getConnection().setAutoCommit(false);
+			res = true;
 		} catch (SQLException e) {
 			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_sql"));
 			e.printStackTrace();
@@ -132,6 +128,7 @@ public class SQLConnection {
 			query.close();
 			isConnected = true;
 		} catch (Exception exception) {
+			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
 		}
 
 		return isConnected;
