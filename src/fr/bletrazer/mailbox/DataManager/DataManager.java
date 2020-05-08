@@ -29,7 +29,7 @@ public class DataManager {
 				res.add(c.cast(data));
 			}
 		}
-		
+		res.sort(ascendingDateComparator().reversed());
 		return res;
 	}
 

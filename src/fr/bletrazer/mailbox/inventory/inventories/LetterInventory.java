@@ -19,6 +19,7 @@ import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.inventory.inventories.creation.CreationInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
@@ -32,15 +33,30 @@ import fr.minuskube.inv.content.Pagination;
 import fr.minuskube.inv.content.SlotIterator;
 
 public class LetterInventory extends InventoryBuilder {
-
-	// Materials
-	public static Material NON_READ_LETTERS_MATERIAL = Material.BELL;
-	public static Material PLAYER_FILTER_MATERIAL = Material.PLAYER_HEAD;
-	public static Material DATE_SORT_MATERIAL = Material.REPEATER;
+	private static final String TITLE = LangManager.getValue("string_menu_letters");
 
 	// primary
 	public static final String ID = "MailBox_Letters";
-		
+
+	private static final String PLAYER_FILTER = LangManager.getValue("string_player_filter");
+	private static final String SHOW_SENDER = LangManager.getValue("string_show_sender");
+	private static final String DELETE_FILTER = LangManager.getValue("help_delete_filter");
+	private static final String QUESTION_CLEAN = LangManager.getValue("question_clean_letters");
+	private static final String PERMISSION_NEEDED = LangManager.getValue("string_permission_needed");
+	private static final String REPLY_ID = LangManager.getValue("string_reply_identifier");
+	private static final String DELETE_LETTER = LangManager.getValue("question_delete_letter");
+	private static final String MARK_ALL = LangManager.getValue("string_help_mark_all");
+	private static final String NON_READ = LangManager.getValue("string_non_read_letters");
+	private static final String MARK_ALL_2 = LangManager.getValue("string_mark_all_as_read");
+	private static final String DISPLAY = LangManager.getValue("string_display");
+	private static final String DESCENDING = LangManager.getValue("string_descending_order");
+	private static final String ASCENDING = LangManager.getValue("string_ascending_order");
+	private static final String TOGGLE = LangManager.getValue("help_toggle_date_order");
+	private static final String TYPE_FILTER = LangManager.getValue("string_filter_by_type");
+	private static final String TYPE_FILTER_1 = LangManager.getValue("help_choose_type_filter_1");
+	private static final String TYPE_FILTER_2 = LangManager.getValue("help_choose_type_filter_2");
+	private static final String EMPTY = LangManager.getValue("string_empty");
+
 	private DataHolder dataSource;
 
 	// secondary
@@ -53,15 +69,13 @@ public class LetterInventory extends InventoryBuilder {
 
 	// builder
 	public LetterInventory(DataHolder dataSource) {
-		super(ID, "§l"+LangManager.getValue("string_menu_letters"), 5);
-
+		super(ID, "§l" + TITLE, 5);
 		this.setDataSource(dataSource);
 
 	}
 
 	public LetterInventory(DataHolder dataSource, InventoryBuilder parent) {
-		super(ID, "§l"+LangManager.getValue("string_menu_letters"), 5);
-
+		super(ID, "§l" + TITLE, 5);
 		this.setDataSource(dataSource);
 		this.setParent(parent);
 	}
@@ -74,88 +88,75 @@ public class LetterInventory extends InventoryBuilder {
 		// CONTENT
 		this.dynamicContent(player, contents);
 
-		contents.fillRow(3,ClickableItem.empty(new ItemStackBuilder(MailBoxInventoryHandler.BORDER_MATERIAL).setName(" ").build()));
+		contents.fillRow(3, ClickableItem.empty(new ItemStackBuilder(Material.BLACK_STAINED_GLASS_PANE).setName(" ").build()));
 
 		// FOOT
 		if (!pagination.isFirst()) {
 			contents.set(4, 1, this.previousPageItem(player, contents));
 		}
-		
+
 		this.setPlayerFilter(player, contents);
 
 		if (!pagination.isLast()) {
 			contents.set(4, 7, this.nextPageItem(player, contents));
 		}
-
-		contents.set(4, 0, this.goBackItem(player));
 	}
-	
+
 	private void setPlayerFilter(Player player, InventoryContents contents) {
-		contents.set(4, 2,ClickableItem.of(new ItemStackBuilder(PLAYER_FILTER_MATERIAL)
-				.setName("§e§l"+LangManager.getValue("string_player_filter")+":" )
-				.addLores(this.getIdList().getPreviewLore())
-				.addAutoFormatingLore(LangManager.getValue("help_delete_filter"), 35)
-				.build(), e -> {
+		contents.set(4, 2, ClickableItem
+				.of(new ItemStackBuilder(Material.PLAYER_HEAD).setName("§e§l" + PLAYER_FILTER + ":").addLores(this.getIdList().getPreviewLore()).addAutoFormatingLore(DELETE_FILTER, 35).build(), e -> {
 					ClickType click = e.getClick();
 
 					if (click == ClickType.LEFT) {
-						PlayerSelectionInventory selector = new PlayerSelectionInventory(this.getIdList(), "§l"+LangManager.getValue("string_show_sender")+":", this);
+						PlayerSelectionInventory selector = new PlayerSelectionInventory(this.getIdList(), "§l" + SHOW_SENDER + ":", this);
 						selector.openInventory(player);
 
-					} else if (click == ClickType.DROP) {
+					} else if (click == ClickType.DROP || click == ClickType.CONTROL_DROP) {
 						this.getIdList().clear();
 						this.setPlayerFilter(player, contents);
 					}
 				}));
 	}
-	
+
 	@Override
 	public void updateInventory(Player player, InventoryContents contents) {
 		this.dynamicContent(player, contents);
 	}
 
 	private void dynamicContent(Player player, InventoryContents contents) {
-		this.setToShow(DataManager.getTypeData(this.getDataSource(), LetterData.class) );
-		
+		this.setToShow(DataManager.getTypeData(this.getDataSource(), LetterData.class));
+
 		if (this.getShowedLetterType() != LetterType.NO_TYPE) {
-			this.setToShow(this.filterByType(this.getToShow()) );
+			this.setToShow(this.filterByType(this.getToShow()));
 
 		}
 
-		if (!this.getIdList().isEmpty() ) {
+		if (!this.getIdList().isEmpty()) {
 			this.setToShow(this.filterByAuthors(this.getToShow()));
-			
+
 		}
 
-		if (this.getIsSortingByDecreasingDate()) {
-			this.getToShow().sort(DataManager.ascendingDateComparator().reversed());
-
-		} else {
+		if (!this.getIsSortingByDecreasingDate()) {
 			this.getToShow().sort(DataManager.ascendingDateComparator());
 
 		}
-		
-		
-		if(this.getToShow().size() > 0 ) {
-			if(this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other") ) {
-				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(MailBoxInventoryHandler.DELETE_ALL_MATERIAL)
-						.setName("§c§lSupprimer les lettres affichées.").build(), e -> {
-							if(e.getClick() == ClickType.LEFT ) {
-						        List<Long> idList = getToShow().stream()
-						                .map(LetterData::getId)
-						                .collect(Collectors.toList());
-			
-								DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, idList, "§4§l"+LangManager.getValue("question_clean_letters", idList.size()), this);
-								inv.openInventory(player); 
-								
-							}
-							
-						}));
+
+		if (this.getToShow().size() > 0) {
+			if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other")) {
+				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§c§lSupprimer les lettres affichées.").build(), e -> {
+					if (e.getClick() == ClickType.LEFT) {
+						DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, getToShow().stream().collect(Collectors.toList()),
+								"§4§l" + LangManager.format(QUESTION_CLEAN, getToShow().size()), this, false);
+						inv.openInventory(player);
+
+					}
+
+				}));
 			}
 		} else {
 			contents.set(4, 4, null);
 		}
-		
+
 		ClickableItem[] clickableItems = new ClickableItem[toShow.size()];
 
 		for (Integer index = 0; index < getToShow().size(); index++) {
@@ -163,38 +164,38 @@ public class LetterInventory extends InventoryBuilder {
 
 			clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData), e -> {
 				ClickType clickType = e.getClick();
-				
-				if (clickType == ClickType.LEFT) {//lire
-					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.read.self") || player.hasPermission("mailbox.letter.read.other") ) {
+
+				if (clickType == ClickType.LEFT) {// lire
+					if (player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.read.self") || player.hasPermission("mailbox.letter.read.other")) {
 						MailBoxController.readLetter(player, tempData);
-						
+
 					} else {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 					}
 
-				} else if (clickType == ClickType.RIGHT ) {//répondre
-					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.reply.self") || player.hasPermission("mailbox.letter.reply.other") ) {
-						CreationInventory ci = new CreationInventory();
+				} else if (clickType == ClickType.RIGHT) {// répondre
+					if (player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.reply.self") || player.hasPermission("mailbox.letter.reply.other")) {
+						CreationInventory ci = CreationInventory.newInventory(player.getUniqueId());
 						IdentifiersList tempIdList = new IdentifiersList(null);
 						tempIdList.addIdentifier(tempData.getAuthor());
 						ci.setRecipients(tempIdList);
-						String tempObj = tempData.getObject().replace(LangManager.getValue("string_reply_identifier") + ": ", "");
-						ci.setObject(LangManager.getValue("string_reply_identifier") + ": " + tempObj);
+						String tempObj = tempData.getObject().replace(REPLY_ID + ": ", "");
+						ci.setObject(REPLY_ID + ": " + tempObj);
 						ci.setParent(this);
-						
+
 						ci.openInventory(player);
-						
+
 					} else {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 					}
-					
+
 				} else if (clickType == ClickType.CONTROL_DROP || clickType == ClickType.DROP) {// supprimer
-					if(player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other") ) {
-						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData.getId(), "§4§l"+LangManager.getValue("question_delete_letter"), this);
+					if (player.getUniqueId().equals(tempData.getOwnerUuid()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other")) {
+						DeletionDataInventory inv = new DeletionDataInventory(this.getDataSource(), tempData, "§4§l" + DELETE_LETTER, this);
 						inv.openInventory(player);
-						
+
 					} else {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 					}
 				}
 
@@ -206,77 +207,63 @@ public class LetterInventory extends InventoryBuilder {
 		pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
 		contents.set(4, 3, generateCycleFilters());
 		contents.set(4, 5, generateSortByDateItem());
-		
+
 		contents.set(4, 6, generateNonReadLettersItem(player));
 	}
 
 	private List<LetterData> filterByAuthors(List<LetterData> list) {
-		List<String> authorsNames = this.getIdList().getPlayerList().stream()
-				.map(PlayerInfo::getName)
-				.collect(Collectors.toList());
-		
-        List<LetterData> res = list.stream()
-                .filter(letterData -> authorsNames.contains(letterData.getAuthor() ) )
-                .collect(Collectors.toList());   
-		
-		
+		List<String> authorsNames = this.getIdList().getPlayerList().stream().map(PlayerInfo::getName).collect(Collectors.toList());
+
+		List<LetterData> res = list.stream().filter(letterData -> authorsNames.contains(letterData.getAuthor())).collect(Collectors.toList());
+
 		return res;
 	};
-	
+
 	public static List<LetterData> filterByReadState(List<LetterData> letterList, Boolean isRead) {
-        List<LetterData> res = letterList.stream()
-                .filter(letter -> letter.getIsRead().equals(isRead) )
-                .collect(Collectors.toList());
-		
+		List<LetterData> res = letterList.stream().filter(letter -> letter.getIsRead().equals(isRead)).collect(Collectors.toList());
+
 		return res;
 	};
-	
+
 	private List<LetterData> filterByType(List<LetterData> letterList) {
-        List<LetterData> res = letterList.stream()
-                .filter(letter -> letter.getLetterType() == this.getShowedLetterType() )
-                .collect(Collectors.toList());   
-		
+		List<LetterData> res = letterList.stream().filter(letter -> letter.getLetterType() == this.getShowedLetterType()).collect(Collectors.toList());
+
 		return res;
 	};
-	
-	private static final String help_mark_all = LangManager.getValue("string_help_mark_all");
-	
+
 	// generate items
 	private ClickableItem generateNonReadLettersItem(Player player) {
 		List<LetterData> list = filterByReadState(DataManager.getTypeData(this.getDataSource(), LetterData.class), false);
-		
-		ItemStack itemStack = new ItemStackBuilder(NON_READ_LETTERS_MATERIAL)
-				.setName("§e§l" + LangManager.getValue("string_non_read_letters", list.size()) )
-				.setAutoFormatingLore(help_mark_all, 23)
-				.setStackSize(list.size(), false )
+
+		ItemStack itemStack = new ItemStackBuilder(Material.BELL).setName("§e§l" + LangManager.format(NON_READ, list.size())).setAutoFormatingLore(MARK_ALL, 23).setStackSize(list.size(), false)
 				.build();
-		
+
 		Consumer<InventoryClickEvent> consumer = null;
-		
-		if (getDataSource().getOwnerUuid().equals(player.getUniqueId()) ) {
+
+		if (getDataSource().getOwnerUuid().equals(player.getUniqueId())) {
 			consumer = e -> {
-				
-				if(player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) && player.hasPermission("mailbox.letter.markall.self") || player.hasPermission("mailbox.letter.markall.other") ) {
-					ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + LangManager.getValue("string_mark_all_as_read", list.size()) ) {
-						
+
+				if (player.getUniqueId().equals(this.getDataSource().getOwnerUuid()) && player.hasPermission("mailbox.letter.markall.self") || player.hasPermission("mailbox.letter.markall.other")) {
+					ConfirmationInventoryBuilder confInv = new ConfirmationInventoryBuilder("mark_all", "§l" + LangManager.format(MARK_ALL_2, list.size())) {
+
 						@Override
 						public void onUpdate(Player player, InventoryContents contents) {
 						}
-						
+
 						@Override
 						public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 							return event -> {
 								for (LetterData letterData : list) {
 									letterData.setIsRead(true);
 									LetterDataSQL.getInstance().update(letterData);
-									
+
 								}
-								
+
 								this.returnToParent(player);
-								
+
 							};
 						}
-						
+
 						@Override
 						public Consumer<InventoryClickEvent> onAnnulation(Player player, InventoryContents contents) {
 							return null;
@@ -284,41 +271,41 @@ public class LetterInventory extends InventoryBuilder {
 					};
 					confInv.setParent(this);
 					confInv.openInventory(player);
-					
+
 				} else {
-					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 				}
 			};
-			
+
 		}
-		
+
 		ClickableItem res;
-		
-		if(consumer != null) {
+
+		if (consumer != null) {
 			res = ClickableItem.of(itemStack, consumer);
-			
+
 		} else {
 			res = ClickableItem.empty(itemStack);
 		}
-		
+
 		return res;
 	}
 
 	private ClickableItem generateSortByDateItem() {
-		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(DATE_SORT_MATERIAL).setName("§e§l"+LangManager.getValue("string_display") + ":");
+		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(Material.REPEATER).setName("§e§l" + DISPLAY + ":");
 
 		if (this.getIsSortingByDecreasingDate()) {
-			itemStackBuilder.addLore(LangManager.getValue("string_descending_order"));
-			
+			itemStackBuilder.addLore(DESCENDING);
+
 		} else {
-			itemStackBuilder.addLore(LangManager.getValue("string_ascending_order"));
+			itemStackBuilder.addLore(ASCENDING);
 
 		}
-		
-		itemStackBuilder.addLore(LangManager.getValue("help_toggle_date_order"));
+
+		itemStackBuilder.addLore(TOGGLE);
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
-			if(e.getClick() == ClickType.LEFT ) {
+			if (e.getClick() == ClickType.LEFT) {
 				this.setIsSortingByDecreasingDate(!this.getIsSortingByDecreasingDate());
 			}
 		});
@@ -326,13 +313,9 @@ public class LetterInventory extends InventoryBuilder {
 	}
 
 	private ClickableItem generateCycleFilters() {
-		String str = this.getShowedLetterType() == LetterType.NO_TYPE ? LangManager.getValue("string_empty") : this.getShowedLetterType().name().toLowerCase();
-		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(this.getShowedLetterType().getMaterial())
-						.setName("§e§l"+LangManager.getValue("string_filter_by_type")+": ")
-						.addLore(str)
-						.addLore(LangManager.getValue("help_choose_type_filter_1"))
-						.addLore(LangManager.getValue("help_choose_type_filter_2"))
-						.addLore(LangManager.getValue("help_delete_filter"));
+		String str = this.getShowedLetterType() == LetterType.NO_TYPE ? EMPTY : this.getShowedLetterType().name().toLowerCase();
+		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(this.getShowedLetterType().getMaterial()).setName("§e§l" + TYPE_FILTER + ": ").addLore(str).addLore(TYPE_FILTER_1).addLore(TYPE_FILTER_2)
+				.addLore(DELETE_FILTER);
 
 		this.setShowedLetterType(LetterType.values()[this.letterTypeIndex]);
 
@@ -351,7 +334,7 @@ public class LetterInventory extends InventoryBuilder {
 		});
 
 	}
-	
+
 	// manipulation
 	private void cycleIndex(Boolean isPositive) {
 		Integer index = this.letterTypeIndex;
@@ -376,7 +359,7 @@ public class LetterInventory extends InventoryBuilder {
 		this.setLetterTypeIndex(index);
 
 	}
-	
+
 	// getters setters
 	public void setLetterTypeIndex(Integer letterTypeIndex) {
 		this.letterTypeIndex = letterTypeIndex;
@@ -422,7 +405,7 @@ public class LetterInventory extends InventoryBuilder {
 		this.notReadYet = notReadYet;
 	}
 
-	public IdentifiersList getIdList() {		
+	public IdentifiersList getIdList() {
 		return idList;
 	}
 

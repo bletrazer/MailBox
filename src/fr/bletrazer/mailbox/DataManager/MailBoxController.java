@@ -197,11 +197,7 @@ public class MailBoxController {
 
 		return res;
 	}
-
-	public static void respondToLetter(Player player, Long id, ItemStack book) {// TODO
-
-	}
-
+	
 	private static ItemStack getBookView(LetterData letterData) {
 		StringBuilder letterHead = new StringBuilder();
 		letterHead.append(String.format("§l%s:§r %s\n", LangManager.getValue("string_author"), letterData.getAuthor()));
@@ -242,8 +238,7 @@ public class MailBoxController {
 
 	}
 
-	public static void deleteData(DataHolder holder, Long id) {
-		Data data = holder.getData(id);
+	public static void deleteData(DataHolder holder, Data data) {
 
 		if (data instanceof ItemData) {
 			deleteItem(holder, (ItemData) data);

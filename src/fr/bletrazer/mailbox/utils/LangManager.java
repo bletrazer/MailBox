@@ -38,18 +38,29 @@ public class LangManager {
 		
 	}
 	
-	public static String getValue(String id, Object... args) {
+	public static String getValue(String str, Object... args) {
 		String res = null;
-		
+
 		try {
-			res = String.format(getValue(id), args);
-			
-		} catch(IllegalFormatException e) {
-			res = id + " : §4wrong formating§r";
+			res = String.format(getValue(str), args);
+
+		} catch (IllegalFormatException e) {
+			res = str + " : §4wrong format§r";
 		}
-		
-		
-		
+
+		return res;
+	}
+	
+	public static String format(String str, Object... args) {
+		String res = null;
+
+		try {
+			res = String.format(str, args);
+
+		} catch (IllegalFormatException e) {
+			res = str + " : §4wrong format§r";
+		}
+
 		return res;
 	}
 	

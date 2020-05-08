@@ -17,24 +17,25 @@ import fr.minuskube.inv.content.InventoryContents;
 public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItem";
 	
-	private DataHolder holder;
-	private Long dataId;
+	private DataHolder dataSource;
+	private Data data;
+	private Boolean update = false;
 	
-	public DeletionDataInventory(DataHolder dataSource, Long dataId, String InventoryTitle, InventoryBuilder parent) {
+	public DeletionDataInventory(DataHolder dataSource, Data data, String InventoryTitle, InventoryBuilder parent) {
 		super(INVENTORY_SUB_ID, InventoryTitle);
-		this.setHolder(dataSource);
-		this.setDataId(dataId);
+		this.setDataSource(dataSource);
+		this.setData(data);
 		this.setParent(parent);
-		
-		// ClickableItem.empty(MailBoxInventoryHandler.getInstance().generateItemRepresentation(this.getHolder().getData(this.getDataId())) )
-
+		if(data instanceof ItemData ) {
+			update = true;
+		}
 	}
 
 	@Override
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
 			if(e.getClick() == ClickType.LEFT ) {
-				MailBoxController.deleteData(this.getHolder(), this.getDataId());
+				MailBoxController.deleteData(this.getDataSource(), this.getData() );
 				this.returnToParent(player);
 			}
 			
@@ -48,30 +49,30 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 
 	@Override
 	public void onUpdate(Player player, InventoryContents contents) {
-		Data data = this.getHolder().getData(this.getDataId());
-		
-		if(data instanceof ItemData) {
-			ItemData tempData = (ItemData) data;
+		if(update ) {
+			ItemData tempData = (ItemData) this.getData();
+			
 			if(tempData.isOutOfDate()) {
-				MailBoxController.deleteItem(this.getHolder(), tempData);
+				MailBoxController.deleteItem(this.getDataSource(), tempData);
 				contents.inventory().getParent().get().open(player);
 			}
 		}
 	}
 
-	public DataHolder getHolder() {
-		return holder;
+	public Data getData() {
+		return data;
 	}
 
-	private void setHolder(DataHolder holder) {
-		this.holder = holder;
+	public void setData(Data data) {
+		this.data = data;
 	}
-	public Long getDataId() {
-		return dataId;
+
+	public DataHolder getDataSource() {
+		return dataSource;
 	}
-	
-	private void setDataId(Long dataId) {
-		this.dataId = dataId;
+
+	public void setDataSource(DataHolder dataSource) {
+		this.dataSource = dataSource;
 	}
 
 }

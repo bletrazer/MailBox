@@ -19,6 +19,7 @@ public class Main extends JavaPlugin {
 	/*
 	 * TODO lettre non envoyés/en cours *-}
 	 * TODO reprendre une lettre        *-}
+	 * TODO bouton "tout supprimé" doit disparaitre après avoir rcup le dernier item -> dans ItemInventory
 	 */
 	
 	public static InventoryManager getManager() {

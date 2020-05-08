@@ -2,116 +2,88 @@ package fr.bletrazer.mailbox.inventory.builders;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitTask;
 
 import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.minuskube.inv.ClickableItem;
-import fr.minuskube.inv.InventoryListener;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.SmartInventory.Builder;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import fr.minuskube.inv.content.Pagination;
 
-public abstract class InventoryBuilder implements InventoryProvider { 
-	public static Material GO_BACK_MATERIAL = Material.OAK_SIGN;
-	public Material PAGINATION_MATERIAL = Material.ARROW;
-	
+public abstract class InventoryBuilder implements InventoryProvider {
+	private static final String NEXT_PAGE = LangManager.getValue("string_next_page");
+	private static final String PREVIOUS_PAGE = LangManager.getValue("string_previous_page");
+	private static final String PREVIOUS_MENU = LangManager.getValue("string_previous_menu");
+	private static final String QUIT = LangManager.getValue("string_quit");
+
 	private String id;
 	private String title;
 	private Integer rows;
-	
+
 	private InventoryBuilder parent;
-	private Consumer<BukkitTask> onFinalQuit;
-	private Boolean finalClose = true;
+	private Boolean showReturnButton = true;
 
 	private List<OptionalClickableItem> fixeOptions = new ArrayList<>();
 	private List<OptionalClickableItem> staticOptions = new ArrayList<>();
-	
+
 	public InventoryBuilder(String id, String title, Integer rows) {
 		this.setId(id);
 		this.setTitle(title);
 		this.setRows(rows);
-		
+
 	}
-	
+
 	protected Builder getBuilder() {
 		Builder res = SmartInventory.builder().manager(Main.getManager());
-		
-		res.id(this.getId() )
-		        .provider(this)
-		        .size(this.getRows(), 9)
-		        .title(this.getTitle())
-		        .closeable(this.isFinalClose());
-		
-		if (this.getFinalQuitTask() != null) {
-			res.listener(new InventoryListener<InventoryCloseEvent>(InventoryCloseEvent.class, e -> {
-				if (this.isFinalClose()) {
-					Main.getInstance().getServer().getScheduler().runTask(Main.getInstance(), this.getFinalQuitTask() );
-				}
-			}));
-		}
-		
+
+		res.id(this.getId()).provider(this).size(this.getRows(), 9).title(this.getTitle());
+
 		return res;
 	}
-	
+
 	public void openInventory(Player player) {
 		Bukkit.getScheduler().runTask(Main.getInstance(), e -> {
-			this.setFinalClose(true);
 			SmartInventory inv = this.getBuilder().build();
 			inv.open(player);
 		});
 	}
-	
+
 	public void returnToParent(Player player) {
-		if(this.getParent() != null) {
+		if (this.getParent() != null) {
 			this.getParent().openInventory(player);
-			
+
 		} else {
 			player.closeInventory();
 		}
-		
+
 	}
-	
+
 	public ClickableItem nextPageItem(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
 		SmartInventory inventory = contents.inventory();
-		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§l" + LangManager.getValue("string_next_page") ).build(), e -> inventory.open(player, pagination.next().getPage()));
+		return ClickableItem.of(new ItemStackBuilder(Material.ARROW).setName("§e§l" + NEXT_PAGE).build(), e -> inventory.open(player, pagination.next().getPage()));
 	}
-	
+
 	public ClickableItem previousPageItem(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
 		SmartInventory inventory = contents.inventory();
-		return ClickableItem.of(new ItemStackBuilder(PAGINATION_MATERIAL).setName("§e§l" + LangManager.getValue("string_previous_page")).build(), e -> inventory.open(player, pagination.previous().getPage()));
+		return ClickableItem.of(new ItemStackBuilder(Material.ARROW).setName("§e§l" + PREVIOUS_PAGE).build(), e -> inventory.open(player, pagination.previous().getPage()));
 	}
-	
+
 	public ClickableItem goBackItem(Player player) {
-		
-		String name = this.getParent() == null ? "§c§l"+LangManager.getValue("string_quit") : "<- §c§l" + LangManager.getValue("string_previous_menu");
+		String name = this.getParent() == null ? "§c§l" + QUIT : "<- §c§l" + PREVIOUS_MENU;
+		return ClickableItem.of(new ItemStackBuilder(Material.OAK_SIGN).setName(name).build(), e -> {
+			returnToParent(player);
 
-		return ClickableItem.of(new ItemStackBuilder(GO_BACK_MATERIAL).setName(name).build(), goBackListener(player));
-	}
-	
-	public Consumer<InventoryClickEvent> goBackListener(Player player){
-		return e -> {
-			if (this.getParent() != null) {
-				this.getParent().openInventory(player);
-
-			} else {
-				player.closeInventory();
-			}
-
-		};
+		});
 	}
 
 	public String getId() {
@@ -137,14 +109,19 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	protected void setRows(Integer rows) {
 		this.rows = rows;
 	}
-	
+
 	public abstract void initializeInventory(Player player, InventoryContents contents);
+
 	public abstract void updateInventory(Player player, InventoryContents contents);
-	
+
 	@Override
 	public void init(Player p, InventoryContents c) {
+		if (this.getShowReturnButton()) {
+			c.set(this.getRows() - 1, 0, this.goBackItem(p));
+		}
+
 		this.initializeInventory(p, c);
-		for(OptionalClickableItem oci : this.getFixeOptions() ) {
+		for (OptionalClickableItem oci : this.getFixeOptions()) {
 			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
 		}
 	}
@@ -152,11 +129,11 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	@Override
 	public void update(Player p, InventoryContents c) {
 		this.updateInventory(p, c);
-		
-		for(OptionalClickableItem oci : this.getStaticOptions() ) {
+
+		for (OptionalClickableItem oci : this.getStaticOptions()) {
 			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
 		}
-		
+
 	}
 
 	public InventoryBuilder getParent() {
@@ -168,23 +145,6 @@ public abstract class InventoryBuilder implements InventoryProvider {
 		return this;
 	}
 
-	public Boolean isFinalClose() {
-		return finalClose;
-	}
-
-	public InventoryBuilder setFinalClose(Boolean finalClose) {
-		this.finalClose = finalClose;
-		return this;
-	}
-
-	public Consumer<BukkitTask> getFinalQuitTask() {
-		return onFinalQuit;
-	}
-
-	public void onFinalClose(Consumer<BukkitTask> onFinalQuit) {
-		this.onFinalQuit = onFinalQuit;
-	}
-
 	private List<OptionalClickableItem> getFixeOptions() {
 		return fixeOptions;
 	}
@@ -192,15 +152,23 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	private List<OptionalClickableItem> getStaticOptions() {
 		return staticOptions;
 	}
-	
+
 	public void addOption(OptionalClickableItem oci) {
-		if(oci.doUpdate() ) {
+		if (oci.doUpdate()) {
 			this.getStaticOptions().add(oci);
-			
+
 		} else {
 			this.getFixeOptions().add(oci);
 		}
-			
+
 	}
-	
+
+	public Boolean getShowReturnButton() {
+		return this.showReturnButton;
+	}
+
+	public void setShowReturnButton(Boolean showReturnButton) {
+		this.showReturnButton = showReturnButton;
+	}
+
 }

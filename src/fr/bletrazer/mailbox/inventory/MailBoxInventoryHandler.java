@@ -15,9 +15,6 @@ import fr.bletrazer.mailbox.utils.LangManager;
 
 public class MailBoxInventoryHandler {
 	
-	public static Material BORDER_MATERIAL = Material.BLACK_STAINED_GLASS_PANE;
-	public static Material DELETE_ALL_MATERIAL = Material.BARRIER;
-	
 	public static ItemStack generateItemRepresentation(Data data) {
 		ItemStack res = null;
 		

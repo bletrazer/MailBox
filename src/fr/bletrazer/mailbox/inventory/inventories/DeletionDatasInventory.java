@@ -20,14 +20,16 @@ import fr.minuskube.inv.content.InventoryContents;
 public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItems";
 	
-	private DataHolder holder;
-	private List<Long> dataIdList = new ArrayList<>();
+	private DataHolder dataSource;
+	private List<Data> dataList = new ArrayList<>();
+	private Boolean doUpdate = false;
 	
-	public DeletionDatasInventory(DataHolder dataSource, List<Long> listDataId, String inventoryTitle, InventoryBuilder parent) {
+	public DeletionDatasInventory(DataHolder dataSource, List<Data> dataList, String inventoryTitle, InventoryBuilder parent, Boolean doUpdate) {
 		super(INVENTORY_SUB_ID, inventoryTitle);
-		this.setHolder(dataSource);
-		this.setDataIdList(listDataId);
+		this.setDataSource(dataSource);
+		this.setDataList(dataList);
 		this.setParent(parent);
+		this.setDoUpdate(doUpdate);
 
 	}
 	
@@ -35,8 +37,8 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
 			if(e.getClick() == ClickType.LEFT ) {
-				for(Long id : this.getDataIdList() ) {
-					MailBoxController.deleteData(this.getHolder(), id);
+				for(Data data : this.getDataList() ) {
+					MailBoxController.deleteData(this.getDataSource(), data);
 					
 				}
 				this.returnToParent(player);
@@ -52,43 +54,51 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 
 	@Override
 	public void onUpdate(Player player, InventoryContents contents) {
-		Iterator<Long> it = this.getDataIdList().iterator();
-
-		while (it.hasNext()) {
-			Long id = it.next();
-			Data data = this.getHolder().getData(id);
-
-			if (data != null) {
-				if (data instanceof ItemData ) {
-					ItemData tempData = (ItemData) data;
-					MailBoxController.deleteItem(this.getHolder(), tempData);
-					it.remove();
-
-					if (this.getDataIdList().isEmpty()) {
-						contents.inventory().getParent().get().open(player);
-
+		if(this.getDoUpdate() ) {
+			Iterator<Data> it = this.getDataList().iterator();
+	
+			while (it.hasNext()) {
+				Data data = it.next();
+	
+				if (data != null) {
+					if (data instanceof ItemData ) {
+						ItemData tempData = (ItemData) data;
+						MailBoxController.deleteItem(this.getDataSource(), tempData);
+						it.remove();
+	
+						if (this.getDataList().isEmpty()) {
+							this.returnToParent(player);
+	
+						}
 					}
+				} else {
+					it.remove();
 				}
-			} else {
-				it.remove();
 			}
-
 		}
 	}
 
-	public DataHolder getHolder() {
-		return holder;
+	public DataHolder getDataSource() {
+		return this.dataSource;
 	}
 
-	private void setHolder(DataHolder holder) {
-		this.holder = holder;
+	private void setDataSource(DataHolder holder) {
+		this.dataSource = holder;
 	}
 	
-	public List<Long> getDataIdList() {
-		return dataIdList;
+	public List<Data> getDataList() {
+		return dataList;
 	}
 
-	public void setDataIdList(List<Long> dataIdList) {
-		this.dataIdList = dataIdList;
+	public void setDataList(List<Data> dataList) {
+		this.dataList = dataList;
+	}
+
+	public Boolean getDoUpdate() {
+		return doUpdate;
+	}
+
+	public void setDoUpdate(Boolean doUpdate) {
+		this.doUpdate = doUpdate;
 	}
 }
