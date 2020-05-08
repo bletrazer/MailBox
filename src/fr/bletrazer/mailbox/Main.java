@@ -17,9 +17,7 @@ public class Main extends JavaPlugin {
 	private static InventoryManager manager;
 	
 	/*
-	 * TODO lettre non envoyés/en cours *-}
-	 * TODO reprendre une lettre        *-}
-	 * TODO bouton "tout supprimé" doit disparaitre après avoir rcup le dernier item -> dans ItemInventory
+	 * TODO menu lettre non envoyés/en cours *-}
 	 */
 	
 	public static InventoryManager getManager() {
