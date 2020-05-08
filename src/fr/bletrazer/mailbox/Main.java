@@ -40,19 +40,20 @@ public class Main extends JavaPlugin {
 				this.getConfig().getString("database.database"), this.getConfig().getString("database.user"),
 				this.getConfig().getString("database.password"));
 
-		if (SQLConnection.getInstance().getConnection() != null && SQLConnection.getInstance().isConnected()) {
-
+		this.getCommand(Cmd_Mailbox.CMD_LABEL).setExecutor(new Cmd_Mailbox());
+		
+		if (SQLConnection.getInstance().isConnected() ) {
 			manager = new InventoryManager(this);
 			manager.init();
 			PlayerManager.getInstance().init();
 			MailBoxController.initialize();
 			
-			this.getCommand("mailbox").setExecutor(new Cmd_Mailbox());
+			
 			this.registerListeners();
 
 		} else {
 			this.getLogger().log(Level.SEVERE, LangManager.getValue("connection_needed"));
-			this.getServer().getPluginManager().disablePlugin(this);
+			
 		}
 
 	}

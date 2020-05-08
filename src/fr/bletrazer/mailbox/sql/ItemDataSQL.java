@@ -151,7 +151,7 @@ public class ItemDataSQL extends DAO<ItemData>{
 				}
 				
 			}
-			
+
 		} catch (SQLException e) {
 			SQLConnection.getInstance().rollBack();
 	        e.printStackTrace();
@@ -211,18 +211,23 @@ public class ItemDataSQL extends DAO<ItemData>{
 	}
 
 	@Override
-	public void delete(ItemData obj) {
+	public Boolean delete(ItemData obj) {
+		Boolean res = false;
+		
 		try {
-			DataSQL.getInstance().delete(obj);
-			PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, obj.getId());
-			query.execute();
-			query.close();
+			if(DataSQL.getInstance().delete(obj) ) {
+				PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+				query.setLong(1, obj.getId());
+				query.execute();
+				query.close();
+				res = true;
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+		
+		return res;
 	}
 
 }

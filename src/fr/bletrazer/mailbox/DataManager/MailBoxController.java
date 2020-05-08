@@ -14,13 +14,15 @@ import org.bukkit.inventory.meta.BookMeta;
 import fr.bletrazer.mailbox.sql.DataSQL;
 import fr.bletrazer.mailbox.sql.ItemDataSQL;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
+import fr.bletrazer.mailbox.sql.SQLConnection;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.bletrazer.mailbox.utils.MessageLevel;
 import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public class MailBoxController {
-
+	private static final String NOT_ENOUGHT_SPACE = LangManager.getValue("string_not_enought_space");
+	
 	private static DataHolder getHolderFromDataBase(UUID uuid) {
 		DataHolder res = new DataHolder(uuid, new ArrayList<>());
 		List<Data> dataList = DataSQL.getInstance().getDataList(uuid);
@@ -64,24 +66,28 @@ public class MailBoxController {
 		return res;
 	}
 
-	public static Boolean sendLetter(LetterData letterData) {
+	public static Boolean sendLetter(Player player, LetterData letterData) {
 		Boolean res = false;
 		LetterData temp = LetterDataSQL.getInstance().create(letterData);
 
 		if (temp != null) {
 			DataHolder holder = DataManager.getDataHolder(temp.getOwnerUuid());
+			
 			if (holder != null) {
 				holder.addData(temp);
 			}
 
 			res = true;
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			player.closeInventory();
 		}
 
 		return res;
 
 	}
 
-	public static Boolean sendLetters(List<LetterData> letters) {
+	public static Boolean sendLetters(Player player, List<LetterData> letters) {
 		Boolean res = false;
 
 		if (letters != null && !letters.isEmpty()) {
@@ -106,12 +112,15 @@ public class MailBoxController {
 
 					res = true;
 
+				} else {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+					player.closeInventory();
 				}
 
 			} else {
 				LetterData toSend = letters.get(0);
 				
-				if (sendLetter(toSend)) {
+				if (sendLetter(player, toSend)) {
 					// notification
 					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
 
@@ -121,9 +130,6 @@ public class MailBoxController {
 					}
 					res = true;
 					
-				} else {
-					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
-					
 				}
 			}
 		}
@@ -131,7 +137,7 @@ public class MailBoxController {
 		return res;
 	}
 
-	public static Boolean sendItem(ItemData itemData) {
+	public static Boolean sendItem(Player player, ItemData itemData) {
 		Boolean res = false;
 		ItemData temp = ItemDataSQL.getInstance().create(itemData);
 
@@ -144,13 +150,16 @@ public class MailBoxController {
 
 			res = true;
 
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			player.closeInventory();
 		}
 
 		return res;
 
 	}
 
-	public static Boolean sendItems(List<ItemData> items) {
+	public static Boolean sendItems(Player player, List<ItemData> items) {
 		Boolean res = false;
 
 		if (items != null && !items.isEmpty()) {
@@ -174,11 +183,14 @@ public class MailBoxController {
 					}
 					res = true;
 
+				} else {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+					player.closeInventory();
 				}
 
 			} else {
 				ItemData toSend = items.get(0);
-				if (sendItem(toSend)) {
+				if (sendItem(player, toSend)) {
 					// notification
 					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
 
@@ -187,9 +199,6 @@ public class MailBoxController {
 
 					}
 					res = true;
-					
-				} else {
-					MessageUtils.sendMessage( Bukkit.getPlayer(toSend.getAuthor()), MessageLevel.ERROR, LangManager.getValue("string_error_player") );
 					
 				}
 			}
@@ -227,42 +236,71 @@ public class MailBoxController {
 
 		if (letterData.getOwnerUuid().equals(player.getUniqueId())) {
 			letterData.setIsRead(true);
-			LetterDataSQL.getInstance().update(letterData);
+			if(SQLConnection.getInstance().isConnected() ) {
+				LetterDataSQL.getInstance().update(letterData);
+			}
 
 		}
 	}
 
-	public static void deleteLetter(DataHolder holder, LetterData letterData) {
-		holder.removeData(letterData.getId() );
-		LetterDataSQL.getInstance().delete(letterData);
-
+	public static Boolean deleteLetter(Player player, DataHolder holder, LetterData letterData) {
+		Boolean res = false;
+		
+		if(LetterDataSQL.getInstance().delete(letterData) ) {
+			holder.removeData(letterData.getId() );
+			res = true;
+			
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			player.closeInventory();
+		}
+		
+		return res;
 	}
 
-	public static void deleteData(DataHolder holder, Data data) {
-
+	public static Boolean deleteData(Player player, DataHolder holder, Data data) {
+		Boolean res = false;
+		
 		if (data instanceof ItemData) {
-			deleteItem(holder, (ItemData) data);
+			res = deleteItem(player, holder, (ItemData) data);
 
 		} else if (data instanceof LetterData) {
-			deleteLetter(holder, (LetterData) data);
+			res = deleteLetter(player, holder, (LetterData) data);
 		}
+		
+		return res;
 	}
 
 	public static Boolean recoverItem(Player player, DataHolder holder, ItemData itemData) {
 		Boolean success = false;
 		
 		if (player.getInventory().firstEmpty() >= 0) {
-			player.getInventory().addItem(itemData.getItem() );
-			deleteItem(holder, itemData);
-			success = true;
+			if(deleteItem(player, holder, itemData) ) {
+				player.getInventory().addItem(itemData.getItem() );
+				success = true;
+				
+			}
+			
 
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, NOT_ENOUGHT_SPACE);
 		}
 
 		return success;
 	}
 
-	public static void deleteItem(DataHolder holder, ItemData itemData) {
-		holder.removeData(itemData.getId() );
-		ItemDataSQL.getInstance().delete(itemData);
+	public static Boolean deleteItem(Player player, DataHolder holder, ItemData itemData) {
+		Boolean res = false;
+		
+		if(ItemDataSQL.getInstance().delete(itemData) ) {
+			holder.removeData(itemData.getId() );
+			res = true;
+			
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			player.closeInventory();
+		}
+		
+		return res;
 	}
 }

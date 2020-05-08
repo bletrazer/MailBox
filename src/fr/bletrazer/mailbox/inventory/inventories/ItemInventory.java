@@ -14,6 +14,7 @@ import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.sql.SQLConnection;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.bletrazer.mailbox.utils.MessageLevel;
@@ -27,7 +28,6 @@ public class ItemInventory extends InventoryBuilder {
 	private static final String TITLE = LangManager.getValue("string_menu_items");
 	private static final String CLEAN = LangManager.getValue("string_clean_inbox");
 	private static final String QUESTION_CLEAN = LangManager.getValue("question_clean_items");
-	private static final String NOT_ENOUGHT_SPACE = LangManager.getValue("string_not_enought_space");
 	private static final String PERMISSION_NEEDED = LangManager.getValue("string_permission_needed");
 	private static final String QUESTION_DELETE = LangManager.getValue("question_delete_item");
 	private static final String RETREIVE_ALL = LangManager.getValue("string_retreive_all");
@@ -53,10 +53,16 @@ public class ItemInventory extends InventoryBuilder {
 			contents.set(4, 6, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l" + CLEAN).build(), e -> {
 
 				if (e.getClick() == ClickType.LEFT) {
-					DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), this.getToShow().stream().collect(Collectors.toList()),
-							"§4§l" + LangManager.format(QUESTION_CLEAN, this.getToShow().size()), this, true);
-					deletionDatasInventory.openInventory(player);
+					if(SQLConnection.getInstance().isConnected() ) {
+						DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), this.getToShow().stream().collect(Collectors.toList()),
+								"§4§l" + LangManager.format(QUESTION_CLEAN, this.getToShow().size()), this, true);
+						deletionDatasInventory.openInventory(player);
 
+					} else {
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+						player.closeInventory();
+						return;
+					}
 				}
 			}));
 
@@ -72,8 +78,7 @@ public class ItemInventory extends InventoryBuilder {
 			ItemData tempData = getToShow().get(index);
 
 			if (tempData.isOutOfDate()) {
-				MailBoxController.deleteItem(this.getDataSource(), tempData);
-
+				MailBoxController.deleteItem(player, this.getDataSource(), tempData);
 			} else {
 				clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData), e -> {
 					ClickType clickType = e.getClick();
@@ -81,7 +86,6 @@ public class ItemInventory extends InventoryBuilder {
 					if (clickType == ClickType.LEFT) {
 						if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
 							if (!MailBoxController.recoverItem(player, getDataSource(), tempData)) {
-								MessageUtils.sendMessage(player, MessageLevel.ERROR, NOT_ENOUGHT_SPACE);
 								
 							} else if (!getToShow().isEmpty() ) {
 								contents.set(4,  6, null);
@@ -154,7 +158,6 @@ public class ItemInventory extends InventoryBuilder {
 				if (!dataList.isEmpty()) {
 					for (ItemData itemData : dataList) {
 						if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData)) {
-							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_not_enought_space"));
 							b = false;
 							break;
 						}

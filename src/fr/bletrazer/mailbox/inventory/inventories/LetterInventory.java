@@ -23,6 +23,7 @@ import fr.bletrazer.mailbox.inventory.inventories.creation.CreationInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
 import fr.bletrazer.mailbox.playerManager.PlayerInfo;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
+import fr.bletrazer.mailbox.sql.SQLConnection;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.bletrazer.mailbox.utils.MessageLevel;
@@ -145,12 +146,17 @@ public class LetterInventory extends InventoryBuilder {
 			if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other")) {
 				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§c§lSupprimer les lettres affichées.").build(), e -> {
 					if (e.getClick() == ClickType.LEFT) {
-						DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, getToShow().stream().collect(Collectors.toList()),
-								"§4§l" + LangManager.format(QUESTION_CLEAN, getToShow().size()), this, false);
-						inv.openInventory(player);
-
+						if(SQLConnection.getInstance().isConnected() ) {
+							DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, getToShow().stream().collect(Collectors.toList()),
+									"§4§l" + LangManager.format(QUESTION_CLEAN, getToShow().size()), this, false);
+							inv.openInventory(player);
+	
+						} else {
+							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+							player.closeInventory();
+							return;
+						}
 					}
-
 				}));
 			}
 		} else {

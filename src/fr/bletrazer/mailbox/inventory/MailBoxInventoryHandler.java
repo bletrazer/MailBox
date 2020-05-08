@@ -2,7 +2,6 @@ package fr.bletrazer.mailbox.inventory;
 
 import java.text.SimpleDateFormat;
 
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;

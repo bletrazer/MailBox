@@ -18,7 +18,7 @@ public abstract class DAO<T> {
 
 	public abstract T update(T obj);
 
-	public abstract void delete(T obj);
+	public abstract Boolean delete(T obj);
 
 	public Connection getConnection() {
 		return connection;

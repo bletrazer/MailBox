@@ -22,13 +22,13 @@ public class LetterDataSQL extends DAO<LetterData> {
 	public static LetterDataSQL getInstance() {
 		return INSTANCE;
 	}
-	
+
 	private LetterDataSQL() {
 		super();
 
 		try {
-			PreparedStatement query = this.getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS	" + TABLE_NAME
-					+ " (id BIGINT NOT NULL, type VARCHAR(255) NOT NULL, content TEXT NOT NULL, isRead BOOLEAN NOT NULL DEFAULT '0', PRIMARY KEY(id))");
+			PreparedStatement query = this.getConnection().prepareStatement(
+					"CREATE TABLE IF NOT EXISTS	" + TABLE_NAME + " (id BIGINT NOT NULL, type VARCHAR(255) NOT NULL, content TEXT NOT NULL, isRead BOOLEAN NOT NULL DEFAULT '0', PRIMARY KEY(id))");
 			query.executeUpdate();
 			query.close();
 
@@ -36,25 +36,25 @@ public class LetterDataSQL extends DAO<LetterData> {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Transforme une liste de string en string unique et les s�pare par un "\n"
 	 */
 	public String toText(List<String> list) {
 		StringBuilder sb = new StringBuilder();
 		String res = "";
-		
-		if(list != null) {
+
+		if (list != null) {
 			for (String page : list) {
 				sb.append(String.format("%s#-#", page == null || page.isEmpty() ? " " : page));
 			}
 			res = sb.toString();
-			
+
 		}
-		
+
 		return res;
 	}
-	
+
 	/**
 	 * Transforme un String en List en utilisant "\n" comme s�parateur
 	 */
@@ -63,11 +63,11 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 
 	/*
-	 * Format de la table: 
-	 * [id: int] [type: String(LetterType name)] [content: String] [isRead: Boolean]
+	 * Format de la table: [id: int] [type: String(LetterType name)] [content:
+	 * String] [isRead: Boolean]
 	 * 
 	 */
-	
+
 	@Override
 	public LetterData create(LetterData obj) {
 		LetterData res = null;
@@ -75,20 +75,20 @@ public class LetterDataSQL extends DAO<LetterData> {
 		try {
 			LetterData temp = obj.clone();
 			Data data = DataSQL.getInstance().create(temp);
-			
-			if(data != null) {
+
+			if (data != null) {
 				temp.setId(data.getId());
 				temp.setCreationDate(data.getCreationDate());
-	
+
 				PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
 				query.setLong(1, temp.getId());
 				query.setString(2, temp.getLetterType().name());
 				query.setString(3, toText(temp.getContent()));
 				query.setBoolean(4, temp.getIsRead());
-	
+
 				query.execute();
 				query.close();
-				
+
 				res = temp;
 			}
 		} catch (SQLException e) {
@@ -97,49 +97,48 @@ public class LetterDataSQL extends DAO<LetterData> {
 
 		return res;
 	}
-	
+
 	@Override
 	public List<LetterData> createAll(List<LetterData> list) {
 		List<LetterData> res = null;
 		PreparedStatement query = null;
-		
+
 		try {
 			Boolean transaction = SQLConnection.getInstance().startTransaction();
-			
-			if(transaction ) {
+
+			if (transaction) {
 				query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
-				List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()) );
-				
+				List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()));
+
 				List<LetterData> tempLetterList = new ArrayList<>();
-				
-				for(Integer index = 0; index < list.size(); index++) {
+
+				for (Integer index = 0; index < list.size(); index++) {
 					LetterData tempLetterData = list.get(index).clone();
 					Data tempData = tempDataList.get(index);
-					
+
 					tempLetterData.setId(tempData.getId());
 					tempLetterData.setCreationDate(tempData.getCreationDate());
-					
+
 					query.setLong(1, tempLetterData.getId());
 					query.setString(2, tempLetterData.getLetterType().name());
 					query.setString(3, toText(tempLetterData.getContent()));
 					query.setBoolean(4, tempLetterData.getIsRead());
-					
+
 					query.execute();
-					
+
 					tempLetterList.add(tempLetterData);
-					
+
 				}
-				
-				if(SQLConnection.getInstance().commit(query) ) {
+
+				if (SQLConnection.getInstance().commit(query)) {
 					res = tempLetterList;
 				}
 			}
-			
 		} catch (SQLException e) {
 			SQLConnection.getInstance().rollBack();
-	        e.printStackTrace();
-	    }
-		
+			e.printStackTrace();
+		}
+
 		return res;
 	}
 
@@ -154,8 +153,7 @@ public class LetterDataSQL extends DAO<LetterData> {
 		LetterData res = null;
 
 		try {
-			PreparedStatement query = super.getConnection()
-					.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE id = ?");
+			PreparedStatement query = super.getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE id = ?");
 			query.setLong(1, i);
 			ResultSet resultset = query.executeQuery();
 
@@ -185,8 +183,7 @@ public class LetterDataSQL extends DAO<LetterData> {
 		LetterData res = null;
 		try {
 			DataSQL.getInstance().update(obj);
-			PreparedStatement query = super.getConnection()
-					.prepareStatement("UPDATE " + TABLE_NAME + " SET content = ?, type = ?, isRead = ? WHERE id = ?");
+			PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET content = ?, type = ?, isRead = ? WHERE id = ?");
 			query.setString(1, toText(obj.getContent()));
 			query.setString(2, obj.getLetterType().name());
 			query.setBoolean(3, obj.getIsRead());
@@ -204,19 +201,23 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 
 	@Override
-	public void delete(LetterData obj) {
+	public Boolean delete(LetterData obj) {
+		Boolean res = false;
+
 		try {
-			DataSQL.getInstance().delete(obj);
-			PreparedStatement query = super.getConnection()
-					.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, obj.getId());
-			query.execute();
-			query.close();
+			if (DataSQL.getInstance().delete(obj)) {
+				PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+				query.setLong(1, obj.getId());
+				query.execute();
+				query.close();
+				res = true;
+			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
+		return res;
 	}
 
 }

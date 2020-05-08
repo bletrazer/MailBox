@@ -58,7 +58,8 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
 			ClickType click = e.getClick();
-
+			Boolean error = false;
+			
 			if (click == ClickType.LEFT) {
 				LetterType type = getRecipients().getPlayerList().size() > 1 ? LetterType.ANNOUNCE : LetterType.STANDARD;
 				List<LetterData> letters = new ArrayList<>();
@@ -77,15 +78,21 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 
 				}
 
-				if (!letters.isEmpty()) {
-					if (MailBoxController.sendLetters(letters)) {
+				if (!error && !letters.isEmpty()) {
+					if (MailBoxController.sendLetters(player, letters) ) {
 						MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.format(SEND_LETTER, ": " + getRecipients().getPreviewString()));
+						
+					} else {
+						error = true;
 					}
 				}
 
-				if (!items.isEmpty()) {
-					if (MailBoxController.sendItems(items)) {
+				if (!error && !items.isEmpty()) {
+					if (MailBoxController.sendItems(player, items)) {
 						MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.format(SEND_ITEM, ": " + getRecipients().getPreviewString()));
+						
+					} else {
+						error = true;
 					}
 				}
 

@@ -47,9 +47,11 @@ public class SQLConnection {
 	public Boolean startTransaction() {
 		Boolean res = false;
 		try {
-			if(this.getConnection() != null) {
+			if(this.isConnected() ) {
 				this.getConnection().setAutoCommit(false);
 				res = true;
+			} else {
+				Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
 			}
 		} catch (SQLException e) {
 			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_sql"));
@@ -61,13 +63,15 @@ public class SQLConnection {
 	
 	public void rollBack() {
         try {
-        	
-        	if(!this.getConnection().getAutoCommit() ) {
-                Main.getInstance().getLogger().log(Level.SEVERE, "Transaction is being rolled back");
-                this.getConnection().rollback();
-                
+        	if(this.isConnected() ) {
+	        	if(!this.getConnection().getAutoCommit() ) {
+	                Main.getInstance().getLogger().log(Level.SEVERE, "Transaction is being rolled back");
+	                this.getConnection().rollback();
+	                
+	        	}
+        	} else {
+        		Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
         	}
-            
         } catch(SQLException excep) {
             excep.printStackTrace();
         }

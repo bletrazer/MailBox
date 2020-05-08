@@ -15,6 +15,9 @@ import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
+import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.content.InventoryContents;
 
 public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
@@ -38,7 +41,11 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 		return e -> {
 			if(e.getClick() == ClickType.LEFT ) {
 				for(Data data : this.getDataList() ) {
-					MailBoxController.deleteData(this.getDataSource(), data);
+					if(!MailBoxController.deleteData(player, this.getDataSource(), data) ) {
+						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+						player.closeInventory();
+						return;
+					}
 					
 				}
 				this.returnToParent(player);
@@ -63,7 +70,11 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 				if (data != null) {
 					if (data instanceof ItemData ) {
 						ItemData tempData = (ItemData) data;
-						MailBoxController.deleteItem(this.getDataSource(), tempData);
+						
+						if(!MailBoxController.deleteItem(player, this.getDataSource(), tempData) ) {
+							return;
+						}
+						
 						it.remove();
 	
 						if (this.getDataList().isEmpty()) {

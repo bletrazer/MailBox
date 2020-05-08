@@ -35,7 +35,7 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
 			if(e.getClick() == ClickType.LEFT ) {
-				MailBoxController.deleteData(this.getDataSource(), this.getData() );
+				MailBoxController.deleteData(player, this.getDataSource(), this.getData() );
 				this.returnToParent(player);
 			}
 			
@@ -53,7 +53,7 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 			ItemData tempData = (ItemData) this.getData();
 			
 			if(tempData.isOutOfDate()) {
-				MailBoxController.deleteItem(this.getDataSource(), tempData);
+				MailBoxController.deleteItem(player, this.getDataSource(), tempData);
 				contents.inventory().getParent().get().open(player);
 			}
 		}
