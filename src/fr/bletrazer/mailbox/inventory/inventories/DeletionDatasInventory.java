@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -19,31 +20,30 @@ import fr.minuskube.inv.content.InventoryContents;
 
 public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItems";
-	
+
 	private DataHolder dataSource;
 	private List<Data> dataList = new ArrayList<>();
 	private Boolean doUpdate = false;
-	
+
 	public DeletionDatasInventory(DataHolder dataSource, List<Data> dataList, String inventoryTitle, InventoryBuilder parent, Boolean doUpdate) {
 		super(INVENTORY_SUB_ID, inventoryTitle);
 		this.setDataSource(dataSource);
 		this.setDataList(dataList);
 		this.setParent(parent);
-		this.setDoUpdate(doUpdate);
-
+		this.doUpdate = doUpdate;
 	}
-	
+
 	@Override
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
-			if(e.getClick() == ClickType.LEFT ) {
-				if(MailBoxController.deleteDatas(player, this.getDataSource(), getDataList()) ) {
+			if (e.getClick() == ClickType.LEFT) {
+
+				if (MailBoxController.deleteDatas(player, this.getDataSource(), getDataList().stream().map(Data::getId).collect(Collectors.toList()))) {
 					this.returnToParent(player);
-					
+
 				} else {
 					player.closeInventory();
 				}
-				
 			}
 		};
 	}
@@ -55,27 +55,26 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 
 	@Override
 	public void onUpdate(Player player, InventoryContents contents) {
-		if(this.getDoUpdate() ) {
+		if (this.doUpdate) {
 			Iterator<Data> it = this.getDataList().iterator();
-	
+
 			while (it.hasNext()) {
 				Data data = it.next();
-	
+
 				if (data != null) {
-					if (data instanceof ItemData ) {
+					if (data instanceof ItemData) {
 						ItemData tempData = (ItemData) data;
-						
-						if(tempData.isOutOfDate() ) {
-							if(MailBoxController.deleteItem(player, this.getDataSource(), tempData) ) {
+
+						if (tempData.isOutOfDate()) {
+							if (MailBoxController.deleteItem(player, this.getDataSource(), tempData)) {
 								if (this.getDataList().isEmpty()) {
 									this.returnToParent(player);
-			
+
 								}
 							} else {
 								player.closeInventory();
 							}
 							it.remove();
-		
 
 						}
 					}
@@ -93,20 +92,12 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 	private void setDataSource(DataHolder holder) {
 		this.dataSource = holder;
 	}
-	
+
 	public List<Data> getDataList() {
 		return dataList;
 	}
 
 	public void setDataList(List<Data> dataList) {
 		this.dataList = dataList;
-	}
-
-	public Boolean getDoUpdate() {
-		return doUpdate;
-	}
-
-	public void setDoUpdate(Boolean doUpdate) {
-		this.doUpdate = doUpdate;
 	}
 }

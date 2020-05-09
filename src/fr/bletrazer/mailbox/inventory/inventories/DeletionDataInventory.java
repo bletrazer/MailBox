@@ -16,17 +16,17 @@ import fr.minuskube.inv.content.InventoryContents;
 
 public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 	public static final String INVENTORY_SUB_ID = "deleteItem";
-	
+
 	private DataHolder dataSource;
 	private Data data;
 	private Boolean update = false;
-	
+
 	public DeletionDataInventory(DataHolder dataSource, Data data, String InventoryTitle, InventoryBuilder parent) {
 		super(INVENTORY_SUB_ID, InventoryTitle);
 		this.setDataSource(dataSource);
 		this.setData(data);
 		this.setParent(parent);
-		if(data instanceof ItemData ) {
+		if (data instanceof ItemData) {
 			update = true;
 		}
 	}
@@ -34,15 +34,15 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 	@Override
 	public Consumer<InventoryClickEvent> onConfirmation(Player player, InventoryContents contents) {
 		return e -> {
-			if(e.getClick() == ClickType.LEFT ) {
-				if(MailBoxController.deleteData(player, this.getDataSource(), this.getData() ) ) {
+			if (e.getClick() == ClickType.LEFT) {
+				if (MailBoxController.deleteData(player, this.getDataSource(), this.getData())) {
 					this.returnToParent(player);
-					
+
 				} else {
 					player.closeInventory();
 				}
 			}
-			
+
 		};
 	}
 
@@ -53,10 +53,10 @@ public class DeletionDataInventory extends ConfirmationInventoryBuilder {
 
 	@Override
 	public void onUpdate(Player player, InventoryContents contents) {
-		if(update ) {
+		if (update) {
 			ItemData tempData = (ItemData) this.getData();
-			
-			if(tempData.isOutOfDate()) {
+
+			if (tempData.isOutOfDate()) {
 				MailBoxController.deleteItem(player, this.getDataSource(), tempData);
 				returnToParent(player);
 			}

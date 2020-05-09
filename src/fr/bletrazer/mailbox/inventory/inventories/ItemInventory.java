@@ -53,15 +53,18 @@ public class ItemInventory extends InventoryBuilder {
 			contents.set(4, 6, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§4§l" + CLEAN).build(), e -> {
 
 				if (e.getClick() == ClickType.LEFT) {
-					if (SQLConnection.getInstance().isConnected()) {
-						DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), this.getToShow().stream().collect(Collectors.toList()),
-								"§4§l" + LangManager.format(QUESTION_CLEAN, this.getToShow().size()), this, true);
-						deletionDatasInventory.openInventory(player);
+					if (getToShow() != null && !getToShow().isEmpty()) {
+						if (SQLConnection.getInstance().isConnected()) {
+							DeletionDatasInventory deletionDatasInventory = new DeletionDatasInventory(this.getDataSource(), this.getToShow().stream().collect(Collectors.toList()),
+									"§4§l" + LangManager.format(QUESTION_CLEAN, this.getToShow().size()), this, true);
+							deletionDatasInventory.openInventory(player);
 
-					} else {
-						MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
-						player.closeInventory();
-						return;
+						} else {
+							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+							player.closeInventory();
+							return;
+						}
+
 					}
 				}
 			}));
@@ -70,6 +73,13 @@ public class ItemInventory extends InventoryBuilder {
 	}
 
 	private void dynamicContent(Player player, InventoryContents contents) {
+        int state = contents.property("state", 0);
+        contents.setProperty("state", state + 1);
+
+        if(state % 20 != 0) {
+        	return;
+        }
+        
 		this.setToShow(DataManager.getTypeData(this.getDataSource(), ItemData.class));
 
 		ClickableItem[] clickableItems = new ClickableItem[getToShow().size()];
@@ -78,18 +88,18 @@ public class ItemInventory extends InventoryBuilder {
 			ItemData tempData = getToShow().get(index);
 
 			if (tempData.isOutOfDate()) {
-				MailBoxController.deleteItem(player, this.getDataSource(), tempData);
+				if(!MailBoxController.deleteItem(player, this.getDataSource(), tempData) ) {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+					player.closeInventory();
+				}
 			} else {
 				clickableItems[index] = ClickableItem.of(MailBoxInventoryHandler.generateItemRepresentation(tempData), e -> {
 					ClickType clickType = e.getClick();
 
 					if (clickType == ClickType.LEFT) {
 						if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
-							if (!MailBoxController.recoverItem(player, getDataSource(), tempData)) {
+							MailBoxController.recoverItem(player, getDataSource(), tempData);
 
-							} else if (!getToShow().isEmpty()) {
-								contents.set(4, 6, null);
-							}
 						} else {
 							MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 						}
@@ -121,9 +131,7 @@ public class ItemInventory extends InventoryBuilder {
 
 		this.dynamicContent(player, contents);
 
-		if (!getToShow().isEmpty()) {
-			deleteAllButton(player, contents);
-		}
+		deleteAllButton(player, contents);
 
 		contents.fillRow(3, ClickableItem.empty(new ItemStackBuilder(Material.BLACK_STAINED_GLASS_PANE).setName(" ").build()));
 
@@ -132,7 +140,7 @@ public class ItemInventory extends InventoryBuilder {
 		}
 
 		if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
-			contents.set(4, 2, generateRecoverAll(player, contents));
+			contents.set(4, 2, recoverAllButton(player, contents));
 		}
 
 		if (!pagination.isLast()) {
@@ -146,26 +154,20 @@ public class ItemInventory extends InventoryBuilder {
 		dynamicContent(player, contents);
 	}
 
-	private ClickableItem generateRecoverAll(Player player, InventoryContents contents) {
+	private ClickableItem recoverAllButton(Player player, InventoryContents contents) {
 		ItemStackBuilder itemStackBuilder = new ItemStackBuilder(Material.CHEST).setName("§e§l" + RETREIVE_ALL);
 
 		return ClickableItem.of(itemStackBuilder.build(), e -> {
 			if (e.getClick() == ClickType.LEFT) {
-				List<ItemData> dataList = getToShow();
-				dataList.sort(DataManager.ascendingDateComparator());
-				Boolean b = true;
+				if (getToShow() != null && !getToShow().isEmpty()) {
+					List<ItemData> dataList = getToShow();
+					dataList.sort(DataManager.descendingDateComparator().reversed());
 
-				if (!dataList.isEmpty()) {
 					for (ItemData itemData : dataList) {
 						if (!MailBoxController.recoverItem(player, this.getDataSource(), itemData)) {
-							b = false;
 							break;
 						}
 					}
-				}
-
-				if (b) {
-					contents.set(4, 6, null);
 				}
 			}
 		});

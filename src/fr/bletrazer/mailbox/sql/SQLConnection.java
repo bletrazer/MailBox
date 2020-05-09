@@ -26,70 +26,67 @@ public class SQLConnection {
 	}
 	
 	public void connect(String jdbc, String host, String database, String user, String password) {
-		if (!isConnected()) {
-			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connection"));
-			setJdbc(jdbc);
-			setHost(host);
-			setDatabase(database);
-			setUser(user);
-			setPassword(password);
+		Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connection"));
+		setJdbc(jdbc);
+		setHost(host);
+		setDatabase(database);
+		setUser(user);
+		setPassword(password);
 
-			try {
-				setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false", getUser(), getPassword()));
-				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connected"));
-				
-			} catch (SQLException e) {
-				Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_impossible_to_connect"));
-			}
+		try {
+			setConnection(DriverManager.getConnection(getJdbc() + getHost() + "/" + getDatabase() + "?useSSL=false", getUser(), getPassword()));
+			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connected"));
+			
+		} catch (SQLException e) {
+			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_impossible_to_connect"));
 		}
 	}
 	
 	public Boolean startTransaction() {
 		Boolean res = false;
 		try {
-			this.getConnection().setAutoCommit(false);
+			if(this.getConnection().getAutoCommit() ) {
+				this.getConnection().setAutoCommit(false);
+			}
 			res = true;
+			
 		} catch (SQLException e) {
-			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_sql"));
 			e.printStackTrace();
 		}
 		
 		return res;
 	}
 	
-	public void rollBack() {
-        try {
-        	if(this.isConnected() ) {
-	        	if(!this.getConnection().getAutoCommit() ) {
-	                Main.getInstance().getLogger().log(Level.SEVERE, "Transaction is being rolled back");
-	                this.getConnection().rollback();
-	                
-	        	}
-        	} else {
-        		Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
-        	}
-        } catch(SQLException excep) {
-            excep.printStackTrace();
-        }
+	public Boolean rollBack() {
+		Boolean res = false;
+
+		if (this.isConnected()) {
+			try {
+				if (!this.getConnection().getAutoCommit()) {
+					Main.getInstance().getLogger().log(Level.SEVERE, "Transaction is being rolled back");
+					this.getConnection().rollback();
+					res = true;
+
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return res;
 	}
 	
-	/*
-	 * Commit transaction and close the parametrized query
-	 */
-	public Boolean commit(PreparedStatement query) {
+	public Boolean commit() {
 		Boolean res = false;
 		
 		try {
 			this.getConnection().commit();
 			this.getConnection().setAutoCommit(true);
-			query.close();
-			
 			res = true;
 			
 		} catch (SQLException e) {
+			this.rollBack();
 			res = false;
-	        e.printStackTrace();
-	        
 
 	    }
 		
@@ -119,19 +116,20 @@ public class SQLConnection {
 		}
 	}
 
-	public boolean isConnected() {
-		boolean isConnected = false;
+	public Boolean isConnected() {
+		boolean res = false;
 
 		try {
 			PreparedStatement query = getConnection().prepareStatement("SELECT 1");
 			query.executeQuery();
 			query.close();
-			isConnected = true;
+			res = true;
+			
 		} catch (Exception exception) {
-			Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
+			exception.printStackTrace();
 		}
 
-		return isConnected;
+		return res;
 	}
 
 	public Connection getConnection() {

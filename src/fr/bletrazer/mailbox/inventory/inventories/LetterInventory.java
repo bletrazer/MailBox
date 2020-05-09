@@ -138,7 +138,7 @@ public class LetterInventory extends InventoryBuilder {
 		}
 
 		if (!this.getIsSortingByDecreasingDate()) {
-			this.getToShow().sort(DataManager.ascendingDateComparator());
+			this.getToShow().sort(DataManager.descendingDateComparator().reversed() );
 
 		}
 
@@ -146,13 +146,13 @@ public class LetterInventory extends InventoryBuilder {
 			if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.letter.delete.self") || player.hasPermission("mailbox.letter.delete.other")) {
 				contents.set(4, 4, ClickableItem.of(new ItemStackBuilder(Material.BARRIER).setName("§c§lSupprimer les lettres affichées.").build(), e -> {
 					if (e.getClick() == ClickType.LEFT) {
-						if(SQLConnection.getInstance().isConnected() ) {
+						if (SQLConnection.getInstance().isConnected()) {
 							DeletionDatasInventory inv = new DeletionDatasInventory(this.dataSource, getToShow().stream().collect(Collectors.toList()),
 									"§4§l" + LangManager.format(QUESTION_CLEAN, getToShow().size()), this, false);
 							inv.openInventory(player);
-	
+
 						} else {
-							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 							player.closeInventory();
 							return;
 						}
@@ -241,8 +241,7 @@ public class LetterInventory extends InventoryBuilder {
 	private ClickableItem generateNonReadLettersItem(Player player) {
 		List<LetterData> list = filterByReadState(DataManager.getTypeData(this.getDataSource(), LetterData.class), false);
 
-		ItemStack itemStack = new ItemStackBuilder(Material.BELL).setName("§e§l" + LangManager.format(NON_READ, list.size())).setAutoFormatingLore(MARK_ALL, 23).setStackSize(list.size(), false)
-				.build();
+		ItemStack itemStack = new ItemStackBuilder(Material.BELL).setName("§e§l" + LangManager.format(NON_READ, list.size())).setAutoFormatingLore(MARK_ALL, 23).setStackSize(list.size(), false).build();
 
 		Consumer<InventoryClickEvent> consumer = null;
 

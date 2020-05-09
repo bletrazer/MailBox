@@ -3,10 +3,8 @@ package fr.bletrazer.mailbox.sql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -101,42 +99,16 @@ public class LetterDataSQL extends DAO<LetterData> {
 	@Override
 	public List<LetterData> createAll(List<LetterData> list) {
 		List<LetterData> res = null;
-		PreparedStatement query = null;
+		Boolean transaction = SQLConnection.getInstance().startTransaction();
 
-		try {
-			Boolean transaction = SQLConnection.getInstance().startTransaction();
+		if (transaction) {
+			List<LetterData> temp = super.createAll(list);
 
-			if (transaction) {
-				query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
-				List<Data> tempDataList = DataSQL.getInstance().createAll(list.stream().collect(Collectors.toList()));
-
-				List<LetterData> tempLetterList = new ArrayList<>();
-
-				for (Integer index = 0; index < list.size(); index++) {
-					LetterData tempLetterData = list.get(index).clone();
-					Data tempData = tempDataList.get(index);
-
-					tempLetterData.setId(tempData.getId());
-					tempLetterData.setCreationDate(tempData.getCreationDate());
-
-					query.setLong(1, tempLetterData.getId());
-					query.setString(2, tempLetterData.getLetterType().name());
-					query.setString(3, toText(tempLetterData.getContent()));
-					query.setBoolean(4, tempLetterData.getIsRead());
-
-					query.execute();
-
-					tempLetterList.add(tempLetterData);
-
-				}
-
-				if (SQLConnection.getInstance().commit(query)) {
-					res = tempLetterList;
+			if (temp != null ) {
+				if(SQLConnection.getInstance().commit()) {
+					res = temp;
 				}
 			}
-		} catch (SQLException e) {
-			SQLConnection.getInstance().rollBack();
-			e.printStackTrace();
 		}
 
 		return res;
@@ -179,42 +151,69 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 
 	@Override
-	public LetterData update(LetterData obj) {
-		LetterData res = null;
-		try {
-			DataSQL.getInstance().update(obj);
-			PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET content = ?, type = ?, isRead = ? WHERE id = ?");
-			query.setString(1, toText(obj.getContent()));
-			query.setString(2, obj.getLetterType().name());
-			query.setBoolean(3, obj.getIsRead());
-			query.setLong(4, obj.getId());
+	public Boolean update(LetterData obj) {
+		Boolean res = null;
 
-			query.executeUpdate();
-			query.close();
-			res = obj;
+		if (SQLConnection.getInstance().startTransaction()) {
+			if (DataSQL.getInstance().update(obj) ) {
+				try {
+					PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET content = ?, type = ?, isRead = ? WHERE id = ?");
+					query.setString(1, toText(obj.getContent()));
+					query.setString(2, obj.getLetterType().name());
+					query.setBoolean(3, obj.getIsRead());
+					query.setLong(4, obj.getId());
 
-		} catch (SQLException e) {
-			e.printStackTrace();
+					query.executeUpdate();
+					query.close();
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			if (SQLConnection.getInstance().commit()) {
+				res = true;
+			}
+
 		}
 
 		return res;
 	}
 
 	@Override
-	public Boolean delete(LetterData obj) {
+	public Boolean delete(Long id) {
 		Boolean res = false;
 
-		try {
-			if (DataSQL.getInstance().delete(obj)) {
-				PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-				query.setLong(1, obj.getId());
-				query.execute();
-				query.close();
+		if (SQLConnection.getInstance().startTransaction()) {
+			if (DataSQL.getInstance().delete(id)) {
+				try {
+					PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+					query.setLong(1, id);
+					query.execute();
+					query.close();
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
+				if(SQLConnection.getInstance().commit() ) {
+					res = true;
+				}
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	public Boolean deleteAll(List<Long> list) {
+		Boolean res = false;
+
+		if (SQLConnection.getInstance().startTransaction() ) {
+			if (super.deleteAll(list) && SQLConnection.getInstance().commit()) {
 				res = true;
 			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 
 		return res;

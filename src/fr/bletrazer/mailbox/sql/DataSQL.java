@@ -9,12 +9,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 
-import fr.bletrazer.mailbox.Main;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
-import fr.bletrazer.mailbox.utils.LangManager;
 
 public class DataSQL extends DAO<Data> {
 
@@ -109,43 +106,6 @@ public class DataSQL extends DAO<Data> {
 	}
 
 	@Override
-	public List<Data> createAll(List<Data> list) {
-		List<Data> res = null;
-		PreparedStatement query = null;
-
-		try {
-			query = this.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-			List<Data> temp = new ArrayList<>();
-
-			for (Integer index = 0; index < list.size(); index++) {
-				Data tempData = list.get(index).clone();
-				tempData.setCreationDate(Timestamp.from(Instant.now()));
-				query.setString(1, tempData.getOwnerUuid().toString());
-				query.setString(2, tempData.getAuthor());
-				query.setString(3, tempData.getObject());
-				query.setTimestamp(4, tempData.getCreationDate());
-
-				query.execute();
-
-				ResultSet tableKeys = query.getGeneratedKeys();
-				if (tableKeys.next()) {
-					tempData.setId(tableKeys.getLong(1));
-				}
-
-				temp.add(tempData);
-
-			}
-
-			res = temp;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return res;
-	}
-
-	@Override
 	public Data find(Long i) {
 		Data res = null;
 
@@ -172,8 +132,9 @@ public class DataSQL extends DAO<Data> {
 	}
 
 	@Override
-	public Data update(Data obj) {
-		Data res = null;
+	public Boolean update(Data obj) {
+		Boolean res = false;
+
 		try {
 			PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, author = ?, object = ?, creationDate = ? WHERE id = ?");
 			query.setString(1, obj.getOwnerUuid().toString());
@@ -184,7 +145,7 @@ public class DataSQL extends DAO<Data> {
 
 			query.executeUpdate();
 			query.close();
-			res = obj;
+			res = true;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -194,16 +155,12 @@ public class DataSQL extends DAO<Data> {
 	}
 
 	@Override
-	public Boolean delete(Data obj) {
+	public Boolean delete(Long id) {
 		Boolean res = false;
 
 		try {
-			if (!SQLConnection.getInstance().isConnected()) {
-				Main.getInstance().getLogger().log(Level.SEVERE, LangManager.getValue("string_error_database_connection"));
-			}
-			
 			PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, obj.getId());
+			query.setLong(1, id);
 			query.execute();
 			query.close();
 			res = true;

@@ -42,7 +42,7 @@ public class Main extends JavaPlugin {
 
 		this.getCommand(Cmd_Mailbox.CMD_LABEL).setExecutor(new Cmd_Mailbox());
 		
-		if (SQLConnection.getInstance().isConnected() ) {
+		if (SQLConnection.getInstance().getConnection() != null && SQLConnection.getInstance().isConnected() ) {
 			manager = new InventoryManager(this);
 			manager.init();
 			PlayerManager.getInstance().init();

@@ -1,6 +1,5 @@
 package fr.bletrazer.mailbox.DataManager;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,11 @@ import fr.bletrazer.mailbox.utils.MessageUtils;
 
 public class MailBoxController {
 	private static final String NOT_ENOUGHT_SPACE = LangManager.getValue("string_not_enought_space");
-	
+
+	/*
+	 * Local
+	 * 
+	 */
 	private static DataHolder getHolderFromDataBase(UUID uuid) {
 		DataHolder res = new DataHolder(uuid, new ArrayList<>());
 		List<Data> dataList = DataSQL.getInstance().getDataList(uuid);
@@ -67,20 +70,33 @@ public class MailBoxController {
 		return res;
 	}
 
+	/*
+	 * 
+	 * Letters
+	 * 
+	 */
+
 	public static Boolean sendLetter(Player player, LetterData letterData) {
 		Boolean res = false;
 		LetterData temp = LetterDataSQL.getInstance().create(letterData);
 
 		if (temp != null) {
 			DataHolder holder = DataManager.getDataHolder(temp.getOwnerUuid());
-			
+
 			if (holder != null) {
 				holder.addData(temp);
 			}
 
+			// notification
+			Player recipient = Bukkit.getPlayer(letterData.getOwnerUuid());
+			if (recipient != null) {
+				MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", letterData.getAuthor()));
+
+			}
+
 			res = true;
 		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 			player.closeInventory();
 		}
 
@@ -107,107 +123,53 @@ public class MailBoxController {
 						Player recipient = Bukkit.getPlayer(letter.getOwnerUuid());
 
 						if (recipient != null) {
-							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", letter.getAuthor()) );
+							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", letter.getAuthor()));
 						}
 					}
 
 					res = true;
 
 				} else {
-					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 					player.closeInventory();
 				}
 
 			} else {
-				LetterData toSend = letters.get(0);
-				
-				if (sendLetter(player, toSend)) {
-					// notification
-					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
+				res = sendLetter(player, letters.get(0));
 
-					if (recipient != null) {
-						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", toSend.getAuthor()) );
-
-					}
-					res = true;
-					
-				}
 			}
 		}
 
 		return res;
 	}
 
-	public static Boolean sendItem(Player player, ItemData itemData) {
+	public static Boolean deleteLetter(Player player, DataHolder holder, LetterData letterData) {
 		Boolean res = false;
-		ItemData temp = ItemDataSQL.getInstance().create(itemData);
 
-		if (temp != null) {
-			DataHolder holder = DataManager.getDataHolder(temp.getOwnerUuid());
-
-			if (holder != null) {
-				holder.addData(temp);
-			}
-
+		if (LetterDataSQL.getInstance().delete(letterData.getId())) {
+			holder.removeData(letterData.getId());
 			res = true;
 
 		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 			player.closeInventory();
 		}
 
 		return res;
-
 	}
 
-	public static Boolean sendItems(Player player, List<ItemData> items) {
-		Boolean res = false;
+	public static void readLetter(Player player, LetterData letterData) {
+		player.openBook(getBookView(letterData));
 
-		if (items != null && !items.isEmpty()) {
-			if (items.size() > 1) {
-				List<ItemData> sent = ItemDataSQL.getInstance().createAll(items);
-
-				if (sent != null) {
-					for (ItemData item : sent) {
-						DataHolder holder = DataManager.getDataHolder(item.getOwnerUuid());
-
-						if (holder != null) {
-							holder.addData(item);
-						}
-
-						// notification
-						Player recipient = Bukkit.getPlayer(item.getOwnerUuid());
-
-						if (recipient != null) {
-							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_item_notification", item.getAuthor()) );
-						}
-					}
-					res = true;
-
-				} else {
-					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
-					player.closeInventory();
-				}
-
-			} else {
-				ItemData toSend = items.get(0);
-				if (sendItem(player, toSend)) {
-					// notification
-					Player recipient = Bukkit.getPlayer(toSend.getOwnerUuid());
-
-					if (recipient != null) {
-						MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_item_notification", toSend.getAuthor()) );
-
-					}
-					res = true;
-					
-				}
+		if (letterData.getOwnerUuid().equals(player.getUniqueId())) {
+			letterData.setIsRead(true);
+			if (SQLConnection.getInstance().isConnected()) {
+				LetterDataSQL.getInstance().update(letterData);
 			}
-		}
 
-		return res;
+		}
 	}
-	
+
 	private static ItemStack getBookView(LetterData letterData) {
 		StringBuilder letterHead = new StringBuilder();
 		letterHead.append(String.format("§l%s:§r %s\n", LangManager.getValue("string_author"), letterData.getAuthor()));
@@ -232,87 +194,102 @@ public class MailBoxController {
 		return book;
 	}
 
-	public static void readLetter(Player player, LetterData letterData) {
-		player.openBook(getBookView(letterData));
+	/*
+	 * 
+	 * Items
+	 */
 
-		if (letterData.getOwnerUuid().equals(player.getUniqueId())) {
-			letterData.setIsRead(true);
-			if(SQLConnection.getInstance().isConnected() ) {
-				LetterDataSQL.getInstance().update(letterData);
+	public static Boolean sendItem(Player player, ItemData itemData) {
+		Boolean res = false;
+		ItemData temp = ItemDataSQL.getInstance().create(itemData);
+
+		if (temp != null) {
+			DataHolder holder = DataManager.getDataHolder(temp.getOwnerUuid());
+
+			if (holder != null) {
+				holder.addData(temp);
 			}
 
-		}
-	}
+			Player recipient = Bukkit.getPlayer(itemData.getOwnerUuid());
+			if (recipient != null) {
+				MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_letter_notification", itemData.getAuthor()));
 
-	public static Boolean deleteLetter(Player player, DataHolder holder, LetterData letterData) {
-		Boolean res = false;
-		
-		if(LetterDataSQL.getInstance().delete(letterData) ) {
-			holder.removeData(letterData.getId() );
+			}
+
 			res = true;
-			
+
 		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 			player.closeInventory();
 		}
-		
+
 		return res;
+
 	}
 
-	public static Boolean deleteData(Player player, DataHolder holder, Data data) {
+	public static Boolean sendItems(Player player, List<ItemData> items) {
 		Boolean res = false;
-		
-		if (data instanceof ItemData) {
-			res = deleteItem(player, holder, (ItemData) data);
 
-		} else if (data instanceof LetterData) {
-			res = deleteLetter(player, holder, (LetterData) data);
-		}
-		
-		return res;
-	}
-	
-	public static Boolean deleteDatas(Player player, DataHolder holder, List<Data> dataList) {
-		Boolean res = true;
-		
-		if(SQLConnection.getInstance().startTransaction() ) {
-			
-			for(Data data : dataList) {
-				if(!deleteData(player, holder, data) ) {
-					res = false;
-					break;
-				}
-			}
-			
-			if(res ) {
-				try {
-					if(SQLConnection.getInstance().isConnected() ) {
-						SQLConnection.getInstance().getConnection().commit();
-						SQLConnection.getInstance().getConnection().setAutoCommit(true);
-					} else {
-						
+		if (items != null && !items.isEmpty()) {
+			if (items.size() > 1) {
+				List<ItemData> sent = ItemDataSQL.getInstance().createAll(items);
+
+				if (sent != null) {
+					for (ItemData item : sent) {
+						DataHolder holder = DataManager.getDataHolder(item.getOwnerUuid());
+
+						if (holder != null) {
+							holder.addData(item);
+						}
+
+						// notification
+						Player recipient = Bukkit.getPlayer(item.getOwnerUuid());
+						if (recipient != null) {
+							MessageUtils.sendMessage(recipient, MessageLevel.NOTIFICATION, LangManager.getValue("string_receive_item_notification", item.getAuthor()));
+						}
 					}
-				} catch (SQLException e) {
-					e.printStackTrace();
+					res = true;
+
+				} else {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+					player.closeInventory();
 				}
+
+			} else {
+				res = sendItem(player, items.get(0));
 			}
-		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
-			res = false;
 		}
-		
+
 		return res;
 	}
+
+	public static Boolean deleteItem(Player player, DataHolder holder, ItemData itemData) {
+		Boolean res = false;
+
+		if (ItemDataSQL.getInstance().delete(itemData.getId())) {
+			holder.removeData(itemData.getId());
+			res = true;
+
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+			player.closeInventory();
+		}
+
+		return res;
+	}
+
 	public static Boolean recoverItem(Player player, DataHolder holder, ItemData itemData) {
 		Boolean success = false;
-		
+
 		if (player.getInventory().firstEmpty() >= 0) {
-			if(deleteItem(player, holder, itemData) ) {
-				player.getInventory().addItem(itemData.getItem() );
+			if (deleteItem(player, holder, itemData)) {
+				player.getInventory().addItem(itemData.getItem());
 				success = true;
-				
+
+			} else {
+				MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+				player.closeInventory();
 			}
-			
 
 		} else {
 			MessageUtils.sendMessage(player, MessageLevel.ERROR, NOT_ENOUGHT_SPACE);
@@ -320,19 +297,38 @@ public class MailBoxController {
 
 		return success;
 	}
+	
+	/*
+	 * generic
+	 */
 
-	public static Boolean deleteItem(Player player, DataHolder holder, ItemData itemData) {
+	public static Boolean deleteData(Player player, DataHolder holder, Data data) {
 		Boolean res = false;
-		
-		if(ItemDataSQL.getInstance().delete(itemData) ) {
-			holder.removeData(itemData.getId() );
+
+		if (data instanceof ItemData) {
+			res = deleteItem(player, holder, (ItemData) data);
+
+		} else if (data instanceof LetterData) {
+			res = deleteLetter(player, holder, (LetterData) data);
+		}
+
+		return res;
+	}
+	
+	public static Boolean deleteDatas(Player player, DataHolder holder, List<Long> idList) {
+		Boolean res = false;
+
+		if (ItemDataSQL.getInstance().deleteAll(idList)) {
+			for (Long id : idList) {
+				holder.removeData(id);
+			}
 			res = true;
-			
+
 		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player") );
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
 			player.closeInventory();
 		}
-		
+
 		return res;
 	}
 }

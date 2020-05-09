@@ -29,7 +29,7 @@ public class DataManager {
 				res.add(c.cast(data));
 			}
 		}
-		res.sort(ascendingDateComparator().reversed());
+		res.sort(descendingDateComparator());
 		return res;
 	}
 
@@ -46,7 +46,7 @@ public class DataManager {
 		}
 	}
 
-	public static Comparator<Data> ascendingDateComparator() {
+	public static Comparator<Data> descendingDateComparator() {
 		return new Comparator<Data>() {
 
 			@Override
@@ -54,7 +54,7 @@ public class DataManager {
 				Timestamp date1 = arg1.getCreationDate();
 				Timestamp date2 = arg2.getCreationDate();
 				
-				return date1.compareTo(date2);
+				return date2.compareTo(date1);
 			}
 		};
 	}
