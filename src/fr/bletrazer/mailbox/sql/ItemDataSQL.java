@@ -87,27 +87,32 @@ public class ItemDataSQL extends DAO<ItemData> {
 	public ItemData create(ItemData obj) {
 		ItemData res = null;
 
-		try {
+		if (SQLConnection.getInstance().startTransaction()) {
 			ItemData temp = obj.clone();
 			Data data = DataSQL.getInstance().create(temp);
 
 			if (data != null) {
 				temp.setId(data.getId());
 				temp.setCreationDate(data.getCreationDate());
+				
+				try {
+					PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, durationInSeconds, itemStack) VALUES(?, ?, ?)");
+					query.setLong(1, temp.getId());
+					query.setLong(2, temp.getDuration().getSeconds());
+					query.setString(3, toBase64(temp.getItem()));
 
-				PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, durationInSeconds, itemStack) VALUES(?, ?, ?)");
-				query.setLong(1, temp.getId());
-				query.setLong(2, temp.getDuration().getSeconds());
-				query.setString(3, toBase64(temp.getItem()));
+					query.execute();
+					query.close();
 
-				query.execute();
-				query.close();
-				res = temp;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 
 			}
 
-		} catch (SQLException e) {
-			e.printStackTrace();
+			if (temp != null && SQLConnection.getInstance().commit()) {
+				res = temp;
+			}
 		}
 
 		return res;
@@ -117,9 +122,7 @@ public class ItemDataSQL extends DAO<ItemData> {
 	public List<ItemData> createAll(List<ItemData> list) {
 		List<ItemData> res = null;
 
-		Boolean transaction = SQLConnection.getInstance().startTransaction();
-
-		if (transaction) {
+		if (SQLConnection.getInstance().startTransaction()) {
 			List<ItemData> temp = super.createAll(list);
 
 			if (temp != null && SQLConnection.getInstance().commit()) {
@@ -163,7 +166,7 @@ public class ItemDataSQL extends DAO<ItemData> {
 		Boolean res = false;
 
 		if (SQLConnection.getInstance().startTransaction()) {
-			if (DataSQL.getInstance().update(obj) ) {
+			if (DataSQL.getInstance().update(obj)) {
 				try {
 					PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET itemStack = ?, durationInSeconds = ? WHERE id = ?");
 					query.setString(1, toBase64(obj.getItem()));
@@ -192,8 +195,8 @@ public class ItemDataSQL extends DAO<ItemData> {
 	public Boolean delete(Long id) {
 		Boolean res = false;
 
-		if (SQLConnection.getInstance().startTransaction() ) {
-			if (DataSQL.getInstance().delete(id) ) {
+		if (SQLConnection.getInstance().startTransaction()) {
+			if (DataSQL.getInstance().delete(id)) {
 				try {
 					PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
 					query.setLong(1, id);
@@ -204,11 +207,11 @@ public class ItemDataSQL extends DAO<ItemData> {
 					e.printStackTrace();
 				}
 			}
-			
-			if(SQLConnection.getInstance().commit() ) {
+
+			if (SQLConnection.getInstance().commit()) {
 				res = true;
 			}
-			
+
 		}
 
 		return res;

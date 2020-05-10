@@ -36,7 +36,7 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 
 	/**
-	 * Transforme une liste de string en string unique et les s�pare par un "\n"
+	 * Transforme une liste de string en string unique et les séparé par " #-# "
 	 */
 	public String toText(List<String> list) {
 		StringBuilder sb = new StringBuilder();
@@ -152,7 +152,7 @@ public class LetterDataSQL extends DAO<LetterData> {
 
 	@Override
 	public Boolean update(LetterData obj) {
-		Boolean res = null;
+		Boolean res = false;
 
 		if (SQLConnection.getInstance().startTransaction()) {
 			if (DataSQL.getInstance().update(obj) ) {

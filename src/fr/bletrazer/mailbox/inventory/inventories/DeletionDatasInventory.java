@@ -55,6 +55,13 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 
 	@Override
 	public void onUpdate(Player player, InventoryContents contents) {
+        int state = contents.property("state", 0);
+        contents.setProperty("state", state + 1);
+
+        if(state % 20 != 0) {
+        	return;
+        }
+		
 		if (this.doUpdate) {
 			Iterator<Data> it = this.getDataList().iterator();
 

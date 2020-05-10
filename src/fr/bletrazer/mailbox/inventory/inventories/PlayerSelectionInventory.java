@@ -71,6 +71,13 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 
 	@Override
 	public void updateInventory(Player player, InventoryContents contents) {
+        int state = contents.property("state", 0);
+        contents.setProperty("state", state + 1);
+
+        if(state % 20 != 0) {
+        	return;
+        }
+        
 		contents.set(0, 4, ClickableItem.of(new ItemStackBuilder(Material.REDSTONE)
 				.setName("§f§l"+DISPLAYED_PLAYERS+":")
 				.addLores(this.getIdentifiersList().getPreviewLore())

@@ -17,6 +17,13 @@ public class Main extends JavaPlugin {
 	private static InventoryManager manager;
 	
 	/*
+	 * TODO read state non enregistré dans la db quand on modifie tout en meme temps -> 
+	 *  -> faire une method updateAll dans SQL
+	 *  quand on recup un item -> actualize inventaire + ne pas pouvoir recup l'item si deja été récup (anti spam bug)
+	 * 
+	 * 
+	 * 
+	 * 
 	 * TODO menu lettre non envoyés/en cours *-}
 	 */
 	
