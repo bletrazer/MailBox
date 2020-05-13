@@ -3,19 +3,21 @@ package fr.bletrazer.mailbox.sql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.LetterType;
-import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 
-public class LetterDataSQL extends DAO<LetterData> {
-	private static final String TABLE_NAME = "MailBox_LetterData";
-	private static LetterDataSQL INSTANCE = new LetterDataSQL();
+public class LetterDataSQL extends BaseSQL<LetterData> {
+	private final String TABLE_NAME = "MailBox_LetterData";
+	private static final LetterDataSQL INSTANCE = new LetterDataSQL();
 
 	public static LetterDataSQL getInstance() {
 		return INSTANCE;
@@ -23,15 +25,17 @@ public class LetterDataSQL extends DAO<LetterData> {
 
 	private LetterDataSQL() {
 		super();
-
-		try {
-			PreparedStatement query = this.getConnection().prepareStatement(
-					"CREATE TABLE IF NOT EXISTS	" + TABLE_NAME + " (id BIGINT NOT NULL, type VARCHAR(255) NOT NULL, content TEXT NOT NULL, isRead BOOLEAN NOT NULL DEFAULT '0', PRIMARY KEY(id))");
-			query.executeUpdate();
-			query.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
+		
+		if(this.getSqlConnection().isConnected() ) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection()
+						.prepareStatement("CREATE TABLE IF NOT EXISTS	" + TABLE_NAME + " (id BIGINT, uuid VARCHAR(255), type VARCHAR(255), content TEXT, isRead BOOLEAN DEFAULT '0', PRIMARY KEY(id))");
+				query.executeUpdate();
+				query.close();
+	
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -54,151 +58,55 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 
 	/**
-	 * Transforme un String en List en utilisant "\n" comme s�parateur
+	 * Transforme un String en List en utilisant "#-#" comme séparateur
 	 */
 	private List<String> fromText(String str) {
 		return Arrays.asList(StringUtils.split(str, "#-#"));
 	}
 
-	/*
-	 * Format de la table: [id: int] [type: String(LetterType name)] [content:
-	 * String] [isRead: Boolean]
-	 * 
-	 */
-
 	@Override
-	public LetterData create(LetterData obj) {
+	protected LetterData onCreate(LetterData obj) {
 		LetterData res = null;
+		LetterData temp = obj.clone();
 
-		try {
-			LetterData temp = obj.clone();
-			Data data = DataSQL.getInstance().create(temp);
+		Data data = DataSQL.getInstance().create(temp);
 
-			if (data != null) {
-				temp.setId(data.getId());
-				temp.setCreationDate(data.getCreationDate());
+		if (data != null) {
+			temp.setId(data.getId());
+			temp.setCreationDate(data.getCreationDate());
 
-				PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?)");
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?, ?)");
 				query.setLong(1, temp.getId());
-				query.setString(2, temp.getLetterType().name());
-				query.setString(3, toText(temp.getContent()));
-				query.setBoolean(4, temp.getIsRead());
+				query.setString(2, obj.getOwnerUuid().toString());
+				query.setString(3, temp.getLetterType().name());
+				query.setString(4, toText(temp.getContent()));
+				query.setBoolean(5, temp.getIsRead());
 
 				query.execute();
 				query.close();
-
+				
 				res = temp;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return res;
-	}
-
-	@Override
-	public List<LetterData> createAll(List<LetterData> list) {
-		List<LetterData> res = null;
-		Boolean transaction = SQLConnection.getInstance().startTransaction();
-
-		if (transaction) {
-			List<LetterData> temp = super.createAll(list);
-
-			if (temp != null ) {
-				if(SQLConnection.getInstance().commit()) {
-					res = temp;
-				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		}
 
 		return res;
 	}
-
-	/*
-	 * table name format ?: - [id: int] [type: String(LetterType name)] [content:
-	 * String] [isRead: Boolean]
-	 * 
-	 */
-
+	
 	@Override
-	public LetterData find(Long i) {
+	public LetterData create(LetterData letterData) {
 		LetterData res = null;
 
-		try {
-			PreparedStatement query = super.getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, i);
-			ResultSet resultset = query.executeQuery();
+		if (this.getSqlConnection().startTransaction()) {
+			System.out.println("create 103 null ?" + (letterData == null));
+			LetterData temp = this.onCreate(letterData);
 
-			if (resultset.next()) {
-				Data data = DataSQL.getInstance().find(i);
-				LetterType type = LetterType.valueOf(resultset.getString("type"));
-				List<String> content = fromText(resultset.getString("content"));
-				Boolean isRead = resultset.getBoolean("isRead");
-
-				if (data != null) {
-					res = new LetterDataFactory(data, type, content, isRead);
-
-				}
-
-			}
-			query.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return res;
-	}
-
-	@Override
-	public Boolean update(LetterData obj) {
-		Boolean res = false;
-
-		if (SQLConnection.getInstance().startTransaction()) {
-			if (DataSQL.getInstance().update(obj) ) {
-				try {
-					PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET content = ?, type = ?, isRead = ? WHERE id = ?");
-					query.setString(1, toText(obj.getContent()));
-					query.setString(2, obj.getLetterType().name());
-					query.setBoolean(3, obj.getIsRead());
-					query.setLong(4, obj.getId());
-
-					query.executeUpdate();
-					query.close();
-
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-			if (SQLConnection.getInstance().commit()) {
-				res = true;
-			}
-
-		}
-
-		return res;
-	}
-
-	@Override
-	public Boolean delete(Long id) {
-		Boolean res = false;
-
-		if (SQLConnection.getInstance().startTransaction()) {
-			if (DataSQL.getInstance().delete(id)) {
-				try {
-					PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-					query.setLong(1, id);
-					query.execute();
-					query.close();
-
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				
-				if(SQLConnection.getInstance().commit() ) {
-					res = true;
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
 				}
 			}
 		}
@@ -207,12 +115,219 @@ public class LetterDataSQL extends DAO<LetterData> {
 	}
 	
 	@Override
-	public Boolean deleteAll(List<Long> list) {
+	public List<LetterData> createAll(List<LetterData> dataList){
+		List<LetterData> res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			List<LetterData> temp = new ArrayList<>();
+
+			for (LetterData obj : dataList) {
+				LetterData TTemp = this.onCreate(obj);
+
+				if (TTemp == null) {
+					temp = null;
+					break;
+
+				} else {
+					temp.add(TTemp);
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+
+	@Override
+	protected List<LetterData> onFind(UUID uuid) {
+		List<LetterData> res = null;
+		List<LetterData> temp = new ArrayList<>();
+		List<Data> dataList = DataSQL.getInstance().onFind(uuid);
+
+		if (dataList != null) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE uuid = ?");
+				query.setString(1, uuid.toString());
+				ResultSet resultset = query.executeQuery();
+
+				while (resultset.next()) {
+					LetterType type = LetterType.valueOf(resultset.getString("type"));
+					List<String> content = fromText(resultset.getString("content"));
+					Boolean isRead = resultset.getBoolean("isRead");
+					Long id = resultset.getLong("id");
+
+					Data tData = dataList.stream().filter(e -> e.getId() == id).findAny().orElse(new DataFactory());
+
+					temp.add(new LetterData(tData, type, content, isRead));
+
+				}
+
+				query.close();
+				
+				res = temp;
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	public List<LetterData> find(UUID uuid){
+		List<LetterData> res = null;
+
+		if (this.getSqlConnection().isConnected()) {
+			List<LetterData> temp = this.onFind(uuid);
+
+			if (temp != null) {
+				res = temp;
+			}
+
+		}
+
+		return res;
+	}
+	
+	@Override
+	protected LetterData onUpdate(Long id, LetterData obj) {
+		LetterData res = null;
+		LetterData temp = obj.clone();
+		Data uData = DataSQL.getInstance().onUpdate(id, obj);
+
+		if (uData != null) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, content = ?, type = ?, isRead = ? WHERE id = ?");
+				query.setString(1, obj.getOwnerUuid().toString());
+				query.setString(2, toText(obj.getContent()));
+				query.setString(3, obj.getLetterType().name());
+				query.setBoolean(4, obj.getIsRead());
+				query.setLong(5, id);
+
+				query.executeUpdate();
+				query.close();
+				temp.setId(id);
+				
+				res = temp;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return res;
+	}
+	
+	@Override
+	public LetterData update(Long id, LetterData letterData) {
+		LetterData res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			LetterData temp = this.onUpdate(id, letterData);
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+
+		}
+
+		return res;
+	}
+	
+	@Override
+	public List<LetterData> updateAll(List<LetterData> dataList){
+		List<LetterData> res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			List<LetterData> temp = new ArrayList<>();
+
+			for (LetterData obj : dataList) {
+				LetterData tTemp = this.onUpdate(obj.getId(), obj);
+
+				if (tTemp != null) {
+					temp.add(tTemp);
+
+				} else {
+					temp = null;
+					break;
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+
+	@Override
+	protected Boolean onDelete(LetterData obj) {
 		Boolean res = false;
 
-		if (SQLConnection.getInstance().startTransaction() ) {
-			if (super.deleteAll(list) && SQLConnection.getInstance().commit()) {
+		if (DataSQL.getInstance().delete(obj)) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+				query.setLong(1, obj.getId());
+				query.execute();
+				query.close();
 				res = true;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	public Boolean delete(LetterData letterData) {
+		Boolean res = false;
+
+		if (this.getSqlConnection().startTransaction()) {
+			if (this.onDelete(letterData)) {
+				if (this.getSqlConnection().commit()) {
+					res = true;
+
+				}
+			}
+		}
+		return res;
+	}
+	
+	@Override
+	public Boolean deleteAll(List<LetterData> dataList) {
+		Boolean res = false;
+
+		if (this.getSqlConnection().startTransaction()) {
+			Boolean temp = true;
+
+			for (LetterData obj : dataList) {
+				Boolean TTemp = this.onDelete(obj);
+
+				if (!TTemp) {
+					temp = false;
+					break;
+
+				}
+			}
+
+			if (temp) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
 			}
 		}
 

@@ -13,76 +13,37 @@ import java.util.UUID;
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 
-public class DataSQL extends DAO<Data> {
-
-	private static final String TABLE_NAME = "MailBox_Data";
-
-	public DataSQL() {
-		super();
-
-		try {
-			PreparedStatement query = this.getConnection().prepareStatement(
-					"CREATE TABLE IF NOT EXISTS	" + TABLE_NAME + " (id BIGINT NOT NULL AUTO_INCREMENT, uuid VARCHAR(255), author VARCHAR(255), object VARCHAR(255), creationDate TIMESTAMP, PRIMARY KEY(id))");
-			query.executeUpdate();
-			query.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private static DataSQL INSTANCE = new DataSQL();
+public class DataSQL extends BaseSQL<Data> {
+	protected final String TABLE_NAME = "MailBox_Data";
+	private static final DataSQL INSTANCE = new DataSQL();
 
 	public static DataSQL getInstance() {
 		return INSTANCE;
 	}
 
-	/*
-	 * table name format ?: - [id: int] [uuid: String] [author: String] [object:
-	 * String] [creationDate: Date]
-	 * 
-	 */
+	public DataSQL() {
+		if (this.getSqlConnection().isConnected()) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS	" + TABLE_NAME
+						+ " (id BIGINT NOT NULL AUTO_INCREMENT, uuid VARCHAR(255), author VARCHAR(255), object VARCHAR(255), creationDate TIMESTAMP, PRIMARY KEY(id))");
+				query.executeUpdate();
+				query.close();
 
-	/**
-	 * Récupère la liste de data associé a l'uuid en paramètre
-	 */
-	public List<Data> getDataList(UUID uuid) {
-		List<Data> res = new ArrayList<>();
-
-		try {
-			PreparedStatement query = getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE uuid = ?");
-			query.setString(1, uuid.toString());
-			ResultSet rs = query.executeQuery();
-
-			while (rs.next()) {
-				Long tempId = rs.getLong("id");
-				UUID tempUuid = UUID.fromString(rs.getString("uuid"));
-				String tempAuthor = rs.getString("author");
-				String tempObject = rs.getString("object");
-				Timestamp tempCreationDate = rs.getTimestamp("creationDate");
-
-				Data tempData = new DataFactory(tempId, tempUuid, tempAuthor, tempObject, tempCreationDate);
-				res.add(tempData);
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-
-			query.close();
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-
 		}
-
-		return res;
 	}
 
 	@Override
-	public Data create(Data obj) {
+	protected Data onCreate(Data obj) {
 		Data res = null;
+		Data temp = obj.clone();
+		temp.setCreationDate(Timestamp.from(Instant.now()));
 
 		try {
-			DataFactory temp = new DataFactory(null, obj.getOwnerUuid(), obj.getAuthor(), obj.getObject(), Timestamp.from(Instant.now()));
-			PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (uuid, author, object, creationDate) VALUES(?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
 			query.setString(1, temp.getOwnerUuid().toString());
 			query.setString(2, temp.getAuthor());
 			query.setString(3, temp.getObject());
@@ -104,25 +65,73 @@ public class DataSQL extends DAO<Data> {
 
 		return res;
 	}
-
+	
 	@Override
-	public Data find(Long i) {
+	public Data create(Data obj) {
 		Data res = null;
 
+		if (this.getSqlConnection().startTransaction()) {
+			Data temp = this.onCreate(obj);
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	public List<Data> createAll(List<Data> dataList){
+		List<Data> res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			List<Data> temp = new ArrayList<>();
+
+			for (Data obj : dataList) {
+				Data TTemp = this.onCreate(obj);
+
+				if (TTemp == null) {
+					temp = null;
+					break;
+
+				} else {
+					temp.add(TTemp);
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+
+	@Override
+	protected List<Data> onFind(UUID uuid) {
+		List<Data> res = null;
+		List<Data> temp = new ArrayList<>();
+
 		try {
-			PreparedStatement query = super.getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, i);
+			PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE uuid = ?");
+			query.setString(1, uuid.toString());
 			ResultSet resultset = query.executeQuery();
 
-			if (resultset.next()) {
-				UUID uuid = UUID.fromString(resultset.getString("uuid"));
+			while (resultset.next()) {
+				Long id = resultset.getLong("id");
 				String author = resultset.getString("author");
 				String object = resultset.getString("object");
 				Timestamp creationDate = resultset.getTimestamp("creationDate");
-				res = new DataFactory(i, uuid, author, object, creationDate);
 
+				temp.add(new DataFactory(id, uuid, author, object, creationDate));
 			}
 			query.close();
+			res = temp;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -130,20 +139,104 @@ public class DataSQL extends DAO<Data> {
 
 		return res;
 	}
+	
+	@Override
+	public List<Data> find(UUID uuid){
+		List<Data> res = null;
+
+		if (this.getSqlConnection().isConnected()) {
+			List<Data> temp = this.onFind(uuid);
+
+			if (temp != null) {
+				res = temp;
+			}
+
+		}
+
+		return res;
+	}
 
 	@Override
-	public Boolean update(Data obj) {
-		Boolean res = false;
+	protected Data onUpdate(Long id, Data obj) {
+		Data res = null;
+		Data temp = obj.clone();
 
 		try {
-			PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, author = ?, object = ?, creationDate = ? WHERE id = ?");
+			PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, author = ?, object = ?, creationDate = ? WHERE id = ?");
 			query.setString(1, obj.getOwnerUuid().toString());
 			query.setString(2, obj.getAuthor());
 			query.setString(3, obj.getObject());
 			query.setTimestamp(4, obj.getCreationDate());
-			query.setLong(5, obj.getId());
+			query.setLong(5, id);
 
 			query.executeUpdate();
+			query.close();
+
+			temp.setId(id);
+			res = temp;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return res;
+	}
+	
+	@Override
+	public Data update(Long id, Data data) {
+		Data res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			Data temp = this.onUpdate(id, data);
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+
+		}
+
+		return res;
+	}
+	
+	@Override
+	public List<Data> updateAll(List<Data> dataList){
+		List<Data> res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			List<Data> temp = new ArrayList<>();
+
+			for (Data obj : dataList) {
+				Data tTemp = this.onUpdate(obj.getId(), obj);
+
+				if (tTemp != null) {
+					temp.add(tTemp);
+
+				} else {
+					temp = null;
+					break;
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	protected Boolean onDelete(Data obj) {
+		Boolean res = false;
+
+		try {
+			PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+			query.setLong(1, obj.getId());
+			query.execute();
 			query.close();
 			res = true;
 
@@ -155,17 +248,42 @@ public class DataSQL extends DAO<Data> {
 	}
 
 	@Override
-	public Boolean delete(Long id) {
+	protected Boolean delete(Data obj) {
 		Boolean res = false;
 
-		try {
-			PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, id);
-			query.execute();
-			query.close();
-			res = true;
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if (this.getSqlConnection().startTransaction()) {
+			if (this.onDelete(obj)) {
+				if (this.getSqlConnection().commit()) {
+					res = true;
+
+				}
+			}
+		}
+		return res;
+	}
+
+	@Override
+	protected Boolean deleteAll(List<Data> list) {
+		Boolean res = false;
+
+		if (this.getSqlConnection().startTransaction()) {
+			Boolean temp = true;
+
+			for (Data obj : list) {
+				Boolean TTemp = this.onDelete(obj);
+
+				if (!TTemp) {
+					temp = false;
+					break;
+
+				}
+			}
+
+			if (temp) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
 		}
 
 		return res;

@@ -18,5 +18,8 @@ public class DataFactory extends Data {
 	public DataFactory( UUID uuid, String author, String object) {
 		super(null, uuid, author, object, null);
 	}
+	public DataFactory() {
+		
+	}
 	
 }

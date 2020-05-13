@@ -99,7 +99,8 @@ public class ItemInventory extends InventoryBuilder {
 					if (clickType == ClickType.LEFT) {
 						if (this.getDataSource().getOwnerUuid().equals(player.getUniqueId()) && player.hasPermission("mailbox.item.recover.self") || player.hasPermission("mailbox.item.recover.other")) {
 							MailBoxController.recoverItem(player, getDataSource(), tempData);
-
+					        contents.setProperty("state", 0);
+					        this.dynamicContent(player, contents);
 						} else {
 							MessageUtils.sendMessage(player, MessageLevel.ERROR, PERMISSION_NEEDED);
 						}
@@ -168,6 +169,9 @@ public class ItemInventory extends InventoryBuilder {
 							break;
 						}
 					}
+					
+			        contents.setProperty("state", 0);
+			        this.dynamicContent(player, contents);
 				}
 			}
 		});

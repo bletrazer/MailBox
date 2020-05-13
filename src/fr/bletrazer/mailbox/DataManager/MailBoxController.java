@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,10 +12,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import fr.bletrazer.mailbox.sql.DataSQL;
 import fr.bletrazer.mailbox.sql.ItemDataSQL;
 import fr.bletrazer.mailbox.sql.LetterDataSQL;
-import fr.bletrazer.mailbox.sql.SQLConnection;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.bletrazer.mailbox.utils.MessageLevel;
@@ -29,20 +28,18 @@ public class MailBoxController {
 	 */
 	private static DataHolder getHolderFromDataBase(UUID uuid) {
 		DataHolder res = new DataHolder(uuid, new ArrayList<>());
-		List<Data> dataList = DataSQL.getInstance().getDataList(uuid);
+		List<ItemData> itemDataList = ItemDataSQL.getInstance().find(uuid);
+		List<LetterData> letterDataList = LetterDataSQL.getInstance().find(uuid);
+		
+		if (itemDataList != null && letterDataList != null) {
+			List<Data> temp = new ArrayList<>();
+			temp.addAll(itemDataList);
+			temp.addAll(letterDataList);
 
-		for (Data data : dataList) {
-			ItemData itemData = ItemDataSQL.getInstance().find(data.getId());
-			LetterData letterData = LetterDataSQL.getInstance().find(data.getId());
+			res = new DataHolder(uuid, temp);
 
-			if (itemData != null) {
-				res.addData(itemData);
-
-			} else if (letterData != null) {
-				res.addData(letterData);
-			}
 		}
-
+		
 		return res;
 	}
 
@@ -78,6 +75,7 @@ public class MailBoxController {
 
 	public static Boolean sendLetter(Player player, LetterData letterData) {
 		Boolean res = false;
+		System.out.println("letter data is null ?" + (letterData == null ));
 		LetterData temp = LetterDataSQL.getInstance().create(letterData);
 
 		if (temp != null) {
@@ -108,6 +106,7 @@ public class MailBoxController {
 		Boolean res = false;
 
 		if (letters != null && !letters.isEmpty()) {
+			System.out.println("letters to send size: " + letters.size());
 			if (letters.size() > 1) {
 				List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
 
@@ -135,24 +134,10 @@ public class MailBoxController {
 				}
 
 			} else {
+				System.out.println(letters.get(0) );
 				res = sendLetter(player, letters.get(0));
 
 			}
-		}
-
-		return res;
-	}
-
-	public static Boolean deleteLetter(Player player, DataHolder holder, LetterData letterData) {
-		Boolean res = false;
-
-		if (LetterDataSQL.getInstance().delete(letterData.getId())) {
-			holder.removeData(letterData.getId());
-			res = true;
-
-		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
-			player.closeInventory();
 		}
 
 		return res;
@@ -162,9 +147,8 @@ public class MailBoxController {
 		player.openBook(getBookView(letterData));
 
 		if (letterData.getOwnerUuid().equals(player.getUniqueId())) {
-			letterData.setIsRead(true);
-			if (SQLConnection.getInstance().isConnected()) {
-				LetterDataSQL.getInstance().update(letterData);
+			if(LetterDataSQL.getInstance().update(letterData.getId(), letterData) != null) {
+				letterData.setIsRead(true);
 			}
 
 		}
@@ -193,7 +177,38 @@ public class MailBoxController {
 
 		return book;
 	}
+	
+	
+	public static Boolean deleteLetter(Player player, DataHolder holder, LetterData letterData) {
+		Boolean res = false;
 
+		if (LetterDataSQL.getInstance().delete(letterData)) {
+			holder.removeData(letterData.getId());
+			res = true;
+
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+			player.closeInventory();
+		}
+
+		return res;
+	}
+	
+	public static Boolean deleteLetters(Player player, DataHolder holder, List<LetterData> dataList) {
+		Boolean res = false;
+		
+		if (LetterDataSQL.getInstance().deleteAll(dataList)) {
+			holder.removeDatas(dataList.stream().map(LetterData::getId).collect(Collectors.toList()) );
+			res = true;
+
+		} else {
+			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+			player.closeInventory();
+		}
+
+		return res;
+	}
+	
 	/*
 	 * 
 	 * Items
@@ -265,9 +280,27 @@ public class MailBoxController {
 
 	public static Boolean deleteItem(Player player, DataHolder holder, ItemData itemData) {
 		Boolean res = false;
+		
+		if(holder.getData(itemData.getId()) != null) {
+			if (ItemDataSQL.getInstance().delete(itemData)) {
+				holder.removeData(itemData.getId());
+				res = true;
+	
+			} else {
+				MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
+				player.closeInventory();
+			}
+		} else {
+			res = true; //si l'objet existe plus, n'envoie pas de message d 'erreur
+		}
+		return res;
+	}
 
-		if (ItemDataSQL.getInstance().delete(itemData.getId())) {
-			holder.removeData(itemData.getId());
+	public static Boolean deleteItems(Player player, DataHolder holder, List<ItemData> dataList) {
+		Boolean res = false;
+
+		if (ItemDataSQL.getInstance().deleteAll(dataList)) {
+			holder.removeDatas(dataList.stream().map(ItemData::getId).collect(Collectors.toList()));
 			res = true;
 
 		} else {
@@ -282,7 +315,9 @@ public class MailBoxController {
 		Boolean success = false;
 
 		if (player.getInventory().firstEmpty() >= 0) {
-			if (deleteItem(player, holder, itemData)) {
+			Boolean t = deleteItem(player, holder, itemData);
+			
+			if (t) {
 				player.getInventory().addItem(itemData.getItem());
 				success = true;
 
@@ -297,7 +332,7 @@ public class MailBoxController {
 
 		return success;
 	}
-	
+
 	/*
 	 * generic
 	 */
@@ -314,19 +349,28 @@ public class MailBoxController {
 
 		return res;
 	}
-	
-	public static Boolean deleteDatas(Player player, DataHolder holder, List<Long> idList) {
-		Boolean res = false;
 
-		if (ItemDataSQL.getInstance().deleteAll(idList)) {
-			for (Long id : idList) {
-				holder.removeData(id);
+	public static Boolean deleteDatas(Player player, DataHolder holder, List<Data> dataList) {
+		Boolean res = true;
+		List<ItemData> itemDataList = new ArrayList<>();
+		List<LetterData> letterDataList = new ArrayList<>();
+		
+		for(Data data : dataList) {
+			if(data instanceof ItemData) {
+				itemDataList.add((ItemData) data);
+				
+			} else if (data instanceof LetterData) {
+				letterDataList.add((LetterData) data);
+				
 			}
-			res = true;
-
-		} else {
-			MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_error_player"));
-			player.closeInventory();
+		}
+		
+		if(res && !itemDataList.isEmpty() ) {
+			res = deleteItems(player, holder, itemDataList);
+		}
+		
+		if(res && !letterDataList.isEmpty() ) {
+			res = deleteLetters(player, holder, letterDataList);
 		}
 
 		return res;

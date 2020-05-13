@@ -23,16 +23,7 @@ public class DataHolder {
 	}
 
 	public Data getData(Long id) {
-		Data res = null;
-
-		for (Integer index = 0; index < this.getDataList().size() && res == null; index++) {
-			Data data = this.getDataList().get(index);
-			if (data.getId().equals(id)) {
-				res = data;
-			}
-		}
-		
-		return res;
+		return this.listData.stream().filter(e -> e.getId() == id).findAny().orElse(null);
 	}
 
 	public void addData(Data data) {
@@ -41,17 +32,23 @@ public class DataHolder {
 
 	public void removeData(Long id) {
 		Iterator<Data> it = this.getDataList().iterator();
-		Boolean stop = false;
 		
-		while(it.hasNext() && !stop) {
+		while(it.hasNext()) {
 			Data data = it.next();
 			
 			if(data.getId().equals(id)) {
-				stop = true;
 				it.remove();
+				break;
 			}
 			
 		}
+	}
+	
+	public void removeDatas(List<Long> idList ) {
+		for(Long id : idList) {
+			this.removeData(id);
+		}
+		
 	}
 
 	public UUID getOwnerUuid() {
