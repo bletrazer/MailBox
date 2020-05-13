@@ -54,8 +54,8 @@ public class ItemData extends Data {
 	}
 
 	public ItemData clone() {
-		ItemData res = new ItemData(this.getOwnerUuid(), this.getAuthor(), this.getObject(), this.getItem(), this.getDuration());
-		res.setId(this.getId());
+		Data data = super.clone();
+		ItemData res = new ItemData(data, this.getItem(), this.getDuration());
 		return res;
 	}
 

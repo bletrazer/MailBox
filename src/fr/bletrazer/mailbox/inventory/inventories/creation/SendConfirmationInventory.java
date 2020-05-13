@@ -17,7 +17,6 @@ import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
-import fr.bletrazer.mailbox.DataManager.factories.LetterDataFactory;
 import fr.bletrazer.mailbox.inventory.builders.ConfirmationInventoryBuilder;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;
@@ -69,7 +68,7 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 					Data data = new DataFactory(pi.getUuid(), player.getName(), getObject().toString());
 
 					if (!getContent().toString().isEmpty()) {
-						letters.add(new LetterDataFactory(data.clone(), type, Arrays.asList(new String[] { getContent().toString() }), false));
+						letters.add(new LetterData(data.clone(), type, Arrays.asList(new String[] { getContent().toString() }), false));
 					}
 
 					if (getItem() != null) {

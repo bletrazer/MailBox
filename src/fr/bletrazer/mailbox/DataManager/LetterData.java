@@ -18,7 +18,7 @@ public class LetterData extends Data {
 		
 	}
 	
-	protected LetterData(Data data, LetterType type, List<String> content, Boolean isRead) {
+	public LetterData(Data data, LetterType type, List<String> content, Boolean isRead) {
 		super(data.getId(), data.getOwnerUuid(), data.getAuthor(), data.getObject(), data.getCreationDate());
 		this.setCreationDate(data.getCreationDate());
 		this.setLetterType(type);
@@ -55,9 +55,10 @@ public class LetterData extends Data {
 		this.isRead = isRead;
 	}
 	
+	@Override
 	public LetterData clone() {
-		LetterData res =  new LetterData(this.getOwnerUuid(), this.getAuthor(), this.getObject(), this.getLetterType(), this.getContent(), this.getIsRead());
-		res.setId(this.getId());
+		Data tempData = super.clone();
+		LetterData res =  new LetterData(tempData, this.getLetterType(), this.getContent(), this.getIsRead());
 		return res;
 	}
 

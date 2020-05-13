@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.output.ByteArrayOutputStream;
 import org.bukkit.inventory.ItemStack;
@@ -16,8 +18,9 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import fr.bletrazer.mailbox.DataManager.Data;
 import fr.bletrazer.mailbox.DataManager.ItemData;
+import fr.bletrazer.mailbox.DataManager.factories.DataFactory;
 
-public class ItemDataSQL extends DAO<ItemData> {
+public class ItemDataSQL extends BaseSQL<ItemData> {
 	private static final String TABLE_NAME = "MailBox_ItemData";
 	private static ItemDataSQL INSTANCE = new ItemDataSQL();
 
@@ -28,13 +31,16 @@ public class ItemDataSQL extends DAO<ItemData> {
 	private ItemDataSQL() {
 		super();
 
-		try {
-			PreparedStatement query = this.getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS	" + TABLE_NAME + " (id BIGINT NOT NULL, durationInSeconds BIGINT, itemStack TEXT, PRIMARY KEY(id))");
-			query.executeUpdate();
-			query.close();
+		if (this.getSqlConnection().isConnected()) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection()
+						.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id BIGINT, uuid VARCHAR(255), durationInSeconds BIGINT, itemStack TEXT, PRIMARY KEY(id))");
+				query.executeUpdate();
+				query.close();
 
-		} catch (SQLException e) {
-			e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -79,155 +85,272 @@ public class ItemDataSQL extends DAO<ItemData> {
 	}
 
 	/*
-	 * table name format ?: - [id: int] [duration: Long] [itemStack: String(?)]
+	 * table name format ?: - [id: int] [uuid: String] [duration: Long] [itemStack:
+	 * String(?)]
 	 * 
 	 */
 
 	@Override
-	public ItemData create(ItemData obj) {
+	protected ItemData onCreate(ItemData obj) {
 		ItemData res = null;
+		ItemData temp = obj.clone();
+		Data data = DataSQL.getInstance().onCreate(temp);
 
-		if (SQLConnection.getInstance().startTransaction()) {
-			ItemData temp = obj.clone();
-			Data data = DataSQL.getInstance().create(temp);
+		if (data != null) {
+			temp.setId(data.getId());
+			temp.setCreationDate(data.getCreationDate());
 
-			if (data != null) {
-				temp.setId(data.getId());
-				temp.setCreationDate(data.getCreationDate());
-				
-				try {
-					PreparedStatement query = super.getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, durationInSeconds, itemStack) VALUES(?, ?, ?)");
-					query.setLong(1, temp.getId());
-					query.setLong(2, temp.getDuration().getSeconds());
-					query.setString(3, toBase64(temp.getItem()));
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("INSERT INTO " + TABLE_NAME + " (id, uuid, durationInSeconds, itemStack) VALUES(?, ?, ?, ?)");
+				query.setLong(1, temp.getId());
+				query.setString(2, temp.getOwnerUuid().toString());
+				query.setLong(3, temp.getDuration().getSeconds());
+				query.setString(4, toBase64(temp.getItem()));
 
-					query.execute();
-					query.close();
+				query.execute();
+				query.close();
 
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				res = temp;
 
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 
-			if (temp != null && SQLConnection.getInstance().commit()) {
-				res = temp;
+		}
+
+		return res;
+	}
+	
+	@Override
+	public ItemData create(ItemData itemData) {
+		ItemData res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			ItemData temp = this.onCreate(itemData);
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
 			}
 		}
 
 		return res;
 	}
-
+	
 	@Override
-	public List<ItemData> createAll(List<ItemData> list) {
+	public List<ItemData> createAll(List<ItemData> dataList){
 		List<ItemData> res = null;
 
-		if (SQLConnection.getInstance().startTransaction()) {
-			List<ItemData> temp = super.createAll(list);
+		if (this.getSqlConnection().startTransaction()) {
+			List<ItemData> temp = new ArrayList<>();
 
-			if (temp != null && SQLConnection.getInstance().commit()) {
+			for (ItemData obj : dataList) {
+				ItemData TTemp = this.onCreate(obj);
+
+				if (TTemp == null) {
+					temp = null;
+					break;
+
+				} else {
+					temp.add(TTemp);
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
+		}
+
+		return res;
+	}
+	
+	@Override
+	protected List<ItemData> onFind(UUID uuid) {
+		List<ItemData> res = null;
+		List<ItemData> temp = new ArrayList<>();
+		List<Data> dataList = DataSQL.getInstance().onFind(uuid);
+		
+		if (dataList != null) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE uuid = ?");
+				query.setString(1, uuid.toString());
+				ResultSet resultset = query.executeQuery();
+
+				while (resultset.next()) {
+					ItemStack itemstack = fromBase64(resultset.getString("itemStack"));
+					Duration duration = Duration.ofSeconds(resultset.getLong("durationInSeconds"));
+					Long id = resultset.getLong("id");
+					Data tData = dataList.stream().filter(e -> e.getId() == id).findAny().orElse(new DataFactory());
+					temp.add(new ItemData(tData, itemstack, duration));
+
+				}
+
+				query.close();
+				res = temp;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return res;
+	}
+	
+	@Override
+	public List<ItemData> find(UUID uuid){
+		List<ItemData> res = null;
+
+		if (this.getSqlConnection().isConnected()) {
+			List<ItemData> temp = this.onFind(uuid);
+			
+			if (temp != null) {
 				res = temp;
 			}
+
+		}
+		
+		return res;
+	}
+	
+	@Override
+	protected ItemData onUpdate(Long id, ItemData obj) {
+		ItemData res = null;
+		ItemData temp = obj.clone();
+		Data uData = DataSQL.getInstance().onUpdate(id, obj);
+
+		if (uData != null) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET uuid = ?, itemStack = ?, durationInSeconds = ? WHERE id = ?");
+				query.setString(1, obj.getOwnerUuid().toString());
+				query.setString(2, toBase64(obj.getItem()));
+				query.setLong(3, obj.getDuration().toMillis() / 1000);
+				query.setLong(4, obj.getId());
+				query.executeUpdate();
+				query.close();
+				temp.setId(id);
+
+				res = temp;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 		return res;
 	}
-
+	
 	@Override
-	public ItemData find(Long i) {
+	public ItemData update(Long id, ItemData itemData) {
 		ItemData res = null;
 
-		try {
-			PreparedStatement query = super.getConnection().prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE id = ?");
-			query.setLong(1, i);
-			ResultSet resultset = query.executeQuery();
+		if (this.getSqlConnection().startTransaction()) {
+			ItemData temp = this.onUpdate(id, itemData);
 
-			if (resultset.next()) {
-				Data data = DataSQL.getInstance().find(i);
-				ItemStack itemstack = fromBase64(resultset.getString("itemStack"));
-				Duration duration = Duration.ofSeconds(resultset.getLong("durationInSeconds"));
-				if (data != null) {
-					res = new ItemData(data, itemstack, duration);
-
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
 				}
-
 			}
-			query.close();
 
-		} catch (SQLException e) {
-			e.printStackTrace();
+		}
+
+		return res;
+	}
+	
+	@Override
+	public List<ItemData> updateAll(List<ItemData> dataList){
+		List<ItemData> res = null;
+
+		if (this.getSqlConnection().startTransaction()) {
+			List<ItemData> temp = new ArrayList<>();
+
+			for (ItemData obj : dataList) {
+				ItemData tTemp = this.onUpdate(obj.getId(), obj);
+
+				if (tTemp != null) {
+					temp.add(tTemp);
+
+				} else {
+					temp = null;
+					break;
+				}
+			}
+
+			if (temp != null) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
+			}
 		}
 
 		return res;
 	}
 
 	@Override
-	public Boolean update(ItemData obj) {
+	protected Boolean onDelete(ItemData obj) {
 		Boolean res = false;
 
-		if (SQLConnection.getInstance().startTransaction()) {
-			if (DataSQL.getInstance().update(obj)) {
-				try {
-					PreparedStatement query = super.getConnection().prepareStatement("UPDATE " + TABLE_NAME + " SET itemStack = ?, durationInSeconds = ? WHERE id = ?");
-					query.setString(1, toBase64(obj.getItem()));
-					query.setLong(2, obj.getDuration().toMillis() / 1000);
-					query.setLong(3, obj.getId());
-
-					query.executeUpdate();
-					query.close();
-
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-			if (SQLConnection.getInstance().commit()) {
+		if (DataSQL.getInstance().delete(obj)) {
+			try {
+				PreparedStatement query = this.getSqlConnection().getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
+				query.setLong(1, obj.getId());
+				query.execute();
+				query.close();
 				res = true;
-			}
 
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return res;
 	}
-
+	
 	@Override
-	public Boolean delete(Long id) {
+	public Boolean delete(ItemData itemData) {
 		Boolean res = false;
 
-		if (SQLConnection.getInstance().startTransaction()) {
-			if (DataSQL.getInstance().delete(id)) {
-				try {
-					PreparedStatement query = super.getConnection().prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE id = ?");
-					query.setLong(1, id);
-					query.execute();
-					query.close();
+		if (this.getSqlConnection().startTransaction()) {
+			
+			if (this.onDelete(itemData)) {
+				
+				if (this.getSqlConnection().commit()) {
+					res = true;
 
-				} catch (SQLException e) {
-					e.printStackTrace();
 				}
 			}
-
-			if (SQLConnection.getInstance().commit()) {
-				res = true;
-			}
-
 		}
-
 		return res;
 	}
-
+	
 	@Override
-	public Boolean deleteAll(List<Long> list) {
+	public Boolean deleteAll(List<ItemData> dataList) {
 		Boolean res = false;
 
-		if (SQLConnection.getInstance().startTransaction()) {
-			if (super.deleteAll(list) && SQLConnection.getInstance().commit()) {
-				res = true;
+		if (this.getSqlConnection().startTransaction()) {
+			Boolean temp = true;
+
+			for (ItemData obj : dataList) {
+				Boolean TTemp = this.onDelete(obj);
+
+				if (!TTemp) {
+					temp = false;
+					break;
+
+				}
+			}
+
+			if (temp) {
+				if (this.getSqlConnection().commit()) {
+					res = temp;
+				}
 			}
 		}
 
 		return res;
 	}
-
 }

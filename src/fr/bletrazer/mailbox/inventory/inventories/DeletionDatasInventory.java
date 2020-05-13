@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -38,7 +37,7 @@ public class DeletionDatasInventory extends ConfirmationInventoryBuilder {
 		return e -> {
 			if (e.getClick() == ClickType.LEFT) {
 
-				if (MailBoxController.deleteDatas(player, this.getDataSource(), getDataList().stream().map(Data::getId).collect(Collectors.toList()))) {
+				if (MailBoxController.deleteDatas(player, this.getDataSource(), getDataList() ) )  {
 					this.returnToParent(player);
 
 				} else {
