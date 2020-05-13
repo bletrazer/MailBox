@@ -101,7 +101,6 @@ public class LetterDataSQL extends BaseSQL<LetterData> {
 		LetterData res = null;
 
 		if (this.getSqlConnection().startTransaction()) {
-			System.out.println("create 103 null ?" + (letterData == null));
 			LetterData temp = this.onCreate(letterData);
 
 			if (temp != null) {

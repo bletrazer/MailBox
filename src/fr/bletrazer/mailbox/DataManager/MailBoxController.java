@@ -75,7 +75,6 @@ public class MailBoxController {
 
 	public static Boolean sendLetter(Player player, LetterData letterData) {
 		Boolean res = false;
-		System.out.println("letter data is null ?" + (letterData == null ));
 		LetterData temp = LetterDataSQL.getInstance().create(letterData);
 
 		if (temp != null) {
@@ -106,7 +105,6 @@ public class MailBoxController {
 		Boolean res = false;
 
 		if (letters != null && !letters.isEmpty()) {
-			System.out.println("letters to send size: " + letters.size());
 			if (letters.size() > 1) {
 				List<LetterData> sent = LetterDataSQL.getInstance().createAll(letters);
 
@@ -134,7 +132,6 @@ public class MailBoxController {
 				}
 
 			} else {
-				System.out.println(letters.get(0) );
 				res = sendLetter(player, letters.get(0));
 
 			}

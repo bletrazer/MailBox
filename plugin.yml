@@ -1,5 +1,5 @@
 name: MailBox
-version: 0.6.1a
+version: 0.8
 depend: [SmartInvs]
 description: Envoyer et recevoir des objets et des mails.
 author: Bletrazer
@@ -25,7 +25,7 @@ permissions:
      - mailbox.openmenu.self
      - mailbox.openmenu.other
   mailbox.openmenu.self:
-    description: Permission d'ouvrir sa propre bo^te de récéption.
+    description: Permission d'ouvrir sa propre boîte de récéption.
     default: true
   mailbox.openmenu.other:
     description: Permission d'ouvrir la boîte de récéption des autres joueurs.
