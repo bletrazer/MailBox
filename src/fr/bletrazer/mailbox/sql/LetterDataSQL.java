@@ -95,52 +95,6 @@ public class LetterDataSQL extends BaseSQL<LetterData> {
 
 		return res;
 	}
-	
-	@Override
-	public LetterData create(LetterData letterData) {
-		LetterData res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			LetterData temp = this.onCreate(letterData);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<LetterData> createAll(List<LetterData> dataList){
-		List<LetterData> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<LetterData> temp = new ArrayList<>();
-
-			for (LetterData obj : dataList) {
-				LetterData TTemp = this.onCreate(obj);
-
-				if (TTemp == null) {
-					temp = null;
-					break;
-
-				} else {
-					temp.add(TTemp);
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
 
 	@Override
 	protected List<LetterData> onFind(UUID uuid) {
@@ -179,22 +133,6 @@ public class LetterDataSQL extends BaseSQL<LetterData> {
 	}
 	
 	@Override
-	public List<LetterData> find(UUID uuid){
-		List<LetterData> res = null;
-
-		if (this.getSqlConnection().isConnected()) {
-			List<LetterData> temp = this.onFind(uuid);
-
-			if (temp != null) {
-				res = temp;
-			}
-
-		}
-
-		return res;
-	}
-	
-	@Override
 	protected LetterData onUpdate(Long id, LetterData obj) {
 		LetterData res = null;
 		LetterData temp = obj.clone();
@@ -223,53 +161,6 @@ public class LetterDataSQL extends BaseSQL<LetterData> {
 
 		return res;
 	}
-	
-	@Override
-	public LetterData update(Long id, LetterData letterData) {
-		LetterData res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			LetterData temp = this.onUpdate(id, letterData);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<LetterData> updateAll(List<LetterData> dataList){
-		List<LetterData> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<LetterData> temp = new ArrayList<>();
-
-			for (LetterData obj : dataList) {
-				LetterData tTemp = this.onUpdate(obj.getId(), obj);
-
-				if (tTemp != null) {
-					temp.add(tTemp);
-
-				} else {
-					temp = null;
-					break;
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
 
 	@Override
 	protected Boolean onDelete(LetterData obj) {
@@ -285,48 +176,6 @@ public class LetterDataSQL extends BaseSQL<LetterData> {
 
 			} catch (SQLException e) {
 				e.printStackTrace();
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
-	public Boolean delete(LetterData letterData) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			if (this.onDelete(letterData)) {
-				if (this.getSqlConnection().commit()) {
-					res = true;
-
-				}
-			}
-		}
-		return res;
-	}
-	
-	@Override
-	public Boolean deleteAll(List<LetterData> dataList) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			Boolean temp = true;
-
-			for (LetterData obj : dataList) {
-				Boolean TTemp = this.onDelete(obj);
-
-				if (!TTemp) {
-					temp = false;
-					break;
-
-				}
-			}
-
-			if (temp) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
 			}
 		}
 

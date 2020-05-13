@@ -22,10 +22,6 @@ import fr.bletrazer.mailbox.utils.MessageUtils;
 public class MailBoxController {
 	private static final String NOT_ENOUGHT_SPACE = LangManager.getValue("string_not_enought_space");
 
-	/*
-	 * Local
-	 * 
-	 */
 	private static DataHolder getHolderFromDataBase(UUID uuid) {
 		DataHolder res = new DataHolder(uuid, new ArrayList<>());
 		List<ItemData> itemDataList = ItemDataSQL.getInstance().find(uuid);
@@ -144,9 +140,8 @@ public class MailBoxController {
 		player.openBook(getBookView(letterData));
 
 		if (letterData.getOwnerUuid().equals(player.getUniqueId())) {
-			if(LetterDataSQL.getInstance().update(letterData.getId(), letterData) != null) {
-				letterData.setIsRead(true);
-			}
+			letterData.setIsRead(true);
+			LetterDataSQL.getInstance().update(letterData.getId(), letterData);
 
 		}
 	}

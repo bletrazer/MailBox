@@ -65,52 +65,6 @@ public class DataSQL extends BaseSQL<Data> {
 
 		return res;
 	}
-	
-	@Override
-	public Data create(Data obj) {
-		Data res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			Data temp = this.onCreate(obj);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<Data> createAll(List<Data> dataList){
-		List<Data> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<Data> temp = new ArrayList<>();
-
-			for (Data obj : dataList) {
-				Data TTemp = this.onCreate(obj);
-
-				if (TTemp == null) {
-					temp = null;
-					break;
-
-				} else {
-					temp.add(TTemp);
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
 
 	@Override
 	protected List<Data> onFind(UUID uuid) {
@@ -135,22 +89,6 @@ public class DataSQL extends BaseSQL<Data> {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<Data> find(UUID uuid){
-		List<Data> res = null;
-
-		if (this.getSqlConnection().isConnected()) {
-			List<Data> temp = this.onFind(uuid);
-
-			if (temp != null) {
-				res = temp;
-			}
-
 		}
 
 		return res;
@@ -181,54 +119,7 @@ public class DataSQL extends BaseSQL<Data> {
 
 		return res;
 	}
-	
-	@Override
-	public Data update(Long id, Data data) {
-		Data res = null;
 
-		if (this.getSqlConnection().startTransaction()) {
-			Data temp = this.onUpdate(id, data);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<Data> updateAll(List<Data> dataList){
-		List<Data> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<Data> temp = new ArrayList<>();
-
-			for (Data obj : dataList) {
-				Data tTemp = this.onUpdate(obj.getId(), obj);
-
-				if (tTemp != null) {
-					temp.add(tTemp);
-
-				} else {
-					temp = null;
-					break;
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-	
 	@Override
 	protected Boolean onDelete(Data obj) {
 		Boolean res = false;
@@ -242,48 +133,6 @@ public class DataSQL extends BaseSQL<Data> {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-
-		return res;
-	}
-
-	@Override
-	protected Boolean delete(Data obj) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			if (this.onDelete(obj)) {
-				if (this.getSqlConnection().commit()) {
-					res = true;
-
-				}
-			}
-		}
-		return res;
-	}
-
-	@Override
-	protected Boolean deleteAll(List<Data> list) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			Boolean temp = true;
-
-			for (Data obj : list) {
-				Boolean TTemp = this.onDelete(obj);
-
-				if (!TTemp) {
-					temp = false;
-					break;
-
-				}
-			}
-
-			if (temp) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
 		}
 
 		return res;

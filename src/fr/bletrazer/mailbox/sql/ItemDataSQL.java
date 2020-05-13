@@ -122,52 +122,6 @@ public class ItemDataSQL extends BaseSQL<ItemData> {
 	}
 	
 	@Override
-	public ItemData create(ItemData itemData) {
-		ItemData res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			ItemData temp = this.onCreate(itemData);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<ItemData> createAll(List<ItemData> dataList){
-		List<ItemData> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<ItemData> temp = new ArrayList<>();
-
-			for (ItemData obj : dataList) {
-				ItemData TTemp = this.onCreate(obj);
-
-				if (TTemp == null) {
-					temp = null;
-					break;
-
-				} else {
-					temp.add(TTemp);
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
 	protected List<ItemData> onFind(UUID uuid) {
 		List<ItemData> res = null;
 		List<ItemData> temp = new ArrayList<>();
@@ -194,22 +148,6 @@ public class ItemDataSQL extends BaseSQL<ItemData> {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}
-		
-		return res;
-	}
-	
-	@Override
-	public List<ItemData> find(UUID uuid){
-		List<ItemData> res = null;
-
-		if (this.getSqlConnection().isConnected()) {
-			List<ItemData> temp = this.onFind(uuid);
-			
-			if (temp != null) {
-				res = temp;
-			}
-
 		}
 		
 		return res;
@@ -244,53 +182,6 @@ public class ItemDataSQL extends BaseSQL<ItemData> {
 	}
 	
 	@Override
-	public ItemData update(Long id, ItemData itemData) {
-		ItemData res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			ItemData temp = this.onUpdate(id, itemData);
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-
-		}
-
-		return res;
-	}
-	
-	@Override
-	public List<ItemData> updateAll(List<ItemData> dataList){
-		List<ItemData> res = null;
-
-		if (this.getSqlConnection().startTransaction()) {
-			List<ItemData> temp = new ArrayList<>();
-
-			for (ItemData obj : dataList) {
-				ItemData tTemp = this.onUpdate(obj.getId(), obj);
-
-				if (tTemp != null) {
-					temp.add(tTemp);
-
-				} else {
-					temp = null;
-					break;
-				}
-			}
-
-			if (temp != null) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
-			}
-		}
-
-		return res;
-	}
-
-	@Override
 	protected Boolean onDelete(ItemData obj) {
 		Boolean res = false;
 
@@ -304,50 +195,6 @@ public class ItemDataSQL extends BaseSQL<ItemData> {
 
 			} catch (SQLException e) {
 				e.printStackTrace();
-			}
-		}
-
-		return res;
-	}
-	
-	@Override
-	public Boolean delete(ItemData itemData) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			
-			if (this.onDelete(itemData)) {
-				
-				if (this.getSqlConnection().commit()) {
-					res = true;
-
-				}
-			}
-		}
-		return res;
-	}
-	
-	@Override
-	public Boolean deleteAll(List<ItemData> dataList) {
-		Boolean res = false;
-
-		if (this.getSqlConnection().startTransaction()) {
-			Boolean temp = true;
-
-			for (ItemData obj : dataList) {
-				Boolean TTemp = this.onDelete(obj);
-
-				if (!TTemp) {
-					temp = false;
-					break;
-
-				}
-			}
-
-			if (temp) {
-				if (this.getSqlConnection().commit()) {
-					res = temp;
-				}
 			}
 		}
 
