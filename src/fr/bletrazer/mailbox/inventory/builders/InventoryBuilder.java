@@ -1,14 +1,10 @@
 package fr.bletrazer.mailbox.inventory.builders;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import fr.bletrazer.mailbox.Main;
-import fr.bletrazer.mailbox.inventory.inventories.utils.OptionalClickableItem;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
 import fr.minuskube.inv.ClickableItem;
@@ -30,9 +26,6 @@ public abstract class InventoryBuilder implements InventoryProvider {
 
 	private InventoryBuilder parent;
 	private Boolean showReturnButton = true;
-
-	private List<OptionalClickableItem> fixeOptions = new ArrayList<>();
-	private List<OptionalClickableItem> staticOptions = new ArrayList<>();
 
 	public InventoryBuilder(String id, String title, Integer rows) {
 		this.setId(id);
@@ -121,18 +114,11 @@ public abstract class InventoryBuilder implements InventoryProvider {
 		}
 
 		this.initializeInventory(p, c);
-		for (OptionalClickableItem oci : this.getFixeOptions()) {
-			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
-		}
 	}
 
 	@Override
 	public void update(Player p, InventoryContents c) {
 		this.updateInventory(p, c);
-
-		for (OptionalClickableItem oci : this.getStaticOptions()) {
-			c.set(oci.getRow(), oci.getColumn(), oci.getClickable());
-		}
 
 	}
 
@@ -143,24 +129,6 @@ public abstract class InventoryBuilder implements InventoryProvider {
 	public InventoryBuilder setParent(InventoryBuilder parent) {
 		this.parent = parent;
 		return this;
-	}
-
-	private List<OptionalClickableItem> getFixeOptions() {
-		return fixeOptions;
-	}
-
-	private List<OptionalClickableItem> getStaticOptions() {
-		return staticOptions;
-	}
-
-	public void addOption(OptionalClickableItem oci) {
-		if (oci.doUpdate()) {
-			this.getStaticOptions().add(oci);
-
-		} else {
-			this.getFixeOptions().add(oci);
-		}
-
 	}
 
 	public Boolean getShowReturnButton() {
