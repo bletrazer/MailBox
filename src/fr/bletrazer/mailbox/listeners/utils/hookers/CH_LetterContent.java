@@ -1,15 +1,17 @@
 package fr.bletrazer.mailbox.listeners.utils.hookers;
 
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 
-public class CH_SimpleMessage extends ChatHooker {
-	
-	public CH_SimpleMessage(String id, String startMsg, StringBuilder content, InventoryBuilder parentInv) {
+public class CH_LetterContent extends ChatHooker {
+
+	public CH_LetterContent(String id, String startMsg, List<String> content, InventoryBuilder parentInv, Boolean doAdd) {
 		super(id, startMsg);
-		
+
 		this.setExecution(event -> {
 			Player ePlayer = event.getPlayer();
 			String eMessage = event.getMessage();
@@ -21,18 +23,20 @@ public class CH_SimpleMessage extends ChatHooker {
 				return;
 			}
 			
-			if(content.toString() != null && !content.toString().isEmpty() ) {
-				content.delete(0, content.length());
+			if(doAdd) {
 				
 			}
 			
-			content.append(eMessage);
-			
+			if(doAdd || content.isEmpty()) {
+				content.add(eMessage);
+				
+			} else {
+				content.set(content.size()-1, eMessage);
+			}
+
 			this.stop();
 			parentInv.openInventory(ePlayer);
-			
-				
+
 		});
 	}
-
 }

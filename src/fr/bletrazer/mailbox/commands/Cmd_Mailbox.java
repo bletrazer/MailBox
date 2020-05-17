@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import fr.bletrazer.mailbox.DataManager.DataHolder;
 import fr.bletrazer.mailbox.DataManager.DataManager;
+import fr.bletrazer.mailbox.DataManager.ItemData;
 import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.inventories.MailBoxInventory;
@@ -46,8 +47,10 @@ public class Cmd_Mailbox implements CommandExecutor {
 						res = true;
 
 						if (player.hasPermission("mailbox.check.self")) {
-							Integer number = DataManager.getTypeData(MailBoxController.getDataHolder(player.getUniqueId()), LetterData.class).size();
-							MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", number));
+							DataHolder pHolder = MailBoxController.getDataHolder(player.getUniqueId());
+							Integer nLetter = DataManager.getTypeData(pHolder, LetterData.class).size();
+							Integer nItem = DataManager.getTypeData(pHolder, ItemData.class).size();
+							MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", nLetter, nItem));
 
 						} else {
 							MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_permission_needed"));
@@ -66,13 +69,14 @@ public class Cmd_Mailbox implements CommandExecutor {
 						if (sourceUuid != null) {
 							if (sourceUuid.equals(player.getUniqueId()) && player.hasPermission("mailbox.check.self") || player.hasPermission("mailbox.check.other")) {
 								DataHolder sHolder = MailBoxController.getDataHolder(sourceUuid);
-								Integer number = DataManager.getTypeData(sHolder, LetterData.class).size();
-
+								Integer nLetter = DataManager.getTypeData(sHolder, LetterData.class).size();
+								Integer nItem = DataManager.getTypeData(sHolder, ItemData.class).size();
+								
 								if (sourceUuid.equals(player.getUniqueId())) {
-									MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", number));
+									MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_self", nLetter, nItem));
 
 								} else {
-									MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_other", args[1], number));
+									MessageUtils.sendMessage(player, MessageLevel.INFO, LangManager.getValue("result_command_check_other", args[1], nLetter, nItem));
 								}
 
 							} else {

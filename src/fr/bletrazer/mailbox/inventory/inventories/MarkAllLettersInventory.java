@@ -1,4 +1,4 @@
-package fr.bletrazer.mailbox.inventory;
+package fr.bletrazer.mailbox.inventory.inventories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,9 @@ public class MarkAllLettersInventory extends ConfirmationInventoryBuilder {
 			List<LetterData> tempList = LetterDataSQL.getInstance().updateAll(dataList);
 
 			if (tempList != null) {
+				for(LetterData letter : dataList) {
+					letter.setIsRead(false);
+				}
 				this.returnToParent(player);
 
 			} else {

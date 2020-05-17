@@ -17,6 +17,12 @@ public class Main extends JavaPlugin {
 	private static InventoryManager manager;
 
 	/*
+	 * completer commandes /mailbox check avec informations objets -> fait
+	 * checker la durée des objet lors du chargement (et supprimé si <0) -> fait
+	 * ajouter lign useSSL dans config -> fait
+	 * ajouter boutton ajout de ligne de message -> fait
+	 * checker si sql rollback fonctionne (permissions)
+	 * 
 	 * TODO menu lettre non envoyés/en cours
 	 */
 
@@ -37,7 +43,7 @@ public class Main extends JavaPlugin {
 		LangManager.load();
 
 		SQLConnection.getInstance().setJdbc(SQLConnection.SGBD_TYPE_ROOT).setHost(this.getConfig().getString("database.host")).setDatabase(this.getConfig().getString("database.database"))
-				.setUser(this.getConfig().getString("database.user")).setPassword(this.getConfig().getString("database.password")).setUseSSL(false).connect();
+				.setUser(this.getConfig().getString("database.user")).setPassword(this.getConfig().getString("database.password")).connect();
 
 		this.getCommand(Cmd_Mailbox.CMD_LABEL).setExecutor(new Cmd_Mailbox());
 

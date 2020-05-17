@@ -19,7 +19,7 @@ public class SQLConnection {
 	private String database;
 	private String user;
 	private String password;
-	private Boolean useSSL = false;
+	private Boolean useSSL = Main.getInstance().getConfig().getBoolean("database.useSSL");
 
 	public static SQLConnection getInstance() {
 		return INSTANCE;
@@ -132,8 +132,7 @@ public class SQLConnection {
 			res = true;
 
 		} catch (Exception exception) {
-			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connexion_error"));
-			exception.printStackTrace();
+			Main.getInstance().getLogger().log(Level.INFO, LangManager.getValue("string_sql_connexion_error") );
 		}
 		
 		return res;
@@ -195,10 +194,5 @@ public class SQLConnection {
 
 	public Boolean getUseSSL() {
 		return useSSL;
-	}
-
-	public SQLConnection setUseSSL(Boolean useSSL) {
-		this.useSSL = useSSL;
-		return this;
 	}
 }

@@ -10,6 +10,8 @@ import fr.bletrazer.mailbox.listeners.utils.ChatHooker;
 import fr.bletrazer.mailbox.listeners.utils.hookers.CH_Player;
 import fr.bletrazer.mailbox.utils.ItemStackBuilder;
 import fr.bletrazer.mailbox.utils.LangManager;
+import fr.bletrazer.mailbox.utils.MessageLevel;
+import fr.bletrazer.mailbox.utils.MessageUtils;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
 
@@ -64,6 +66,8 @@ public class PlayerSelectionInventory extends InventoryBuilder {
 					player.closeInventory();
 					chatHooker.start(player);
 					
+				} else {
+					MessageUtils.sendMessage(player, MessageLevel.ERROR, LangManager.getValue("string_end_last_entry_first"));
 				}
 			}
 		}));

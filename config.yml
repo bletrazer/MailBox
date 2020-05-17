@@ -2,6 +2,7 @@ lang_file: "FR_fr"
 plugin_prefix: "§3[§bMailBox§3]§b:§r "
 
 database:
+  useSSL: false
   database: 'database'
   host: 'localhost'
   user: 'user'

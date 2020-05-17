@@ -17,7 +17,6 @@ import fr.bletrazer.mailbox.DataManager.LetterData;
 import fr.bletrazer.mailbox.DataManager.LetterType;
 import fr.bletrazer.mailbox.DataManager.MailBoxController;
 import fr.bletrazer.mailbox.inventory.MailBoxInventoryHandler;
-import fr.bletrazer.mailbox.inventory.MarkAllLettersInventory;
 import fr.bletrazer.mailbox.inventory.builders.InventoryBuilder;
 import fr.bletrazer.mailbox.inventory.inventories.creation.CreationInventory;
 import fr.bletrazer.mailbox.inventory.inventories.utils.IdentifiersList;

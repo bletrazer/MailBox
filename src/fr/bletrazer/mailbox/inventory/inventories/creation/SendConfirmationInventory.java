@@ -2,7 +2,6 @@ package fr.bletrazer.mailbox.inventory.inventories.creation;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -35,11 +34,11 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 	
 	private IdentifiersList recipients;
 	private String object;
-	private String content;
+	private List<String> content;
 	private Duration duration;
 	private ItemStack item;
 
-	public SendConfirmationInventory(InventoryBuilder parent, IdentifiersList recipients, String object, String content, Duration duration, ItemStack item) {
+	public SendConfirmationInventory(InventoryBuilder parent, IdentifiersList recipients, String object, List<String> content, Duration duration, ItemStack item) {
 		super(SUB_ID, "§l" + SEND_CONFIRMATION);
 		super.setParent(parent);
 		this.setRecipients(recipients);
@@ -67,8 +66,8 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 				for (PlayerInfo pi : getRecipients().getPlayerList()) {
 					Data data = new DataFactory(pi.getUuid(), player.getName(), getObject().toString());
 
-					if (!getContent().toString().isEmpty()) {
-						letters.add(new LetterData(data.clone(), type, Arrays.asList(new String[] { getContent().toString() }), false));
+					if (!getContent().isEmpty()) {
+						letters.add(new LetterData(data.clone(), type, getContent(), false));
 					}
 
 					if (getItem() != null) {
@@ -122,11 +121,11 @@ public class SendConfirmationInventory extends ConfirmationInventoryBuilder {
 		this.object = object;
 	}
 
-	public String getContent() {
+	public List<String> getContent() {
 		return content;
 	}
 
-	public void setContent(String content) {
+	public void setContent(List<String> content) {
 		this.content = content;
 	}
 

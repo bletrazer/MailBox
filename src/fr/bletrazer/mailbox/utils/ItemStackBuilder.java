@@ -132,6 +132,13 @@ public class ItemStackBuilder {
 	    this.getLore().addAll(format(str, size) );
 		return this;
 	}
+	
+	public ItemStackBuilder addAutoFormatingLores(List<String> list, Integer size) {
+		for(String str : list) {
+			this.getLore().addAll(format(str, size) );
+		}
+		return this;
+	}
 
 	public Map<Enchantment, Integer> getEnchantements() {
 		return enchantments;
